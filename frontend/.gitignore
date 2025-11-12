@@ -1,25 +1,3 @@
-# Node
-node_modules/
-.next/
-out/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-venv/
-.env
-
-# Logs & temp
-*.log
-*.sqlite3
-*.db
-.DS_Store
-
-# Docker
-*.pid
-*.tar
-
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
