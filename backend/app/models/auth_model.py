@@ -8,7 +8,7 @@ class Auth(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), nullable=False, unique=True)
     hash_password = Column(String(255), nullable=False)
-    roles = Column(Enum("admin", "staff", name="user_roles"), nullable=False, default="staff")
+    roles = Column(Enum("user", "admin", name="user_roles"), nullable=False, default="user")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     last_login = Column(DateTime, nullable=True)
