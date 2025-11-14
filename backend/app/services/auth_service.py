@@ -1,11 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-# models: user
+# models, schemas: auth
 from app.models.auth_model import Auth
+from app.models.schemas.auth_schema import authBasePlus
 # utils: exceptions
 from app.utils.exceptions import THROW_ERROR
-# schemas: auth
-from app.models.schemas.auth_schema import authBasePlus
 
 def aUser(auth_UID: int, db: Session):
     user = db.query(Auth).filter(Auth.id == auth_UID).first()
@@ -18,6 +17,12 @@ def aEmail(auth_email: str, db: Session):
     user = db.query(Auth).filter(Auth.email == auth_email).first()
     if user: return user
     else: return False
+
+def aRole(auth_UID: int, db: Session):
+    user = db.query(Auth).filter(Auth.id == auth_UID).first()
+    if user.roles != "admin":
+        THROW_ERROR("Not enought access!", 404)
+    else: return True
 
 # inserts
 def ins_UserAuth(user: authBasePlus, db: Session):

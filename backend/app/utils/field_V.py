@@ -1,6 +1,8 @@
 "field validators file"
 import re
+from pydantic import HttpUrl
 from typing import Optional
+from decimal import Decimal
 # external libs
 from email_validator import validate_email, EmailNotValidError
 # utils: exceptions
@@ -43,6 +45,96 @@ def vPassword(value: Optional[str])-> str:
         THROW_ERROR("Passowrd need at least 6 characters, 1 letter upercase, 1 lowercase and 1 simbol!", 400)
 
     return password
+# id
+def vID(id: Optional[int]) -> int:
+    if id is None or not isinstance(id, int):
+        THROW_ERROR("Invalid ID", 400)
+
+    try:
+        id = int(id)
+    except:
+        THROW_ERROR("Invalid ID", 400)
+    
+    if id <= 0:
+        THROW_ERROR("Invalid ID", 400)
+# url
+def vUrl(url: str, title: Optional[str] = "url") -> HttpUrl:
+    try:
+        return HttpUrl(url)
+    except Exception:
+        THROW_ERROR(f"Invalid {title}!", 400)
+
+
+"generals"
+
+normal_text = re.compile(r"^[0-9A-Za-zÀ-ÖØ-öø-ÿ\s.,!?@#%&()\-_/]*$")
+
+# string
+def vString(value: Optional[str], title: Optional[str] = "text",
+   minlen: Optional[int] = 1,         
+   maxlen: Optional[int] = 20         
+) -> str:
+    if value is None:
+        THROW_ERROR(f"{title} cannot be blank!", 400)
+    if not isinstance(value, str):
+        THROW_ERROR(f"{title} is not in correct format!", 400)
+
+    string = value.strip()
+    if not string:
+        THROW_ERROR(f"{title} cannot be blank!", 400)
+
+    if len(string) < minlen:
+        THROW_ERROR(f"Minimum characters {minlen}!", 400)
+    if len(string) > maxlen:
+        THROW_ERROR(f"Too many characters {maxlen}", 400)
+
+    if not re.match(normal_text, string):
+        THROW_ERROR(f"Invalid {string}!", 400)
+
+    return string
+
+# numbers
+def vInt(integer: Optional[int], title: Optional[str] = "number",
+    minNumber: Optional[int] = 0,
+    maxNumber: Optional[int] = 1000000,     
+) -> int:
+    if integer is None:
+        THROW_ERROR(f"{title} cannot be blank!", 400)
+    if not isinstance(integer, int):
+        THROW_ERROR(f"{title} is not in correct format!", 400)
+
+    if not (minNumber <= integer <= maxNumber):
+        THROW_ERROR(f"{title} must be between {minNumber} and {maxNumber}!", 400)
+
+    return integer
+
+def vDecimal(decimal = Optional[Decimal], title: Optional[str] = "number",
+    minNumber: Decimal = Decimal("0"),
+    maxNumber: Decimal = Decimal("1000000"),  
+) -> Decimal:
+    
+    if decimal is None:
+        THROW_ERROR(f"{title} cannot be blank!", 400)
+    try:
+        decimal = Decimal(str(decimal))
+    except:
+        THROW_ERROR(f"{title} is not in correct format!", 400)
+
+    if not (minNumber <= decimal <= maxNumber):
+        THROW_ERROR(f"{title} must be between {minNumber} and {maxNumber}!", 400)
+
+    return decimal
+
+
+
+
+    
+
+
+    
+
+
+    
 
 
     

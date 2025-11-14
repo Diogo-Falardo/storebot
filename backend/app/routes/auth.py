@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime,timezone
 # system: db, security
 from app.system.db import db
-from app.system.system import create_password_hash, verify_password_hash, generate_access_token, verify_token
-# models, schemas: auth
-from app.models.auth_model import Auth
+from app.system.system import generate_access_token, verify_token
+# schemas: auth
 from app.models.schemas.auth_schema import authBasePlus, authOut, Token, RF_Token
 # controllers: auth
 from app.controllers import auth_controller

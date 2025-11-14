@@ -23,7 +23,7 @@ from app.system.db import db
 # utils: exceptions
 from app.utils.exceptions import THROW_ERROR
 # services: auth
-from app.services.auth_service import aUser
+from app.services.auth_service import aUser, aRole
 "jwt"
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -104,9 +104,13 @@ def validate_auth_token(
     except Exception as e:
         THROW_ERROR(str(e), 500)
 
+def validate_sender(id: int, db: Session) -> True:
+    if aRole(id, db):
+        return True
 
 pwd_context = CryptContext(schemes=["bcrypt_sha256", "bcrypt"], deprecated="auto")
 def create_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 def verify_password_hash(plain_password: str, password_hash: str)-> bool:
     return pwd_context.verify(plain_password, password_hash)
+

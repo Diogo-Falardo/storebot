@@ -18,3 +18,7 @@ app.add_middleware(
 from app.routes.auth import router as auth_router
 app.include_router(auth_router)
 
+# shop
+from app.routes.shop import router as shop_router
+app.include_router(shop_router)
+
