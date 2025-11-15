@@ -36,6 +36,22 @@ class productCreate(productBase):
     images_url: Optional[list[HttpUrl]] = None
     discount: Optional[Decimal] = None
 
+    @field_validator("images_url", mode="before")
+    @classmethod
+    def _images_url(cls, url):
+        if isinstance(url, list):
+            return url
+        
+        if isinstance(url, str):
+            if not url.strip():
+                return None
+            return [url.strip() for url in url.split(",")]
+        
+        if url is None:
+            return None
+
+        return url
+
     @field_validator("discount", mode="before")
     @classmethod
     def _discount(cls, discount):
@@ -90,10 +106,15 @@ class cartItemBaseExtended(cartItemBase):
 
 # OUT --- cart
 class cartOut(BaseModel):
-    cart: list[cartItemBase] = []
+    id_product: int
+    quantity: int
+    price_at_time: Decimal
+    discount_at_time: Decimal
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
 
 
 

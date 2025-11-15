@@ -35,6 +35,12 @@ def sCartItem_Product(id_product: int, db: Session):
     if cartItem: return cartItem
     else: return None
 
+def sCartItem_idCart(id_cart: int, db:Session):
+    cartItems = db.query(CartItem).filter(CartItem.id_cart == id_cart).all()
+    print(cartItems)
+    if cartItems: return cartItems
+    else: return None
+
 # inserts
 
 def ins_product(payload: dict, db: Session):
@@ -77,7 +83,6 @@ def ins_cart(user_id: int, db: Session):
 
         return new_cart
     except Exception:
-        db.rollback()
         THROW_ERROR("Error while creating cart...", 500)
 
 def ins_cartItem(payload: cartItemBaseExtended, db: Session):
@@ -87,7 +92,7 @@ def ins_cartItem(payload: cartItemBaseExtended, db: Session):
             id_product=payload.id_product,
             quantity=payload.quantity,
             price_at_time= payload.price_at_time,
-            discout = payload.price_at_time
+            discount_at_time = payload.price_at_time
         )
 
         db.add(newItem)

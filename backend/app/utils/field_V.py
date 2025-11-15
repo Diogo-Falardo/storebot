@@ -47,7 +47,7 @@ def vPassword(value: Optional[str])-> str:
     return password
 # id
 def vID(id: Optional[int]) -> int:
-    if id is None or not isinstance(id, int):
+    if id is None:
         THROW_ERROR("Invalid ID", 400)
 
     try:
@@ -57,6 +57,8 @@ def vID(id: Optional[int]) -> int:
     
     if id <= 0:
         THROW_ERROR("Invalid ID", 400)
+
+    return id
 # url
 def vUrl(url: str, title: Optional[str] = "url") -> HttpUrl:
     try:

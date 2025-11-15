@@ -31,3 +31,12 @@ def add_cart(
     db: Session = Depends(db)
 ):
     return shop_controller.new_cart(sender_id,payload,db)
+
+@router.get("/my-cart", response_model=list[cartOut], name="userCart")
+def get_cart(
+    sender_id = Depends(validate_auth_token),
+    db: Session = Depends(db)
+):
+    return shop_controller.get_cart(sender_id,db)
+
+ 
