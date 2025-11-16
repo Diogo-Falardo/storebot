@@ -1,0 +1,18 @@
+# VCS / OS
+.git
+.gitignore
+*.log
+.DS_Store
+
+# Env / secrets
+.env
+.env.*
+*.pem
+
+# Python caches and virtualenvs
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/

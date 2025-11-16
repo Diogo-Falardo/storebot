@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend # use only the backend folder as build context
+      dockerfile: Dockerfile # Dockerfile inside backend folder
+    container_name: kira-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app # hot reload in dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend # use only the frontend folder as build context
+      dockerfile: Dockerfile # Dockerfile inside frontend folder
+    container_name: kira-frontend
+    ports:
+      - "5173:5173" # map Vite dev server port
+    volumes:
+      - ./frontend:/app # hot reload in dev
+      - /app/node_modules # keep node_modules inside container
+    command: npm run dev -- --host 0.0.0.0 --port 5173 # start Vite dev server
