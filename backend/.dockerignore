@@ -9,19 +9,10 @@
 .env.*
 *.pem
 
-# Python
+# Python caches and virtualenvs
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 .venv/
 venv/
-
-# Node
-node_modules/
-.next/
-dist/
-out/
-
-# Docker
-docker-compose.override.yml

@@ -1,31 +1,23 @@
-version: "3.9"
-
 services:
   backend:
     build:
-      context: . # use root so .dockerignore applies
-      dockerfile: backend/Dockerfile
+      context: ./backend # use only the backend folder as build context
+      dockerfile: Dockerfile # Dockerfile inside backend folder
     container_name: kira-backend
     ports:
       - "8000:8000"
-    environment:
-      - CORS_ORIGIN=http://localhost:3000
     volumes:
       - ./backend:/app # hot reload in dev
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build:
-      context: . # use root so .dockerignore applies
-      dockerfile: frontend/Dockerfile
+      context: ./frontend # use only the frontend folder as build context
+      dockerfile: Dockerfile # Dockerfile inside frontend folder
     container_name: kira-frontend
     ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-    depends_on:
-      - backend
+      - "5173:5173" # map Vite dev server port
     volumes:
       - ./frontend:/app # hot reload in dev
-      - /app/node_modules # prevent overwriting node_modules
-    command: npm run dev
+      - /app/node_modules # keep node_modules inside container
+    command: npm run dev -- --host 0.0.0.0 --port 5173 # start Vite dev server
