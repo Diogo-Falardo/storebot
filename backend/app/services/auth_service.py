@@ -24,6 +24,8 @@ def aRole(auth_UID: int, db: Session):
         THROW_ERROR("Not enought access!", 404)
     else: return True
 
+# def isUser(auth_UID: int, db: Session):
+
 # inserts
 def ins_UserAuth(user: authBasePlus, db: Session):
     try:

@@ -7,6 +7,8 @@ from app.models.schemas.shop_schema import productCreate, cartItemBaseExtended
 # utils: exceptions
 from app.utils.exceptions import THROW_ERROR
 
+# search
+
 def sProduct(value: str, db: Session,title: Optional[str] = "id"):
     if title == "id":
         id = int(value)
@@ -103,3 +105,10 @@ def ins_cartItem(payload: cartItemBaseExtended, db: Session):
     except Exception:
         db.rollback()
         THROW_ERROR("Error while adding item...", 500)
+
+# gets
+
+def get_products(db: Session):
+    return db.query(Product).all()
+
+    

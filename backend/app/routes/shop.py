@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 # system: db, security
 from app.system.db import db
-from app.system.system import validate_auth_token, validate_sender
+from app.system.system import validate_auth_token, validate_sender_admin
 # schemas: shop
 from app.models.schemas.shop_schema import productCreate, productOut, cartItemBase, cartOut
 # controllers: shop
@@ -19,9 +19,15 @@ def add_product(
     sender_id = Depends(validate_auth_token),
     db: Session = Depends(db)
 ):
-    validate_sender(sender_id, db)
+    validate_sender_admin(sender_id, db)
 
     return shop_controller.add_product(payload,db)
+
+@router.get("/products", response_model=list[productOut], name="getProducts")
+def products(
+    db: Session = Depends(db)
+):
+    return shop_controller.products(db)
 
 # cart system
 @router.post("/cart", response_model=cartOut, name="newCart")

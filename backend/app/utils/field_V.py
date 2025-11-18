@@ -65,7 +65,27 @@ def vUrl(url: str, title: Optional[str] = "url") -> HttpUrl:
         return HttpUrl(url)
     except Exception:
         THROW_ERROR(f"Invalid {title}!", 400)
+# username
+def vUsername(value: Optional[str]) -> str:
+    if value is None:
+        THROW_ERROR("Username cannot be blank.", 400)
+    if not isinstance(value, str):
+        THROW_ERROR("Username is not in correct format", 400)
+    
+    username = value.strip()
+    if not username:
+        THROW_ERROR("Username cannot be blank.", 400)
 
+    if len(username) > 20:
+        THROW_ERROR("Username is to long!", 400)
+    if len(username) <= 2:
+        THROW_ERROR("Username is to short!", 400)
+
+    username_pattern = r'^[A-Za-z0-9_ ]+$'
+    if not re.match(username_pattern, username):
+        THROW_ERROR("Username must contain only letters, numbers, underscores and spaces!", 400)
+
+    return username
 
 "generals"
 

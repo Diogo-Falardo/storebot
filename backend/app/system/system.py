@@ -104,9 +104,14 @@ def validate_auth_token(
     except Exception as e:
         THROW_ERROR(str(e), 500)
 
-def validate_sender(id: int, db: Session) -> True:
+def validate_sender_admin(id: int, db: Session) -> True:
     if aRole(id, db):
         return True
+    
+# def validate_sender(id: int, db: Session) -> True:
+#     if isUser(id,db):
+#         return True
+    
 
 pwd_context = CryptContext(schemes=["bcrypt_sha256", "bcrypt"], deprecated="auto")
 def create_password_hash(password: str) -> str:

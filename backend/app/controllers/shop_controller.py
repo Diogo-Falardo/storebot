@@ -6,8 +6,6 @@ from app.models.schemas.shop_schema import productCreate, cartItemBase, cartItem
 # utils: excepitons
 from app.utils.exceptions import THROW_ERROR
 
-# cart items
-
 # insert new product
 def add_product(payload: productCreate, db: Session):
     
@@ -18,8 +16,12 @@ def add_product(payload: productCreate, db: Session):
 
     return shop_service.ins_product(data,db)
 
-# cart sytem logic
+def products(db: Session):
 
+    return shop_service.get_products(db)
+
+
+# cart system logic
 # new cart
 def new_cart(user_id: int, payload: cartItemBase, db: Session):
 
@@ -66,8 +68,7 @@ def new_cart(user_id: int, payload: cartItemBase, db: Session):
 
         cart_item = shop_service.ins_cartItem(newCartItem,db)
         return cart_item
-
-
+    
 # get user cart
 def get_cart(user_id: int, db: Session): 
     cart = shop_service.sCart(user_id,db)

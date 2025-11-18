@@ -5,7 +5,7 @@ from decimal import Decimal
 # utils: validators
 from app.utils import field_V
 
-# product --- base
+# product 
 class productBase(BaseModel):
     product_name: str
     product_desc: str
@@ -57,14 +57,14 @@ class productCreate(productBase):
     def _discount(cls, discount):
         return field_V.vDecimal(discount, title="discount", maxNumber=90)
 
-# OUT --- product
+# out
 class productOut(productCreate):
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
-# cart --- base
+# cart 
 class cartBase(BaseModel):
     user_id: int
 
@@ -73,7 +73,7 @@ class cartBase(BaseModel):
     def _id(cls, id):
         return field_V.vID(id)
 
-# cart item --- base
+# cart item 
 class cartItemBase(BaseModel):
     id_cart: Optional[int] = None
     id_product: int
@@ -104,7 +104,7 @@ class cartItemBaseExtended(cartItemBase):
     def _discount(cls, discount):
         return field_V.vDecimal(discount, title="discount", maxNumber=90)
 
-# OUT --- cart
+# out
 class cartOut(BaseModel):
     id_product: int
     quantity: int

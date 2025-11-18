@@ -4,7 +4,7 @@ from typing import Optional
 # utils: validatores
 from app.utils import field_V
 
-# auth --- base
+# auth
 class authBase(BaseModel):
     email: EmailStr
 
@@ -13,7 +13,7 @@ class authBase(BaseModel):
     def _email(cls, email):
         return field_V.vEmail(email)
 
-# auth --- base extended
+# auth base extended
 class authBasePlus(authBase):
     password: str
 
@@ -22,7 +22,7 @@ class authBasePlus(authBase):
     def _password(cls, password):
         return field_V.vPassword(password)
 
-# OUT ---
+# out
 class authOut(authBase):
     created_at: datetime
     updated_at: datetime
@@ -30,7 +30,7 @@ class authOut(authBase):
 
     model_config = ConfigDict(from_attributes=True)
 
-# JWT ---
+# JWT 
 class RF_Token(BaseModel):
     refresh_token: str
 
