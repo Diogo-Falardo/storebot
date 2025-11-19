@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   backend:
     build:
@@ -16,8 +18,14 @@ services:
       dockerfile: Dockerfile # Dockerfile inside frontend folder
     container_name: kira-frontend
     ports:
-      - "5173:5173" # map Vite dev server port
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      WATCHPACK_POLLING: "true" # key for hot reload in Docker
+      CHOKIDAR_USEPOLLING: "true" # extra help on some OSes
     volumes:
       - ./frontend:/app # hot reload in dev
       - /app/node_modules # keep node_modules inside container
-    command: npm run dev -- --host 0.0.0.0 --port 5173 # start Vite dev server
