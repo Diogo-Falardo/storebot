@@ -1,0 +1,24 @@
+{
+  "projectName": "web",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "mysql"
+    }
+  },
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "eslint",
+    "railway",
+    "start",
+    "clerk",
+    "drizzle",
+    "shadcn",
+    "tanstack-query"
+  ]
+}
