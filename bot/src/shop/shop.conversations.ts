@@ -8,20 +8,21 @@ export async function createShopConversation(
 ) {
   const username = ctx.from?.username;
   await ctx.reply(
-    `Hi${username ? ` ${username}` : ""}, thank you for creating a bot with Kira\n\n`,
-  );
-  await ctx.reply(
-    "What is your new shop name? \n" + "Please only right the name of it\n",
+    `Hi${username ? ` ${username}` : ""}! Thanks for creating a shop with Kira.\n\n` +
+      "What would you like to name your shop?\n" +
+      "Reply with the name only.",
   );
   const { message } = await conversation.waitFor("message:text");
   let shopName = String(message.text).trim();
 
   if (!shopName) {
-    await ctx.reply("Aborted no name was given!");
+    await ctx.reply("No name received. Send /create to try again.");
     return;
   }
   while (shopName.length < 1 || shopName.length > 50) {
-    await ctx.reply("Your shop name must have between 1 and 50 letters!");
+    await ctx.reply(
+      "That name is too long. Please send a name between 1 and 50 characters.",
+    );
     const { message } = await conversation.waitFor("message:text");
     shopName = String(message.text).trim();
   }
@@ -29,15 +30,13 @@ export async function createShopConversation(
   try {
     const tgUserId = ctx.from!.id;
 
-    console.log(shopName);
     const result = await createShopTgOnly(tgUserId, shopName);
 
-    console.log(result);
     await ctx.reply(
-      `✅ Shop created: ${result.shopName ?? shopName}\n` +
-        "Dont forget to activate it. /activate!",
+      `Shop created: ${result.shopName ?? shopName}\n` +
+        "Next step: activate it with /activate",
     );
   } catch (e: any) {
-    await ctx.reply(`❌ Failed to create shop.\n${e.message ?? e}`);
+    await ctx.reply(`Failed to create shop.\n${e.message ?? e}`);
   }
 }
