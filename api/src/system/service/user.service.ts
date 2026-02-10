@@ -1,8 +1,7 @@
-import { users } from "../../../drizzle/schema";
+import { users } from "../../db/schema";
 import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
-import { v4 } from "uuid";
 
 export const UserService = {
   /**
@@ -33,15 +32,20 @@ export const UserService = {
     const user = await this.tg_getUserId(id);
     if (user) return user;
 
-    const newUserId = v4();
     try {
-      await db.insert(users).values({
-        id: newUserId,
+      const newUser = await db.insert(users).values({
         telegramUserId: id,
       });
-      return newUserId;
+
+      const userId = await this.tg_getUserId(id);
+
+      if (!userId) {
+        throw new HttpError(500, "error creating user");
+      }
+
+      return userId;
     } catch (err) {
-      throw new HttpError(500, "generating user!");
+      throw new HttpError(500, "error generating user!");
     }
   },
 };
