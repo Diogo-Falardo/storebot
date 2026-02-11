@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import { Link } from '@tanstack/react-router'
-import { Button, buttonVariants } from './ui/button'
+import { buttonVariants } from './ui/button'
+import ShopBtn from './shop.btn'
 
 const Navbar = () => {
   return (
@@ -12,9 +13,7 @@ const Navbar = () => {
         <SignedIn>
           <div className="flex items-center gap-4">
             <UserButton />
-            <Button variant={'outline'} className="cursor-pointer">
-              Create your shop!
-            </Button>
+            <ShopBtn />
           </div>
         </SignedIn>
         <SignedOut>
