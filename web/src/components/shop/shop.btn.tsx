@@ -1,8 +1,9 @@
 import { useForm } from '@tanstack/react-form'
 import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
+import { Link } from '@tanstack/react-router'
+import { Button, buttonVariants } from '../ui/button'
+import { Input } from '../ui/input'
 import {
   Dialog,
   DialogContent,
@@ -10,21 +11,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog'
+} from '../ui/dialog'
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from './ui/field'
+} from '../ui/field'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select'
+} from '../ui/select'
 import { useGetUserShops } from '@/server/shop/shop.hooks'
 import {
   shopCreateSchema,
@@ -37,10 +38,10 @@ const ShopBtn = () => {
   // get the user
   const { userId } = useUserContext()
 
-  if (!userId) return null
+  if (!userId) return <Button variant={'outline'}>Loading user...</Button>
 
   // loaded shops from user
-  const { data: shops } = useGetUserShops({ id: userId })
+  const { data: shops, isLoading } = useGetUserShops({ id: userId })
   const createShop = useServerFn(postcreateUserShop)
 
   // create a shop
@@ -65,6 +66,10 @@ const ShopBtn = () => {
       }
     },
   })
+
+  if (isLoading) {
+    return <Button variant={'outline'}>Loading...</Button>
+  }
 
   // if user doesnt have  any shop
   if (!shops || shops.length === 0) {
@@ -169,7 +174,15 @@ const ShopBtn = () => {
     )
   }
 
-  return <Button variant={'outline'}>Dashboard</Button>
+  return (
+    <Link
+      to="/dashboard/$id"
+      params={{ id: shops[0].id }}
+      className={buttonVariants({ variant: 'outline' })}
+    >
+      Dashboard
+    </Link>
+  )
 }
 
 export default ShopBtn

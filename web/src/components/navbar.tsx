@@ -1,7 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from './ui/button'
-import ShopBtn from './shop.btn'
+import ShopBtn from './shop/shop.btn'
 
 const Navbar = () => {
   return (
