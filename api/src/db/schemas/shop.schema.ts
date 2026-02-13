@@ -9,7 +9,7 @@ export const shopCreateSchema = z.object({
 export type shopCreateSchemaType = z.infer<typeof shopCreateSchema>;
 
 export const shopViewSchema = shopCreateSchema.extend({
-  id: z.uuidv4(),
-  userId: z.uuidv4(),
+  id: z.uuid(),
+  userId: z.uuid(),
 });
 export type shopViewSchemaType = z.infer<typeof shopViewSchema>;

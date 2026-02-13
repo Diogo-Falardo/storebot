@@ -22,8 +22,15 @@ export const ShopController = {
       const tg_userID = header["x-tg-user-id"];
 
       const userId = await UserService.tg_checkId(tg_userID);
-      const newShop = await shopService.createShop(userId, shopCreateDto);
+      // existing user shops
+      const userShops = await shopService.getShopsByUserId(userId);
+      if (userShops.length > 1)
+        throw new HttpError(
+          400,
+          "We are sorry for now its only available one shop per user",
+        );
 
+      const newShop = await shopService.createShop(userId, shopCreateDto);
       return res.status(201).json(newShop);
     } catch (err) {
       next(err);

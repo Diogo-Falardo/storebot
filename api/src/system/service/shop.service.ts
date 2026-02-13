@@ -8,7 +8,6 @@ import {
   shopViewSchemaType,
 } from "../../db/schemas/shop.schema";
 import { shops } from "../../db/schema";
-import { v4 } from "uuid";
 
 export const shopService = {
   /**
@@ -33,19 +32,32 @@ export const shopService = {
     }
   },
 
+  async getShopsByUserId(userId: string): Promise<Array<shopViewSchemaType>> {
+    try {
+      const newShops = await db
+        .select()
+        .from(shops)
+        .where(eq(shops.userId, userId));
+
+      if (!newShops || newShops.length === 0)
+        throw new HttpError(404, "shop not found");
+
+      return shopViewSchema.array().parse(newShops);
+    } catch (err) {
+      throw new HttpError(500, "error getting shops");
+    }
+  },
+
   // creates a new shop
   async createShop(userId: string, dto: shopCreateSchemaType) {
-    const shopId = v4();
     try {
       await db.insert(shops).values({
-        id: shopId,
         userId: userId,
         shopName: dto.shopName,
         shopType: dto.shopType,
       });
 
-      const shop = await this.getShopById(shopId);
-      return shop;
+      return "shop created";
     } catch (err) {
       throw new HttpError(500, "error creating shop");
     }

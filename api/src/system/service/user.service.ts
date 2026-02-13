@@ -33,7 +33,7 @@ export const UserService = {
     if (user) return user;
 
     try {
-      const newUser = await db.insert(users).values({
+      await db.insert(users).values({
         telegramUserId: id,
       });
 

@@ -7,8 +7,10 @@ import {
   primaryKey,
   char,
   datetime,
-  mysqlEnum,
   varchar,
+  decimal,
+  text,
+  mysqlEnum,
   unique,
   bigint,
 } from "drizzle-orm/mysql-core";
@@ -33,6 +35,29 @@ export const linkTokens = mysqlTable(
     index("idx_link_tokens_user_id").on(table.userId),
     primaryKey({ columns: [table.tokenHash], name: "link_tokens_token_hash" }),
   ],
+);
+
+export const products = mysqlTable(
+  "products",
+  {
+    id: char({ length: 36 })
+      .default(sql`(uuid())`)
+      .notNull()
+      .primaryKey(),
+    shopId: char("shop_id", { length: 36 })
+      .notNull()
+      .references(() => shops.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    productName: varchar("product_name", { length: 120 }).notNull(),
+    productPrice: decimal("product_price", {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
+    productDesc: text("product_desc"),
+    createdAt: datetime("created_at", { mode: "string", fsp: 3 })
+      .default(sql`(CURRENT_TIMESTAMP(3))`)
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.id], name: "products_id" })],
 );
 
 export const shops = mysqlTable(
@@ -63,8 +88,7 @@ export const users = mysqlTable(
   {
     id: char({ length: 36 })
       .default(sql`(uuid())`)
-      .notNull()
-      .primaryKey(),
+      .notNull(),
     clerkUserId: varchar("clerk_user_id", { length: 191 }),
     telegramUserId: bigint("telegram_user_id", { mode: "number" }),
     createdAt: datetime("created_at", { mode: "string", fsp: 3 })
