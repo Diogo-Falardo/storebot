@@ -9,13 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as publicRouteRouteImport } from './routes/(public)/route'
+import { Route as publicIndexRouteImport } from './routes/(public)/index'
+import { Route as shopLayoutRouteImport } from './routes/(shop)/_layout'
 import { Route as AuthSignUpSplatRouteImport } from './routes/auth/sign-up.$'
 import { Route as AuthSignInSplatRouteImport } from './routes/auth/sign-in.$'
+import { Route as shopLayoutDashboardIdRouteImport } from './routes/(shop)/_layout.dashboard.$id'
 
-const IndexRoute = IndexRouteImport.update({
+const publicRouteRoute = publicRouteRouteImport.update({
+  id: '/(public)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const publicIndexRoute = publicIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const shopLayoutRoute = shopLayoutRouteImport.update({
+  id: '/(shop)/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpSplatRoute = AuthSignUpSplatRouteImport.update({
@@ -28,44 +39,76 @@ const AuthSignInSplatRoute = AuthSignInSplatRouteImport.update({
   path: '/auth/sign-in/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const shopLayoutDashboardIdRoute = shopLayoutDashboardIdRouteImport.update({
+  id: '/dashboard/$id',
+  path: '/dashboard/$id',
+  getParentRoute: () => shopLayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof publicIndexRoute
   '/auth/sign-in/$': typeof AuthSignInSplatRoute
   '/auth/sign-up/$': typeof AuthSignUpSplatRoute
+  '/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof publicIndexRoute
   '/auth/sign-in/$': typeof AuthSignInSplatRoute
   '/auth/sign-up/$': typeof AuthSignUpSplatRoute
+  '/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/(public)': typeof publicRouteRouteWithChildren
+  '/(shop)/_layout': typeof shopLayoutRouteWithChildren
+  '/(public)/': typeof publicIndexRoute
   '/auth/sign-in/$': typeof AuthSignInSplatRoute
   '/auth/sign-up/$': typeof AuthSignUpSplatRoute
+  '/(shop)/_layout/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/sign-in/$' | '/auth/sign-up/$'
+  fullPaths: '/' | '/auth/sign-in/$' | '/auth/sign-up/$' | '/dashboard/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/sign-in/$' | '/auth/sign-up/$'
-  id: '__root__' | '/' | '/auth/sign-in/$' | '/auth/sign-up/$'
+  to: '/' | '/auth/sign-in/$' | '/auth/sign-up/$' | '/dashboard/$id'
+  id:
+    | '__root__'
+    | '/(public)'
+    | '/(shop)/_layout'
+    | '/(public)/'
+    | '/auth/sign-in/$'
+    | '/auth/sign-up/$'
+    | '/(shop)/_layout/dashboard/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  publicRouteRoute: typeof publicRouteRouteWithChildren
+  shopLayoutRoute: typeof shopLayoutRouteWithChildren
   AuthSignInSplatRoute: typeof AuthSignInSplatRoute
   AuthSignUpSplatRoute: typeof AuthSignUpSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/(public)': {
+      id: '/(public)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof publicRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(public)/': {
+      id: '/(public)/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof publicIndexRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(shop)/_layout': {
+      id: '/(shop)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof shopLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up/$': {
@@ -82,11 +125,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(shop)/_layout/dashboard/$id': {
+      id: '/(shop)/_layout/dashboard/$id'
+      path: '/dashboard/$id'
+      fullPath: '/dashboard/$id'
+      preLoaderRoute: typeof shopLayoutDashboardIdRouteImport
+      parentRoute: typeof shopLayoutRoute
+    }
   }
 }
 
+interface publicRouteRouteChildren {
+  publicIndexRoute: typeof publicIndexRoute
+}
+
+const publicRouteRouteChildren: publicRouteRouteChildren = {
+  publicIndexRoute: publicIndexRoute,
+}
+
+const publicRouteRouteWithChildren = publicRouteRoute._addFileChildren(
+  publicRouteRouteChildren,
+)
+
+interface shopLayoutRouteChildren {
+  shopLayoutDashboardIdRoute: typeof shopLayoutDashboardIdRoute
+}
+
+const shopLayoutRouteChildren: shopLayoutRouteChildren = {
+  shopLayoutDashboardIdRoute: shopLayoutDashboardIdRoute,
+}
+
+const shopLayoutRouteWithChildren = shopLayoutRoute._addFileChildren(
+  shopLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  publicRouteRoute: publicRouteRouteWithChildren,
+  shopLayoutRoute: shopLayoutRouteWithChildren,
   AuthSignInSplatRoute: AuthSignInSplatRoute,
   AuthSignUpSplatRoute: AuthSignUpSplatRoute,
 }

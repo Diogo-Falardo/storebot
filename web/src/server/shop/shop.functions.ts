@@ -1,5 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import { createUserShop, getUserShopsByUserId } from './shop.server'
+import {
+  createUserShop,
+  getShopById,
+  getUserShopsByUserId,
+} from './shop.server'
 import type { shopCreateSchemaType } from '@/db/schemas/shop.schemas'
 /**
  * function to return the user shops
@@ -20,4 +24,13 @@ export const postcreateUserShop = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     return await createUserShop(data.userId, data.createShopDto)
+  })
+
+/**
+ * function to get a user shop info
+ */
+export const getUserShopInfo = createServerFn({ method: 'GET' })
+  .inputValidator((data: { userId: string; shopId: string }) => data)
+  .handler(async ({ data }) => {
+    return await getShopById(data.userId, data.shopId)
   })

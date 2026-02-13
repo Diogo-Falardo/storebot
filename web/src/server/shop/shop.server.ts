@@ -27,14 +27,14 @@ export async function getUserShopsByUserId(
 
 // get shop by id
 export async function getShopById(
-  id: string,
   userId: string,
+  shopId: string,
 ): Promise<shopViewSchemaType> {
   try {
     const shop = await db
       .select()
       .from(shops)
-      .where(and(eq(shops.id, id), eq(shops.userId, userId)))
+      .where(and(eq(shops.id, shopId), eq(shops.userId, userId)))
       .limit(1)
 
     if (shop.length === 0) throw new Error('Shop not found')

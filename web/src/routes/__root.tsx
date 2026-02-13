@@ -12,7 +12,6 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import TanStackQueryDevtools from '@/integrations/tanstack-query/devtools'
 import ClerkProvider from '@/integrations/clerk/provider'
-import Navbar from '@/components/navbar'
 import { getOrCreateDbUser } from '@/server/user/user.server'
 
 interface MyRouterContext {
@@ -76,13 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ClerkProvider>
           <UserContext.Provider value={{ userId }}>
             <Toaster />
-            <div className="min-h-screen grid grid-rows-[auto,1fr,auto]">
-              <header className="p-4">
-                <Navbar />
-              </header>
-              <main className="p-6">{children}</main>
-              <footer className="p-4"></footer>
-            </div>
+            {children}
             <TanStackDevtools
               config={{
                 position: 'bottom-right',

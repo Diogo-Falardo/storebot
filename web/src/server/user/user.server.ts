@@ -24,7 +24,7 @@ export async function getUserbyClerkId(id: string) {
 }
 
 /**
- * Creates new user if there is no user with that cler id
+ * Creates new user if there is no user with that clerk id
  * returns user_id or not authenticated error
  */
 export const getOrCreateDbUser = createServerFn({ method: 'POST' }).handler(
