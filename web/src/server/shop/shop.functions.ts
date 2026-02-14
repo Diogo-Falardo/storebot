@@ -5,6 +5,7 @@ import {
   getUserShopsByUserId,
 } from './shop.server'
 import type { shopCreateSchemaType } from '@/db/schemas/shop.schemas'
+
 /**
  * function to return the user shops
  */
