@@ -12,7 +12,7 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import TanStackQueryDevtools from '@/integrations/tanstack-query/devtools'
 import ClerkProvider from '@/integrations/clerk/provider'
-import { getOrCreateDbUser } from '@/server/user/user.server'
+import { getOrCreateDbUser } from '@/server/user/user.function'
 
 interface MyRouterContext {
   queryClient: QueryClient
