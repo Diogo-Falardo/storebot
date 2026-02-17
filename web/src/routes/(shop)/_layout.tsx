@@ -4,10 +4,25 @@ import {
   createFileRoute,
   useLoaderData,
 } from '@tanstack/react-router'
-import { Settings } from 'lucide-react'
+import { Settings, Store, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import ShopUpdate from '@/components/shop/shopUpdate'
 
 export const Route = createFileRoute('/(shop)/_layout')({
   component: RouteComponent,
@@ -23,17 +38,50 @@ function RouteComponent() {
           <div className="w-full lg:max-w-7xl flex items-center justify-between">
             <Link
               to="/"
-              className="select-none text-4xl font-bold tracking-widest"
+              className="select-none text-4xl font-bold tracking-wide"
             >
-              Kira
+              {data.shopInfo.shopName}
             </Link>
             <div className="flex items-center gap-3">
               <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant={'outline'} size={'icon-sm'}>
-                    <Settings />
-                  </Button>
-                </DialogTrigger>
+                {/* representative dialog trigger */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      size={'icon-sm'}
+                      className="cursor-pointer"
+                    >
+                      <Settings />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="p-2">
+                    <DropdownMenuGroup>
+                      {/* actual dialog trigger */}
+                      <DialogTrigger asChild>
+                        <DropdownMenuItem>
+                          <Store />
+                          Update Shop
+                        </DropdownMenuItem>
+                      </DialogTrigger>
+                    </DropdownMenuGroup>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem variant="destructive">
+                        <TrashIcon />
+                        Delete Shop
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* update shop content */}
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Update Shop</DialogTitle>
+                    <DialogDescription></DialogDescription>
+                  </DialogHeader>
+                  <ShopUpdate />
+                </DialogContent>
               </Dialog>
             </div>
           </div>

@@ -40,6 +40,17 @@ export const shopLoader = createServerFn({ method: 'GET' })
         }
       }
     }
+    try {
+      const shopInfo = await getUserShopInfo({
+        data: {
+          userId: 'bf8d62b5-08f3-11f1-a9f8-644ed72189d4',
+          shopId: data.shopId,
+        },
+      })
+      return { shopInfo: shopInfo }
+    } catch (err: any) {
+      throw new Error(err.message)
+    }
   })
 
 function DashboardErrorComponent({ error }: { error: Error }) {
@@ -63,8 +74,6 @@ export const Route = createFileRoute('/(shop)/_layout/dashboard/$id')({
 
 function RouteComponent() {
   const shopInfo = Route.useLoaderData()
-
-  console.log(shopInfo)
 
   return <div>Hello "/(shop)/dashboard/$id"!</div>
 }

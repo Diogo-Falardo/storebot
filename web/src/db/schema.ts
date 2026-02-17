@@ -16,7 +16,7 @@ export const products = mysqlTable("products", {
 export const shops = mysqlTable("shops", {
 	id: char({ length: 36 }).default(sql`(uuid())`).notNull(),
 	userId: char("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" } ),
-	shopType: mysqlEnum("shop_type", ['Public','Private']).default('Public').notNull(),
+	shopType: mysqlEnum("shop_type", ['public','private']).default('public').notNull(),
 	shopName: varchar("shop_name", { length: 120 }).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(CURRENT_TIMESTAMP(3))`).notNull(),
 },
