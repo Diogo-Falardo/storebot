@@ -4,18 +4,8 @@ import {
   createFileRoute,
   useLoaderData,
 } from '@tanstack/react-router'
-import { Settings, Plus, Package, ShoppingCart } from 'lucide-react'
-import { UserButton } from '@clerk/clerk-react'
+import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 
@@ -38,7 +28,6 @@ function RouteComponent() {
               Kira
             </Link>
             <div className="flex items-center gap-3">
-              <UserButton />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant={'outline'} size={'icon-sm'}>
