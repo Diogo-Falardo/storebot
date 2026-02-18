@@ -1,27 +1,22 @@
+import { useState } from 'react'
 import {
   Link,
   Outlet,
   createFileRoute,
   useLoaderData,
 } from '@tanstack/react-router'
-import { Settings, Store, TrashIcon } from 'lucide-react'
+import { Settings, Store, Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import ShopUpdate from '@/components/shop/shopUpdate'
 
 export const Route = createFileRoute('/(shop)/_layout')({
@@ -30,6 +25,7 @@ export const Route = createFileRoute('/(shop)/_layout')({
 
 function RouteComponent() {
   const data = useLoaderData({ from: '/(shop)/_layout/dashboard/$id' })
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="min-h-screen grid grid-rows-[auto,1fr,auto]">
@@ -43,44 +39,37 @@ function RouteComponent() {
               {data.shopInfo.shopName}
             </Link>
             <div className="flex items-center gap-3">
-              <Dialog>
-                {/* representative dialog trigger */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      size={'icon-sm'}
-                      className="cursor-pointer"
-                    >
-                      <Settings />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="p-2">
-                    <DropdownMenuGroup>
-                      {/* actual dialog trigger */}
-                      <DialogTrigger asChild>
-                        <DropdownMenuItem>
-                          <Store />
-                          Update Shop
-                        </DropdownMenuItem>
-                      </DialogTrigger>
-                    </DropdownMenuGroup>
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem variant="destructive">
-                        <TrashIcon />
-                        Delete Shop
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger>
+                  <Button
+                    variant={'outline'}
+                    size={'icon-sm'}
+                    className="cursor-pointer"
+                  >
+                    <Settings />
+                  </Button>
+                </DialogTrigger>
                 {/* update shop content */}
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Update Shop</DialogTitle>
                     <DialogDescription></DialogDescription>
                   </DialogHeader>
-                  <ShopUpdate />
+                  <ShopUpdate
+                    shopId={data.shopInfo.id}
+                    userId={data.shopInfo.userId}
+                    onSuccess={() => setOpen(false)}
+                  />
+                  <DialogFooter>
+                    <Button variant={'destructive'}>
+                      <Trash />
+                      Delete Shop
+                    </Button>
+                    <Button form="update-shop-form" type="submit">
+                      <Store />
+                      Update Shop
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>

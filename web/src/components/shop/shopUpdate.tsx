@@ -1,6 +1,9 @@
 // this component is supossed to go inside a dialog to update a shop
+import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import {
   Field,
   FieldDescription,
@@ -16,18 +19,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
-import { shopSchema, shopTypeEnum } from '@/db/schemas/shop.schemas'
+import { Spinner } from '../ui/spinner'
+import {
+  shopExtendedSchema,
+  shopExtendedSchemaType,
+  shopSchema,
+  shopTypeEnum,
+} from '@/db/schemas/shop.schemas'
+import { useGetUserShopInfo } from '@/server/shop/shop.hooks'
+import { updateUserShop } from '@/server/shop/shop.server'
 
-const ShopUpdate = () => {
+// update the shop function
+const updateShop = createServerFn({ method: 'POST' })
+  .inputValidator((data: shopExtendedSchemaType) => data)
+  .handler(async ({ data }) => {
+    return await updateUserShop(data)
+  })
+
+const ShopUpdate = ({
+  userId,
+  shopId,
+  onSuccess,
+}: {
+  userId: string
+  shopId: string
+  onSuccess?: () => void
+}) => {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  // load existing data
+  const { data, isLoading } = useGetUserShopInfo({ userId, shopId })
+  const update = useServerFn(updateShop)
+
   const form = useForm({
     defaultValues: {
-      shopName: '',
-      shopType: '',
+      shopName: data?.shopName ?? '',
+      shopType: 'public',
     },
     validators: {
       onSubmit: shopSchema,
     },
+    onSubmit: async ({ value }) => {
+      const payload = {
+        ...value,
+        userId,
+        id: shopId,
+      }
+
+      const _payload = shopExtendedSchema.parse(payload)
+
+      try {
+        await update({ data: _payload })
+        toast.success('Shop updated!')
+        queryClient.invalidateQueries({ queryKey: ['shop'] })
+        router.invalidate()
+        if (onSuccess) onSuccess()
+      } catch (err: any) {
+        toast.error(err.message ?? 'Error while updating shop!')
+      }
+    },
   })
+
+  if (isLoading) {
+    return <Spinner className="size-6" />
+  }
+
   return (
     <form
       id="update-shop-form"
@@ -61,6 +117,7 @@ const ShopUpdate = () => {
             )
           }}
         />
+        {/* shop type */}
         <form.Field
           name="shopType"
           children={(field) => {
@@ -85,7 +142,7 @@ const ShopUpdate = () => {
                   </SelectContent>
                 </Select>
                 <FieldDescription className="text-red-500">
-                  Currently disabled! Shops are all public for now.
+                  Currently disabled!
                 </FieldDescription>
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
