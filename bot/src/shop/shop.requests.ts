@@ -13,7 +13,7 @@ export async function createShopTgOnly(tgUserId: number, shopName: string) {
     },
     body: JSON.stringify({
       shopName,
-      shopType: "telegram_only",
+      shopType: "public",
     }),
   });
 

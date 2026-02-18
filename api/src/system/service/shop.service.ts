@@ -34,15 +34,12 @@ export const shopService = {
 
   async getShopsByUserId(userId: string): Promise<Array<shopViewSchemaType>> {
     try {
-      const newShops = await db
+      const userShops = await db
         .select()
         .from(shops)
         .where(eq(shops.userId, userId));
 
-      if (!newShops || newShops.length === 0)
-        throw new HttpError(404, "shop not found");
-
-      return shopViewSchema.array().parse(newShops);
+      return shopViewSchema.array().parse(userShops);
     } catch (err) {
       throw new HttpError(500, "error getting shops");
     }
@@ -59,6 +56,7 @@ export const shopService = {
 
       return "shop created";
     } catch (err) {
+      console.error(err);
       throw new HttpError(500, "error creating shop");
     }
   },

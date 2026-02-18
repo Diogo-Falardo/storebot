@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const shopTypeEnum = z.enum(["public", "private", "telegram_only"]);
+export const shopTypeEnum = z.enum(["public", "private"]);
 
 export const shopCreateSchema = z.object({
   shopType: shopTypeEnum,

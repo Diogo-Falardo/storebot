@@ -24,7 +24,7 @@ export const ShopController = {
       const userId = await UserService.tg_checkId(tg_userID);
       // existing user shops
       const userShops = await shopService.getShopsByUserId(userId);
-      if (userShops.length > 1)
+      if (userShops.length > 0)
         throw new HttpError(
           400,
           "We are sorry for now its only available one shop per user",
