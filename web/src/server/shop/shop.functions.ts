@@ -4,7 +4,7 @@ import {
   getShopById,
   getUserShopsByUserId,
 } from './shop.server'
-import type { shopCreateSchemaType } from '@/db/schemas/shop.schemas'
+import type { shopSchemaType } from '@/db/schemas/shop.schemas'
 
 /**
  * function to return the user shops
@@ -21,7 +21,7 @@ export const getUserShops = createServerFn({ method: 'GET' })
 
 export const postcreateUserShop = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: { userId: string; createShopDto: shopCreateSchemaType }) => data,
+    (data: { userId: string; createShopDto: shopSchemaType }) => data,
   )
   .handler(async ({ data }) => {
     return await createUserShop(data.userId, data.createShopDto)

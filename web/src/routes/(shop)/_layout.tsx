@@ -40,9 +40,11 @@ import {
 import { db } from '@/db'
 import { shops } from '@/db/schema'
 import { useQueryClient } from '@tanstack/react-query'
+import { DashboardErrorComponent } from './_layout.dashboard.$id'
 
 export const Route = createFileRoute('/(shop)/_layout')({
   component: RouteComponent,
+  errorComponent: DashboardErrorComponent,
 })
 
 const deleteShop = createServerFn({ method: 'POST' })
@@ -75,6 +77,7 @@ const deleteShop = createServerFn({ method: 'POST' })
 
 function RouteComponent() {
   const data = useLoaderData({ from: '/(shop)/_layout/dashboard/$id' })
+
   const [open, setOpen] = useState(false)
   // required hooks
   const queryClient = useQueryClient()
@@ -104,7 +107,7 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen grid grid-rows-[auto,1fr,auto]">
-      <header className="p-4">
+      <header className="p-4 max-h-20">
         <nav className="w-full flex justify-center">
           <div className="w-full lg:max-w-7xl flex items-center justify-between">
             <Link
@@ -181,10 +184,10 @@ function RouteComponent() {
           </div>
         </nav>
       </header>
-      <main className="p-6">
+      <main className="p-6  w-full flex justify-center">
         <Outlet />
       </main>
-      <footer className="p-4"></footer>
+      <footer className="p-4 max-h-20"></footer>
     </div>
   )
 }

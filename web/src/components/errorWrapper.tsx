@@ -29,7 +29,7 @@ const ErrorWrapper = ({
         <AlertDialogFooter>
           <AlertDialogAction
             onClick={() => window.location.reload()}
-            className={buttonVariants({ variant: 'secondary' })}
+            className={`${buttonVariants({ variant: 'secondary' })} cursor-pointer`}
           >
             Try to reload
           </AlertDialogAction>

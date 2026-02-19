@@ -43,7 +43,7 @@ export async function getShopById(
     return shopExtendedSchema.parse(shop[0])
   } catch (err: any) {
     console.error(err)
-    throw new Error('Error getting shop')
+    throw new Error(err.message ?? 'Error getting shop')
   }
 }
 
