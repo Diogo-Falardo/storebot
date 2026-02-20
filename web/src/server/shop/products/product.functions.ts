@@ -1,7 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import {
   deleteProductFromShop,
+  getProductById,
   getProductsFromShopId,
+  toogleVisibiltyFromProduct,
   updateProductFromShop,
 } from './products.server'
 import { productUpdateType } from '@/db/schemas/product.schema'
@@ -29,4 +31,18 @@ export const serverUpdateProductFromShop = createServerFn({
   .inputValidator((data: { dto: productUpdateType }) => data)
   .handler(async ({ data }) => {
     return await updateProductFromShop(data.dto)
+  })
+
+// function to switch visibilty of the product
+export const serverToogleProductVisibilty = createServerFn({
+  method: 'POST',
+})
+  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .handler(async ({ data }) => {
+    const product = await getProductById(data.shopId, data.productId)
+    if (!product) throw new Error('Product not found')
+
+    const newVisibility = product.visible === 1 ? 0 : 1
+
+    return await toogleVisibiltyFromProduct(data.productId, newVisibility)
   })

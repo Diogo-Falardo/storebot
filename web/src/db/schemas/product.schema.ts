@@ -18,6 +18,7 @@ export const productSchema = z.object({
     message:
       'Product price must be a decimal with up to 2 decimal places and max 10 digits (8 before, 2 after decimal).',
   }),
+  visible: z.number(),
 })
 export type productSchemaType = z.infer<typeof productSchema>
 

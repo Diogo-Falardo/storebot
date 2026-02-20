@@ -56,7 +56,7 @@ export async function getProductByName(shopId: string, productName: string) {
       )
 
     if (product[0]) {
-      return product
+      return product[0]
     }
 
     return null
@@ -80,7 +80,7 @@ export async function getProductById(shopId: string, productId: string) {
       .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
 
     if (product[0]) {
-      return product
+      return product[0]
     }
 
     return null
@@ -156,11 +156,9 @@ export async function deleteProductFromShop(shopId: string, productId: string) {
 }
 
 export async function updateProductFromShop(dto: productUpdateType) {
-  const productExists = await getProductById(dto.shopId, dto.id)
+  const product = await getProductById(dto.shopId, dto.id)
 
-  if (!productExists) throw new Error('Product not found!')
-
-  const [product] = productExists
+  if (!product) throw new Error('Product not found!')
 
   // object for updated fields
   const updateObj: Record<string, any> = {}
@@ -199,5 +197,23 @@ export async function updateProductFromShop(dto: productUpdateType) {
   } catch (err: any) {
     console.error(err)
     throw new Error(err.message ?? 'Error while updating product')
+  }
+}
+
+// function to toogle the visibily from
+export async function toogleVisibiltyFromProduct(
+  productId: string,
+  visibility: number,
+) {
+  try {
+    await db
+      .update(products)
+      .set({ visible: visibility })
+      .where(eq(products.id, productId))
+
+    return 'Product visibilty changed'
+  } catch (err: any) {
+    console.error(err)
+    throw new Error(err.message ?? 'Error while changing visibility')
   }
 }

@@ -12,11 +12,12 @@ import {
 import { Label } from '@/components/ui/label'
 import {
   serverDeleteProductFromShop,
+  serverToogleProductVisibilty,
   serverUpdateProductFromShop,
 } from '@/server/shop/products/product.functions'
 import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { Eye, Trash2 } from 'lucide-react'
+import { Eye, EyeOff, ToolCaseIcon, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import ProductUpdate from './productUpdate'
@@ -27,11 +28,13 @@ type productProps = {
   productName: string
   productPrice: string
   productDesc?: string | null
+  visible: number
 }
 
 const ProductCardADM = (product: productProps) => {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
   const deleted = useServerFn(serverDeleteProductFromShop)
+  const visibility = useServerFn(serverToogleProductVisibilty)
 
   const queryClient = useQueryClient()
 
@@ -50,15 +53,47 @@ const ProductCardADM = (product: productProps) => {
     }
   }
 
+  const visibilityToogler = async () => {
+    try {
+      const result = await visibility({
+        data: { shopId: product.shopId, productId: product.id },
+      })
+
+      if (result) {
+        toast.success(
+          product.visible === 1 ? 'Product hidden!' : 'Product shown!',
+        )
+        queryClient.invalidateQueries({ queryKey: ['products'] })
+      }
+    } catch (err: any) {
+      toast.error(
+        err.message ?? 'Error switching the visibility of the product',
+      )
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-xl">{product.productName}</CardTitle>
         {/* visibility toogler */}
         <CardAction>
-          <Button variant={'ghost'} className="text-sm">
-            <Eye className="h-3 w-3" />
-            hide product
+          <Button
+            variant={'ghost'}
+            className="text-sm"
+            onClick={() => visibilityToogler()}
+          >
+            {product.visible === 1 ? (
+              <>
+                <Eye className="h-3 w-3" />
+                Hide product
+              </>
+            ) : (
+              <>
+                <EyeOff className="h-3 w-3" />
+                Show product
+              </>
+            )}
           </Button>
         </CardAction>
       </CardHeader>
