@@ -28,6 +28,19 @@ export const productExtendedSchema = productDtoExtend.extend({
 })
 export type productExtendedSchemaType = z.infer<typeof productExtendedSchema>
 
+/**
+ * update a product
+ * everything is optional except IDs
+ */
+export const productUpdate = productDto
+  .extend({
+    shopId: z.uuid(),
+    id: z.uuid(),
+  })
+  .partial()
+  .required({ shopId: true, id: true })
+export type productUpdateType = z.infer<typeof productUpdate>
+
 // visualization
 export const productDisplaySchema = productExtendedSchema.extend({
   productDesc: z.string().min(0).optional().nullable(),

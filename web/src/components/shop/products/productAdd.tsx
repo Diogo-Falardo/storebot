@@ -26,7 +26,6 @@ import {
 } from '@/db/schemas/product.schema'
 import { addProductToShop } from '@/server/shop/products/products.server'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,7 +39,6 @@ const addProduct = createServerFn({ method: 'POST' })
 
 const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
   const queryClient = useQueryClient()
-  const router = useRouter()
 
   const add = useServerFn(addProduct)
 
@@ -66,7 +64,6 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
         await add({ data: { userId, dto: _payload } })
         toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
-        router.invalidate()
       } catch (err: any) {
         toast.error(err.message ?? 'Error while adding product')
       }

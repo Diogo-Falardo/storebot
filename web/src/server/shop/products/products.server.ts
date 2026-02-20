@@ -6,6 +6,7 @@ import {
   productDtoType,
   productExtendedSchema,
   productExtendedSchemaType,
+  productUpdateType,
 } from '@/db/schemas/product.schema'
 import { validateUserShopOwnership } from '@/server/user/user.server'
 import { and, eq } from 'drizzle-orm'
@@ -58,12 +59,37 @@ export async function getProductByName(shopId: string, productName: string) {
       return product
     }
 
-    return false
+    return null
   } catch (err: any) {
     console.error(err)
-    throw new Error(err.message ?? 'Error while getting product...')
+    throw new Error(err.message ?? 'Error while loading product...')
   }
 }
+
+/**
+ * Function to get a product from its id
+ * @param shopId
+ * @param productId
+ * @returns
+ */
+export async function getProductById(shopId: string, productId: string) {
+  try {
+    const product = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+
+    if (product[0]) {
+      return product
+    }
+
+    return null
+  } catch (err: any) {
+    console.log(err)
+    throw new Error(err.message ?? 'Error while loading product...')
+  }
+}
+
 /**
  * Function to add a product to a shop
  * @param userId
@@ -103,5 +129,75 @@ export async function addProductToShop(
   } catch (err: any) {
     console.error(err)
     throw new Error(err.message ?? 'Error while creating product')
+  }
+}
+
+/**
+ * Function to delete a product by its id
+ * @param shopId
+ * @param productId
+ * @returns
+ */
+export async function deleteProductFromShop(shopId: string, productId: string) {
+  const productExists = await getProductById(shopId, productId)
+
+  if (!productExists) throw new Error('Product not found!')
+
+  try {
+    await db
+      .delete(products)
+      .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+
+    return 'product deleted'
+  } catch (err: any) {
+    console.error(err)
+    throw new Error(err.message ?? 'Error while deleting shop')
+  }
+}
+
+export async function updateProductFromShop(dto: productUpdateType) {
+  const productExists = await getProductById(dto.shopId, dto.id)
+
+  if (!productExists) throw new Error('Product not found!')
+
+  const [product] = productExists
+
+  // object for updated fields
+  const updateObj: Record<string, any> = {}
+
+  if (
+    typeof dto.productName !== 'undefined' &&
+    dto.productName !== product.productName
+  ) {
+    updateObj.producName = dto.productName
+  }
+  if (
+    typeof dto.productPrice !== 'undefined' &&
+    dto.productPrice !== product.productPrice
+  ) {
+    updateObj.productPrice = dto.productPrice
+  }
+  if (
+    typeof dto.productDesc !== 'undefined' &&
+    dto.productDesc !== product.productDesc
+  ) {
+    updateObj.productDesc = dto.productDesc
+  }
+
+  // if no changes, return
+  if (Object.keys(updateObj).length === 0) {
+    return 'No changes were applied!'
+  }
+
+  try {
+    await db
+      .update(products)
+      .set(updateObj)
+      .where(and(eq(products.shopId, dto.shopId), eq(products.id, dto.id)))
+
+    return 'Product Updated'
+  } catch (err: any) {
+    console.error(err)
+    throw new Error(err.message ?? 'Error while updating product')
   }
 }

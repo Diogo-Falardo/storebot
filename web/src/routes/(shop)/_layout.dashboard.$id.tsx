@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/empty'
 import { Package } from 'lucide-react'
 import ProductAdd from '@/components/shop/products/productAdd'
+import ProductCardADM from '@/components/shop/products/productCard.admin'
 
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return ''
@@ -126,8 +127,12 @@ function RouteComponent() {
                 Loading your products
               </div>
             )}
-            {data && data.length > 0 ? (
-              <div></div>
+            {!isLoading && data && data.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {data.map((product) => (
+                  <ProductCardADM key={product.id} {...product} />
+                ))}
+              </div>
             ) : (
               <Empty>
                 <EmptyHeader>

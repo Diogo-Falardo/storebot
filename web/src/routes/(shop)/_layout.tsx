@@ -8,7 +8,7 @@ import {
   useLoaderData,
   useRouter,
 } from '@tanstack/react-router'
-import { Settings, Store, Trash, Trash2Icon } from 'lucide-react'
+import { Settings, Store, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -143,14 +143,14 @@ function RouteComponent() {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant={'destructive'}>
-                          <Trash />
+                          <Trash2 />
                           Delete Shop
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent size="sm">
                         <AlertDialogHeader>
                           <AlertDialogMedia className="bg-destructive">
-                            <Trash2Icon />
+                            <Trash2 />
                           </AlertDialogMedia>
                           <AlertDialogTitle>
                             Delete shop?
