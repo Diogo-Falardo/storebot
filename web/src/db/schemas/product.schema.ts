@@ -1,5 +1,13 @@
 import { z } from 'zod'
 
+/**
+ *
+ *
+ * THIS FILE NEEDS A BIG REVIEW AND FIX
+ *
+ *
+ */
+
 // base required for product
 export const productSchema = z.object({
   productName: z
@@ -32,14 +40,23 @@ export type productExtendedSchemaType = z.infer<typeof productExtendedSchema>
  * update a product
  * everything is optional except IDs
  */
-export const productUpdate = productDto
+export const productUpdateSchema = productDto
   .extend({
     shopId: z.uuid(),
     id: z.uuid(),
   })
   .partial()
   .required({ shopId: true, id: true })
-export type productUpdateType = z.infer<typeof productUpdate>
+export type productUpdateType = z.infer<typeof productUpdateSchema>
+
+// form haved some complications so we created this....
+export const productUpdateFormSchema = z.object({
+  productName: z.string().or(z.undefined()),
+  productPrice: z.string().or(z.undefined()),
+  productDesc: z.string(),
+  id: z.string(),
+  shopId: z.string(),
+})
 
 // visualization
 export const productDisplaySchema = productExtendedSchema.extend({

@@ -20,7 +20,7 @@ import {
 import {
   productDto,
   productDtoExtend,
-  productDtoType,
+  productDtoExtendedType,
   productExtendedSchema,
   productExtendedSchemaType,
 } from '@/db/schemas/product.schema'
@@ -30,15 +30,19 @@ import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { useRouter } from '@tanstack/react-router'
 
 const addProduct = createServerFn({ method: 'POST' })
-  .inputValidator((data: { userId: string; dto: productDtoType }) => data)
+  .inputValidator(
+    (data: { userId: string; dto: productDtoExtendedType }) => data,
+  )
   .handler(async ({ data }) => {
     return await addProductToShop(data.userId, data.dto.shopId, data.dto)
   })
 
 const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const add = useServerFn(addProduct)
 
@@ -52,18 +56,18 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       onSubmit: productDto,
     },
     onSubmit: async ({ value }) => {
-      console.log('Entr')
-      const payload = {
+      const _payload = {
         shopId,
         ...value,
       }
 
-      const _payload = productDtoExtend.parse(payload)
+      const payload = productDtoExtend.parse(_payload)
 
       try {
-        await add({ data: { userId, dto: _payload } })
+        await add({ data: { userId, dto: payload } })
         toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
+        router.invalidate()
       } catch (err: any) {
         toast.error(err.message ?? 'Error while adding product')
       }

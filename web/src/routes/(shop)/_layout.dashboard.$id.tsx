@@ -108,7 +108,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="w-full lg:max-w-7xl flex items-center justify-between">
+    <div className="w-full lg:max-w-7xl flex  justify-between">
       <Tabs defaultValue={'product'} className="w-full">
         <TabsList className="w-full">
           <TabsTrigger value="product" className="cursor-pointer">
@@ -128,10 +128,16 @@ function RouteComponent() {
               </div>
             )}
             {!isLoading && data && data.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {data.map((product) => (
-                  <ProductCardADM key={product.id} {...product} />
-                ))}
+              <div className="flex flex-col gap-5">
+                <div className="flex justify-end">
+                  <ProductAdd userId={userId} shopId={shopId} />
+                </div>
+                {/* products display grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {data.map((product) => (
+                    <ProductCardADM key={product.id} {...product} />
+                  ))}
+                </div>
               </div>
             ) : (
               <Empty>

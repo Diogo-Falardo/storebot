@@ -19,13 +19,14 @@ import { useServerFn } from '@tanstack/react-start'
 import { Eye, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import ProductUpdate from './productUpdate'
 
 type productProps = {
   id: string
   shopId: string
   productName: string
   productPrice: string
-  prouctDesc?: string | null
+  productDesc?: string | null
 }
 
 const ProductCardADM = (product: productProps) => {
@@ -53,7 +54,6 @@ const ProductCardADM = (product: productProps) => {
     <Card>
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-xl">{product.productName}</CardTitle>
-        <CardDescription>{product.prouctDesc ?? ''}</CardDescription>
         {/* visibility toogler */}
         <CardAction>
           <Button variant={'ghost'} className="text-sm">
@@ -62,8 +62,11 @@ const ProductCardADM = (product: productProps) => {
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex items-end justify-end">
-        <Label className="text-xl">{product.productPrice}</Label>
+      <CardContent>
+        <CardDescription>{product.productDesc ?? ''}</CardDescription>
+        <div className="flex justify-end">
+          <Label className="text-xl">{product.productPrice}</Label>
+        </div>
       </CardContent>
       <CardFooter className="flex items-end justify-end gap-2">
         {/* delete */}
@@ -85,7 +88,7 @@ const ProductCardADM = (product: productProps) => {
           onConfirm={() => deleteProduct()}
         />
         {/* update */}
-        <Button>Update Product</Button>
+        <ProductUpdate {...product} />
       </CardFooter>
     </Card>
   )

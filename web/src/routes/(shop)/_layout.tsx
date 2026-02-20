@@ -106,7 +106,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen grid grid-rows-[auto,1fr,auto]">
+    <div className="min-h-screen flex flex-col">
       <header className="p-4 max-h-20">
         <nav className="w-full flex justify-center">
           <div className="w-full lg:max-w-7xl flex items-center justify-between">
@@ -184,10 +184,10 @@ function RouteComponent() {
           </div>
         </nav>
       </header>
-      <main className="p-6  w-full flex justify-center">
+      {/* das */}
+      <main className="p-6 w-full flex flex-1  overflow-auto">
         <Outlet />
       </main>
-      <footer className="p-4 max-h-20"></footer>
     </div>
   )
 }
