@@ -51,17 +51,20 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       productName: '',
       productPrice: '',
       productDesc: '',
+      visible: 1,
     },
     validators: {
       onSubmit: productDto,
     },
     onSubmit: async ({ value }) => {
+      console.log('Here')
       const _payload = {
         shopId,
         ...value,
       }
 
       const payload = productDtoExtend.parse(_payload)
+      console.log('Parsed paylod:', payload)
 
       try {
         await add({ data: { userId, dto: payload } })
@@ -69,6 +72,7 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
         queryClient.invalidateQueries({ queryKey: ['products'] })
         router.invalidate()
       } catch (err: any) {
+        console.error('Error:', err)
         toast.error(err.message ?? 'Error while adding product')
       }
     },
@@ -184,8 +188,12 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button form="add-product-form" type="submit">
-            add product
+          <Button
+            form="add-product-form"
+            type="submit"
+            disabled={form.state.isSubmitting}
+          >
+            {form.state.isSubmitting ? 'Adding...' : 'add product'}
           </Button>
         </DialogFooter>
       </DialogContent>

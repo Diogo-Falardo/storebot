@@ -56,15 +56,12 @@ export const shopLoader = createServerFn({ method: 'GET' })
       }
     }
     try {
-      console
       const shopInfo = await getUserShopInfo({
         data: {
           userId: 'bf8d62b5-08f3-11f1-a9f8-644ed72189d4',
           shopId: data.shopId,
         },
       })
-
-      console.log(shopInfo)
 
       if (typeof shopInfo === 'undefined') {
         throw new Error('sry')
@@ -97,15 +94,10 @@ export const Route = createFileRoute('/(shop)/_layout/dashboard/$id')({
 
 function RouteComponent() {
   const { shopInfo } = Route.useLoaderData()
-  console.error(shopInfo)
 
   const { userId, id: shopId } = shopInfo
 
   const { data, isLoading } = useGetShopProducts({ userId, shopId })
-
-  if (data) {
-    console.log(data)
-  }
 
   return (
     <div className="w-full lg:max-w-7xl flex  justify-between">

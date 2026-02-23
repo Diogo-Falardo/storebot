@@ -28,6 +28,26 @@ export async function getUserShopsByUserId(
 }
 
 // get shop by id
+export async function getNameByShopId(shopId: string) {
+  try {
+    const shop = await db
+      .select({
+        shopName: shops.shopName,
+      })
+      .from(shops)
+      .where(eq(shops.id, shopId))
+      .limit(1)
+
+    console.log(shop.length)
+    if (shop.length === 0) throw new Error('Shop not found')
+    return shop[0].shopName
+  } catch (err: any) {
+    console.error(err)
+    throw new Error(err.message ?? 'Error getting shop')
+  }
+}
+
+// get shop by id and corresponding user id
 export async function getShopById(
   userId: string,
   shopId: string,
@@ -39,7 +59,7 @@ export async function getShopById(
       .where(and(eq(shops.id, shopId), eq(shops.userId, userId)))
       .limit(1)
 
-    if (shop.length === 0) throw new Error('Shop not found')
+    if (!shop[0]) throw new Error('Shop not found')
     return shopExtendedSchema.parse(shop[0])
   } catch (err: any) {
     console.error(err)

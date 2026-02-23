@@ -3,6 +3,7 @@ import {
   deleteProductFromShop,
   getProductById,
   getProductsFromShopId,
+  getProductsFromShopPublic,
   toogleVisibiltyFromProduct,
   updateProductFromShop,
 } from './products.server'
@@ -45,4 +46,13 @@ export const serverToogleProductVisibilty = createServerFn({
     const newVisibility = product.visible === 1 ? 0 : 1
 
     return await toogleVisibiltyFromProduct(data.productId, newVisibility)
+  })
+
+// function to get products from a shop
+export const serverGetProductsFromShop = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((data: { shopId: string }) => data)
+  .handler(async ({ data }) => {
+    return await getProductsFromShopPublic(data.shopId)
   })

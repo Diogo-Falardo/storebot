@@ -45,3 +45,36 @@ export async function verifyTelegram(initData: string) {
     username: userData.username,
   }
 }
+
+/**
+ * This function is to check if the user that is going to use the shop is accessing from the telegram
+ * @param initData
+ */
+export function verifyTelegramUser(initData: string) {
+  if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN not configured')
+  }
+
+  // convert the initData string to URLSearchParams
+  const params = new URLSearchParams(initData)
+
+  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+
+  if (!isValid) {
+    throw new Error('Invalid Telegram initData: signature verification failed')
+  }
+
+  // user data
+  const userDataStr = params.get('user')
+  if (!userDataStr) {
+    throw new Error('Invalid initData: missing user data')
+  }
+
+  const userData = JSON.parse(userDataStr)
+
+  return {
+    telegramId: userData.id,
+    firstName: userData.first_name,
+    username: userData.username,
+  }
+}

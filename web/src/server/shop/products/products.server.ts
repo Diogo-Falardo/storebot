@@ -217,3 +217,20 @@ export async function toogleVisibiltyFromProduct(
     throw new Error(err.message ?? 'Error while changing visibility')
   }
 }
+
+// function to get all products from a shop
+export async function getProductsFromShopPublic(
+  shopId: string,
+): Promise<Array<productDisplaySchemaType>> {
+  try {
+    const productsList = await db
+      .select()
+      .from(products)
+      .where(eq(products.shopId, shopId))
+
+    return productDisplaySchema.array().parse(productsList)
+  } catch (err: any) {
+    console.error(err)
+    throw new Error('Error while getting products')
+  }
+}
