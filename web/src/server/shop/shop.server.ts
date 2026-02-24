@@ -94,20 +94,28 @@ export async function updateUserShop(dto: shopExtendedSchemaType) {
 
   const shop = await getShopById(userId, shopId)
 
-  if (shop === dto) {
-    return true
+  const updateObj: Record<string, any> = {}
+
+  if (typeof dto.shopName !== 'undefined' && dto.shopName !== shop.shopName) {
+    updateObj.shopName = dto.shopName
   }
 
-  if (shop.shopName === dto.shopName) {
-    return true
+  if (
+    typeof dto.shopCurrency !== 'undefined' &&
+    dto.shopCurrency !== shop.shopCurrency
+  ) {
+    updateObj.shopCurrency = dto.shopCurrency
+  }
+
+  // if no changes, return
+  if (Object.keys(updateObj).length === 0) {
+    return 'No changes were applied!'
   }
 
   try {
     await db
       .update(shops)
-      .set({
-        shopName: dto.shopName,
-      })
+      .set(updateObj)
       .where(and(eq(shops.id, shopId), eq(shops.userId, userId)))
 
     return true

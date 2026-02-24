@@ -56,6 +56,7 @@ export const shops = mysqlTable(
     createdAt: datetime('created_at', { mode: 'string', fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
       .notNull(),
+    shopCurrency: varchar('ShopCurrency', { length: 3 }).default('EUR'),
   },
   (table) => [
     index('idx_shops_user_id').on(table.userId),

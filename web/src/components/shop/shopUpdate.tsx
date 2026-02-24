@@ -21,6 +21,7 @@ import {
 } from '../ui/select'
 import { Spinner } from '../ui/spinner'
 import {
+  currencyEnum,
   shopExtendedSchema,
   shopExtendedSchemaType,
   shopSchema,
@@ -55,22 +56,23 @@ const ShopUpdate = ({
     defaultValues: {
       shopName: data?.shopName ?? '',
       shopType: 'public',
+      shopCurrency: data?.shopCurrency ?? 'EUR',
     },
     validators: {
       onSubmit: shopSchema,
     },
     onSubmit: async ({ value }) => {
-      const payload = {
+      const _payload = {
         ...value,
         userId,
         id: shopId,
       }
 
-      const _payload = shopExtendedSchema.parse(payload)
+      const payload = shopExtendedSchema.parse(_payload)
 
       try {
-        await update({ data: _payload })
-        toast.success('Shop updated!')
+        const updatedInfo = await update({ data: payload })
+        toast.success(updatedInfo)
         queryClient.invalidateQueries({ queryKey: ['shop'] })
         router.invalidate()
         if (onSuccess) onSuccess()
@@ -112,6 +114,37 @@ const ShopUpdate = ({
                   placeholder="Kira Shop"
                   autoComplete="off"
                 />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        />
+        {/* shop currency */}
+        <form.Field
+          name="shopCurrency"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Shop Currency</FieldLabel>
+                <Select
+                  value={field.state.value}
+                  onValueChange={(value) =>
+                    field.handleChange(value as typeof field.state.value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your shop currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencyEnum.options.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             )
