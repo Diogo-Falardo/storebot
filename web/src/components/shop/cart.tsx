@@ -9,7 +9,7 @@ import {
   SheetTrigger,
 } from '../ui/sheet'
 import { Card } from '../ui/card'
-import { useGetShopProductsPublic } from '@/server/shop/products/product.hook'
+import { ShoppingBag } from 'lucide-react'
 
 type StoredItem = {
   productId: string
@@ -38,12 +38,10 @@ function getItemFromStorage(): Array<StoredItem> {
   return stored
 }
 
-const Cart = ({ shopId }: { shopId: string }) => {
+const Cart = () => {
   const [stored, setStored] = useState<Array<StoredItem>>(() =>
     getItemFromStorage(),
   )
-
-  const { data, isLoading } = useGetShopProductsPublic({ shopId })
 
   // refreshes the cart everytime the user opens it
   const refreshCart = () => setStored(getItemFromStorage())
@@ -62,14 +60,15 @@ const Cart = ({ shopId }: { shopId: string }) => {
   return (
     <Sheet onOpenChange={(open) => open && refreshCart()}>
       <SheetTrigger asChild>
-        <Button variant={'outline'}>Open Cart</Button>
+        <Button variant={'outline'}>
+          <ShoppingBag /> My Cart
+        </Button>
       </SheetTrigger>
       <SheetContent className="p-2">
         {cartProducts.length > 0 ? (
           <div>
             <SheetHeader>
               <SheetTitle>Products in Cart:</SheetTitle>
-              <p>{total ? `${total.toFixed(2)}€` : ''}</p>
             </SheetHeader>
             <div className="flex flex-col gap-2">
               {cartProducts.map((item) => (
@@ -86,6 +85,10 @@ const Cart = ({ shopId }: { shopId: string }) => {
         ) : (
           <div>No products</div>
         )}
+        <div className="flex justify-between px-2">
+          <h1 className="text-lg">Total:</h1>
+          <p>{total ? `${total.toFixed(2)}` : ''}</p>
+        </div>
         <Button onClick={sendDataToApi}>Checkout</Button>
       </SheetContent>
     </Sheet>

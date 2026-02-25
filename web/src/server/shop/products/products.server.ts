@@ -1,3 +1,4 @@
+import ProductCategory from '@/components/shop/products/productCategory'
 import { db } from '@/db'
 import { products } from '@/db/schema'
 import {
@@ -117,12 +118,18 @@ export async function addProductToShop(
     productDesc = dto.productDesc
   }
 
+  let productCategory: string | null = null
+  if (dto.categoryId !== 'none') {
+    productCategory = dto.categoryId
+  }
+
   try {
     await db.insert(products).values({
       shopId: shopId,
       productName: dto.productName,
       productPrice: dto.productPrice,
       productDesc: productDesc,
+      categoryId: productCategory,
     })
 
     return 'product created'
@@ -167,7 +174,7 @@ export async function updateProductFromShop(dto: productUpdateType) {
     typeof dto.productName !== 'undefined' &&
     dto.productName !== product.productName
   ) {
-    updateObj.producName = dto.productName
+    updateObj.productName = dto.productName
   }
   if (
     typeof dto.productPrice !== 'undefined' &&
@@ -180,6 +187,16 @@ export async function updateProductFromShop(dto: productUpdateType) {
     dto.productDesc !== product.productDesc
   ) {
     updateObj.productDesc = dto.productDesc
+  }
+  if (
+    typeof dto.categoryId !== 'undefined' &&
+    dto.categoryId !== product.categoryId
+  ) {
+    if (dto.categoryId === 'none') {
+      updateObj.categoryId = null
+    } else {
+      updateObj.categoryId = dto.categoryId
+    }
   }
 
   // if no changes, return

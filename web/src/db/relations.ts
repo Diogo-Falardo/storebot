@@ -1,18 +1,31 @@
 import { relations } from "drizzle-orm/relations";
-import { shops, products, users } from "./schema";
+import { shops, category, products, users } from "./schema";
 
-export const productsRelations = relations(products, ({one}) => ({
+export const categoryRelations = relations(category, ({one, many}) => ({
 	shop: one(shops, {
-		fields: [products.shopId],
+		fields: [category.shopId],
 		references: [shops.id]
 	}),
+	products: many(products),
 }));
 
 export const shopsRelations = relations(shops, ({one, many}) => ({
+	categories: many(category),
 	products: many(products),
 	user: one(users, {
 		fields: [shops.userId],
 		references: [users.id]
+	}),
+}));
+
+export const productsRelations = relations(products, ({one}) => ({
+	category: one(category, {
+		fields: [products.categoryId],
+		references: [category.id]
+	}),
+	shop: one(shops, {
+		fields: [products.shopId],
+		references: [shops.id]
 	}),
 }));
 

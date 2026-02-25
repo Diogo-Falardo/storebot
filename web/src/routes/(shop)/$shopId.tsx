@@ -16,7 +16,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Package } from 'lucide-react'
+import { Camera, Info, Package } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -27,6 +27,12 @@ import {
 } from '@/components/ui/card'
 import CartAdd from '@/components/shop/cartAdd'
 import Cart from '@/components/shop/cart'
+import { Button } from '@/components/ui/button'
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card'
 
 const publicShopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { shopId: string; initData?: string }) => data)
@@ -100,17 +106,41 @@ function RouteComponent() {
         {!isLoading && data && data.length > 0 ? (
           <div className="flex flex-col gap-4">
             <div className="flex justify-end p-2">
-              <Cart shopId={shopId} />
+              <Cart />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 auto-rows-max">
               {visibleProducts.map((product) => (
                 <Card key={product.id}>
-                  <CardHeader>
-                    <CardTitle>{product.productName}</CardTitle>
-                    <CardDescription>{product.productPrice}</CardDescription>
+                  <CardHeader className="flex justify-between">
+                    <CardTitle className="text-xl">
+                      {product.productName}
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent></CardContent>
-                  <CardFooter>
+                  <CardContent className="pb-3 flex-1 flex items-end justify-end">
+                    <span className="text-lg font-semibold">
+                      {product.productPrice}
+                    </span>
+                  </CardContent>
+                  {/* footer */}
+                  <CardFooter className="justify-end gap-2 pt-auto mt-auto">
+                    <HoverCard openDelay={10} closeDelay={200}>
+                      <HoverCardTrigger asChild>
+                        <Button
+                          variant={'ghost'}
+                          size={'icon-lg'}
+                          className="cursor-pointer"
+                        >
+                          <Info />
+                        </Button>
+                      </HoverCardTrigger>
+                      <HoverCardContent side="right" className="text-sm">
+                        {product.productDesc ?? 'No description available'}
+                      </HoverCardContent>
+                    </HoverCard>
+                    <Button variant={'outline'}>
+                      <Camera className="h-4 w-4" />
+                      Image
+                    </Button>
                     <CartAdd
                       productId={product.id}
                       productName={product.productName}

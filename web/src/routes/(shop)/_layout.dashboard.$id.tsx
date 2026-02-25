@@ -19,6 +19,7 @@ import {
 import { Package } from 'lucide-react'
 import ProductAdd from '@/components/shop/products/productAdd'
 import ProductCardADM from '@/components/shop/products/productCard.admin'
+import ProductCategory from '@/components/shop/products/productCategory'
 
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return ''
@@ -35,26 +36,26 @@ export const shopLoader = createServerFn({ method: 'GET' })
       throw new Error('What are you looking for couldnt be found')
 
     // if there is data
-    if (typeof data.initData === 'string' && data.initData.length > 0) {
-      // gets tgUser Object
-      const tgUser = await telegramVerification({
-        data: { initData: data.initData },
-      })
-      const uuidValidation = z.uuid().safeParse(tgUser.userId)
-      if (uuidValidation.success) {
-        // userId validated
-        const userId = uuidValidation.data
-        // shop info from telegram
-        try {
-          const shopInfo = await getUserShopInfo({
-            data: { userId: userId, shopId: data.shopId },
-          })
-          return { shopInfo: shopInfo }
-        } catch (err: any) {
-          throw new Error(err.message)
-        }
-      }
-    }
+    // if (typeof data.initData === 'string' && data.initData.length > 0) {
+    //   // gets tgUser Object
+    //   const tgUser = await telegramVerification({
+    //     data: { initData: data.initData },
+    //   })
+    //   const uuidValidation = z.uuid().safeParse(tgUser.userId)
+    //   if (uuidValidation.success) {
+    //     // userId validated
+    //     const userId = uuidValidation.data
+    //     // shop info from telegram
+    //     try {
+    //       const shopInfo = await getUserShopInfo({
+    //         data: { userId: userId, shopId: data.shopId },
+    //       })
+    //       return { shopInfo: shopInfo }
+    //     } catch (err: any) {
+    //       throw new Error(err.message)
+    //     }
+    //   }
+    // }
     try {
       const shopInfo = await getUserShopInfo({
         data: {
@@ -63,12 +64,11 @@ export const shopLoader = createServerFn({ method: 'GET' })
         },
       })
 
-      if (typeof shopInfo === 'undefined') {
-        throw new Error('sry')
-      }
+      console.log('SHOP INFO', shopInfo)
 
       return { shopInfo: shopInfo }
     } catch (err: any) {
+      console.error(err)
       throw new Error(err.message)
     }
   })
@@ -94,6 +94,9 @@ export const Route = createFileRoute('/(shop)/_layout/dashboard/$id')({
 
 function RouteComponent() {
   const { shopInfo } = Route.useLoaderData()
+
+  if (!shopInfo) {
+  }
 
   const { userId, id: shopId } = shopInfo
 
@@ -121,8 +124,9 @@ function RouteComponent() {
             )}
             {!isLoading && data && data.length > 0 ? (
               <div className="flex flex-col gap-5">
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
                   <ProductAdd userId={userId} shopId={shopId} />
+                  <ProductCategory shopId={shopId} />
                 </div>
                 {/* products display grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

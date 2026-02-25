@@ -1,5 +1,6 @@
 // component to add a product to a cart
 // ui
+import { ShoppingCart } from 'lucide-react'
 import { Button } from '../ui/button'
 
 type CartAddProps = {
@@ -21,8 +22,8 @@ const CartAdd = ({ productId, productName, productPrice }: CartAddProps) => {
   }
 
   return (
-    <Button variant={'outline'} onClick={addItemToStorage}>
-      Add
+    <Button onClick={addItemToStorage}>
+      <ShoppingCart />
     </Button>
   )
 }

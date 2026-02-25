@@ -30,7 +30,17 @@ import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { useRef } from 'react'
+import { PackagePlus } from 'lucide-react'
 import { useRouter } from '@tanstack/react-router'
+import { useGetShopCategorys } from '@/server/shop/products/category/productCategory.hook'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const addProduct = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -41,8 +51,9 @@ const addProduct = createServerFn({ method: 'POST' })
   })
 
 const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
+  const { data: categories, isLoading } = useGetShopCategorys({ shopId })
   const queryClient = useQueryClient()
-  const router = useRouter()
+  const closeDialogRef = useRef<HTMLButtonElement>(null)
 
   const add = useServerFn(addProduct)
 
@@ -51,28 +62,27 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       productName: '',
       productPrice: '',
       productDesc: '',
+      categoryId: 'none',
       visible: 1,
     },
     validators: {
       onSubmit: productDto,
     },
     onSubmit: async ({ value }) => {
-      console.log('Here')
       const _payload = {
         shopId,
         ...value,
       }
 
       const payload = productDtoExtend.parse(_payload)
-      console.log('Parsed paylod:', payload)
 
       try {
         await add({ data: { userId, dto: payload } })
         toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
-        router.invalidate()
+        closeDialogRef.current?.click()
       } catch (err: any) {
-        console.error('Error:', err)
+        console.error('Error: ', err)
         toast.error(err.message ?? 'Error while adding product')
       }
     },
@@ -81,7 +91,10 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>add product</Button>
+        <Button>
+          <PackagePlus />
+          add product
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -182,11 +195,49 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
                 )
               }}
             />
+            <form.Field
+              name="categoryId"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Product Category
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={field.handleChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {isLoading && <div>Loading...</div>}
+                        {!isLoading &&
+                          categories &&
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.category}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
           </FieldGroup>
         </form>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button ref={closeDialogRef} variant="outline">
+              Cancel
+            </Button>
           </DialogClose>
           <Button
             form="add-product-form"

@@ -13,8 +13,6 @@ import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
 import { Route as shopLayoutRouteImport } from './routes/(shop)/_layout'
 import { Route as shopShopIdRouteImport } from './routes/(shop)/$shopId'
-import { Route as AuthSignUpSplatRouteImport } from './routes/auth/sign-up.$'
-import { Route as AuthSignInSplatRouteImport } from './routes/auth/sign-in.$'
 import { Route as shopLayoutDashboardIdRouteImport } from './routes/(shop)/_layout.dashboard.$id'
 
 const publicRouteRoute = publicRouteRouteImport.update({
@@ -35,16 +33,6 @@ const shopShopIdRoute = shopShopIdRouteImport.update({
   path: '/$shopId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthSignUpSplatRoute = AuthSignUpSplatRouteImport.update({
-  id: '/auth/sign-up/$',
-  path: '/auth/sign-up/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInSplatRoute = AuthSignInSplatRouteImport.update({
-  id: '/auth/sign-in/$',
-  path: '/auth/sign-in/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const shopLayoutDashboardIdRoute = shopLayoutDashboardIdRouteImport.update({
   id: '/dashboard/$id',
   path: '/dashboard/$id',
@@ -54,15 +42,11 @@ const shopLayoutDashboardIdRoute = shopLayoutDashboardIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/$shopId': typeof shopShopIdRoute
   '/': typeof publicIndexRoute
-  '/auth/sign-in/$': typeof AuthSignInSplatRoute
-  '/auth/sign-up/$': typeof AuthSignUpSplatRoute
   '/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRoutesByTo {
   '/$shopId': typeof shopShopIdRoute
   '/': typeof publicIndexRoute
-  '/auth/sign-in/$': typeof AuthSignInSplatRoute
-  '/auth/sign-up/$': typeof AuthSignUpSplatRoute
   '/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRoutesById {
@@ -71,33 +55,19 @@ export interface FileRoutesById {
   '/(shop)/$shopId': typeof shopShopIdRoute
   '/(shop)/_layout': typeof shopLayoutRouteWithChildren
   '/(public)/': typeof publicIndexRoute
-  '/auth/sign-in/$': typeof AuthSignInSplatRoute
-  '/auth/sign-up/$': typeof AuthSignUpSplatRoute
   '/(shop)/_layout/dashboard/$id': typeof shopLayoutDashboardIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/$shopId'
-    | '/'
-    | '/auth/sign-in/$'
-    | '/auth/sign-up/$'
-    | '/dashboard/$id'
+  fullPaths: '/$shopId' | '/' | '/dashboard/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/$shopId'
-    | '/'
-    | '/auth/sign-in/$'
-    | '/auth/sign-up/$'
-    | '/dashboard/$id'
+  to: '/$shopId' | '/' | '/dashboard/$id'
   id:
     | '__root__'
     | '/(public)'
     | '/(shop)/$shopId'
     | '/(shop)/_layout'
     | '/(public)/'
-    | '/auth/sign-in/$'
-    | '/auth/sign-up/$'
     | '/(shop)/_layout/dashboard/$id'
   fileRoutesById: FileRoutesById
 }
@@ -105,8 +75,6 @@ export interface RootRouteChildren {
   publicRouteRoute: typeof publicRouteRouteWithChildren
   shopShopIdRoute: typeof shopShopIdRoute
   shopLayoutRoute: typeof shopLayoutRouteWithChildren
-  AuthSignInSplatRoute: typeof AuthSignInSplatRoute
-  AuthSignUpSplatRoute: typeof AuthSignUpSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,20 +105,6 @@ declare module '@tanstack/react-router' {
       path: '/$shopId'
       fullPath: '/$shopId'
       preLoaderRoute: typeof shopShopIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-up/$': {
-      id: '/auth/sign-up/$'
-      path: '/auth/sign-up/$'
-      fullPath: '/auth/sign-up/$'
-      preLoaderRoute: typeof AuthSignUpSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in/$': {
-      id: '/auth/sign-in/$'
-      path: '/auth/sign-in/$'
-      fullPath: '/auth/sign-in/$'
-      preLoaderRoute: typeof AuthSignInSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(shop)/_layout/dashboard/$id': {
@@ -191,8 +145,6 @@ const rootRouteChildren: RootRouteChildren = {
   publicRouteRoute: publicRouteRouteWithChildren,
   shopShopIdRoute: shopShopIdRoute,
   shopLayoutRoute: shopLayoutRouteWithChildren,
-  AuthSignInSplatRoute: AuthSignInSplatRoute,
-  AuthSignUpSplatRoute: AuthSignUpSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

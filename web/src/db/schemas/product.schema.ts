@@ -25,6 +25,7 @@ export type productSchemaType = z.infer<typeof productSchema>
 // insert a new product
 export const productDto = productSchema.extend({
   productDesc: z.string().min(0),
+  categoryId: z.string(),
 })
 export type productDtoType = z.infer<typeof productDto>
 export const productDtoExtend = productDto.extend({
@@ -55,6 +56,7 @@ export const productUpdateFormSchema = z.object({
   productName: z.string().or(z.undefined()),
   productPrice: z.string().or(z.undefined()),
   productDesc: z.string(),
+  categoryId: z.string(),
   id: z.string(),
   shopId: z.string(),
 })
@@ -62,5 +64,6 @@ export const productUpdateFormSchema = z.object({
 // visualization
 export const productDisplaySchema = productExtendedSchema.extend({
   productDesc: z.string().min(0).optional().nullable(),
+  categoryId: z.string().optional().nullable(),
 })
 export type productDisplaySchemaType = z.infer<typeof productDisplaySchema>

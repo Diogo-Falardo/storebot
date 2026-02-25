@@ -25,6 +25,15 @@ import { useServerFn } from '@tanstack/react-start'
 import { serverUpdateProductFromShop } from '@/server/shop/products/product.functions'
 import { toast } from 'sonner'
 import { useRouter } from '@tanstack/react-router'
+import { useRef } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useGetShopCategorys } from '@/server/shop/products/category/productCategory.hook'
 
 type productProps = {
   id: string
@@ -35,8 +44,9 @@ type productProps = {
 }
 
 const ProductUpdate = (product: productProps) => {
+  const { data, isLoading } = useGetShopCategorys({ shopId: product.shopId })
   const queryClient = useQueryClient()
-  const router = useRouter()
+  const closeDialogRef = useRef<HTMLButtonElement>(null)
 
   const update = useServerFn(serverUpdateProductFromShop)
 
@@ -45,6 +55,7 @@ const ProductUpdate = (product: productProps) => {
       productName: product.productName,
       productPrice: product.productPrice,
       productDesc: product.productDesc ?? '',
+      categoryId: 'none',
       id: product.id,
       shopId: product.shopId,
     },
@@ -61,7 +72,7 @@ const ProductUpdate = (product: productProps) => {
         const service = await update({ data: { dto: payload } })
         toast.success(service)
         queryClient.invalidateQueries({ queryKey: ['products'] })
-        router.invalidate()
+        closeDialogRef.current?.click()
       } catch (err: any) {
         toast.error(err.message ?? 'Error while updating product')
       }
@@ -169,11 +180,50 @@ const ProductUpdate = (product: productProps) => {
                 )
               }}
             />
+            {/* product category */}
+            <form.Field
+              name="categoryId"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Product Category
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={field.handleChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {isLoading && <div>Loading...</div>}
+                        {!isLoading &&
+                          data &&
+                          data.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.category}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
           </FieldGroup>
         </form>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant={'outline'}>Cancel</Button>
+            <Button ref={closeDialogRef} variant={'outline'}>
+              Cancel
+            </Button>
           </DialogClose>
           <Button form="update-product-form" type="submit">
             update product

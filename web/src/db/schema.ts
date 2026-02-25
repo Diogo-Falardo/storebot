@@ -1,9 +1,9 @@
 import {
   mysqlTable,
   mysqlSchema,
-  tinyint,
   AnyMySqlColumn,
   foreignKey,
+  tinyint,
   primaryKey,
   char,
   varchar,
@@ -16,6 +16,20 @@ import {
   bigint,
 } from 'drizzle-orm/mysql-core'
 import { sql } from 'drizzle-orm'
+
+export const category = mysqlTable(
+  'category',
+  {
+    id: char({ length: 36 })
+      .default(sql`(uuid())`)
+      .notNull(),
+    shopId: char('shop_id', { length: 36 })
+      .notNull()
+      .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    category: varchar({ length: 255 }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.id], name: 'category_id' })],
+)
 
 export const products = mysqlTable(
   'products',
@@ -36,6 +50,9 @@ export const products = mysqlTable(
       .default(sql`(CURRENT_TIMESTAMP(3))`)
       .notNull(),
     visible: tinyint().default(1),
+    categoryId: char('category_id', { length: 36 }).references(
+      () => category.id,
+    ),
   },
   (table) => [primaryKey({ columns: [table.id], name: 'products_id' })],
 )
