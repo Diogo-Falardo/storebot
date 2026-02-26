@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-# TanStack Start dev usually runs on 3000 (vite dev)
+# Keep container alive + hot reload
 CMD ["npm", "run", "dev"]
 
-EXPOSE 3000
+EXPOSE 2109

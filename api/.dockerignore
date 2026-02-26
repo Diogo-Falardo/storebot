@@ -1,0 +1,39 @@
+# api/.dockerignore
+
+# Build artifacts
+dist/
+output/
+
+# Dependencies (rebuilt in Dockerfile anyway)
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml          # if you ever switch to pnpm
+
+# Local env & secrets (never send to Docker daemon)
+.env
+.env.*
+!.env.example           # keep example if you have one
+
+# Editor / OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing & coverage
+coverage/
+test-results/
+playwright-report/
+
+# Drizzle / migrations temp files (if any)
+drizzle/
+migrations/             # ← usually committed, but if you generate temp files
+
+# Git & logs
+.git
+.gitignore
+Dockerfile*
+docker-compose*
+*.log

@@ -1,34 +1,61 @@
-# Include any files or directories that you don't want to be copied to your
-# container here (e.g., local build artifacts, temporary files, etc.).
-#
-# For more help, visit the .dockerignore file reference guide at
-# https://docs.docker.com/go/build-context-dockerignore/
+# web/.dockerignore
 
-**/.classpath
-**/.dockerignore
-**/.env
-**/.git
-**/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/.next
-**/.cache
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/charts
-**/docker-compose*
-**/compose.y*ml
-**/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
-**/secrets.dev.yaml
-**/values.dev.yaml
-**/build
-**/dist
-LICENSE
-README.md
+# Vite / build artifacts
+
+dist/
+build/
+.output/
+.preview/
+.cache/
+.vite/
+.tanstack/ # ← sometimes generated route trees, etc.
+
+# Dependencies (very large in modern React stacks)
+
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Environment files
+
+.env
+.env.\*
+!.env.example
+.env.local
+.env.development.local
+.env.production.local
+
+# Testing & reports
+
+coverage/
+vitest/
+playwright-report/
+test-results/
+
+# Editor / IDE
+
+.vscode/
+.idea/
+\*.swp
+.DS_Store
+
+# Formatting & lint cache
+
+.prettiercache
+.eslintcache
+
+# Git
+
+.git
+.gitignore
+
+# Docker related (if building only from this folder)
+
+Dockerfile*
+docker-compose*
+
+# Misc large/unneeded
+
+public/sitemap.xml # if generated dynamically
+\*.log

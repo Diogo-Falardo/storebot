@@ -1,19 +1,57 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
+  api:
+    build: ./api
+    container_name: kira-api
     ports:
-      - "3000:3000"
-    env_file:
-      - ./web/.env
+      - "2109:2109"
+    volumes:
+      - ./api:/app
+      - /app/node_modules # preserve installed modules
     environment:
-      NODE_ENV: production
-    networks:
-      - kira-network
+      - NODE_ENV=development
+      - PORT=2109 # most express apps respect this
+      # If your API needs to know where the real DB is:
+      - DATABASE_URL=postgresql://user:pass@host.docker.internal:5432/mydb
+      # or mongodb://...@host.docker.internal:27017/...
+    restart: unless-stopped
+
+  bot:
+    build: ./bot
+    container_name: kira-bot
+    # no ports → bot doesn't listen on network
+    volumes:
+      - ./bot:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      # If bot also needs DB:
+      # - DATABASE_URL=postgresql://...@host.docker.internal:5432/...
+    restart: unless-stopped
+    depends_on:
+      - api # optional – only if bot needs API available
+
+  web:
+    build: ./web
+    container_name: kira-web
+    ports:
+      - "3000:3000" # TanStack Start dev server
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      # Very important: tell frontend where backend (api) lives inside network
+      - VITE_API_URL=http://api:2109
+      # or if using import.meta.env / process.env in TanStack Start:
+      # - VITE_BACKEND_URL=http://api:2109
+      # If web also needs DB directly (unlikely but possible):
+      # - DATABASE_URL=...@host.docker.internal:...
+    restart: unless-stopped
+    depends_on:
+      - api # recommended – web calls api
 
 networks:
-  kira-network:
-    driver: bridge
+  default:
+    name: kira-net

@@ -1,0 +1,37 @@
+# bot/.dockerignore
+
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Logs & temp
+*.log
+tmp/
+cache/
+
+# Git
+.git
+.gitignore
+
+# Docker files (if you don't want them copied when building from this context)
+Dockerfile*
+docker-compose*
+
+# Testing
+coverage/
