@@ -1,0 +1,13 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# TanStack Start dev usually runs on 3000 (vite dev)
+CMD ["npm", "run", "dev"]
+
+EXPOSE 3000

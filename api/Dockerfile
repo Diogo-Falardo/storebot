@@ -1,13 +1,37 @@
+# ────────────────────────────────────────────────
+# Stage 1: Build
+# ────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install all dependencies (needed for build)
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build TypeScript → outputs to dist/
+RUN npm run build
+
+# ────────────────────────────────────────────────
+# Stage 2: Production runtime
+# ────────────────────────────────────────────────
 FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Copy package files and install ONLY production dependencies
+COPY --from=builder /app/package*.json ./
+RUN npm ci --only=production --ignore-scripts --no-audit --prefer-offline
 
-COPY . .
+# Copy compiled output
+COPY --from=builder /app/dist ./dist
 
-# Keep container alive + hot reload
-CMD ["npm", "run", "dev"]
+# Port (app uses 2109)
+ENV PORT=2109
+EXPOSE ${PORT}
 
-EXPOSE 2109
+# Production start command
+CMD ["node", "dist/index.js"]

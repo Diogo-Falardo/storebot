@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   api:
-    build: ./api
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
     container_name: kira-api
     ports:
       - "2109:2109"
@@ -18,7 +20,9 @@ services:
     restart: unless-stopped
 
   bot:
-    build: ./bot
+    build:
+      context: ./bot
+      dockerfile: Dockerfile.dev
     container_name: kira-bot
     # no ports → bot doesn't listen on network
     volumes:
@@ -33,7 +37,9 @@ services:
       - api # optional – only if bot needs API available
 
   web:
-    build: ./web
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
     container_name: kira-web
     ports:
       - "3000:3000" # TanStack Start dev server
@@ -48,6 +54,7 @@ services:
       # - VITE_BACKEND_URL=http://api:2109
       # If web also needs DB directly (unlikely but possible):
       # - DATABASE_URL=...@host.docker.internal:...
+    command: npm run dev -- --host 0.0.0.0 --port 3000
     restart: unless-stopped
     depends_on:
       - api # recommended – web calls api
