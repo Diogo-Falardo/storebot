@@ -12,6 +12,10 @@ app.use(express.json());
 const api = express.Router();
 app.use("/kira", api);
 
+// user route
+import userRouter from "./system/route/user.route";
+api.use("/user", userRouter);
+
 // shop route
 import shopRouter from "./system/route/shop.route";
 api.use("/shop", shopRouter);

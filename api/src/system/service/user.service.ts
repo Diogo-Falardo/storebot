@@ -2,14 +2,57 @@ import { users } from "../../db/schema";
 import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
+import { shopService } from "./shop.service";
+import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
 export const UserService = {
   /**
-   * If user return user, else return null
-   * @param id telegram_id
-   * @returns user_id
+   * From the telegram_user_id trys to obtain all the info
+   *
+   * **info**: user (table) + shop (table)
+   * @param id
+   * @returns the entire user object or null
    */
-  async tg_getUserId(id: number): Promise<string | null> {
+  async getUserInfo(id: number) {
+    try {
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.telegramUserId, id))
+        .limit(1);
+
+      if (!user[0]) {
+        throw new HttpError(404, "User not found");
+      }
+
+      const userShop = await shopService.getShopByUserId(user[0].id);
+
+      // remove this in the future
+      // need to think on a better solution for this
+      if (!userShop) {
+        return "no shops";
+      }
+
+      return {
+        userCreatedAt: user[0].createdAt,
+        ...user[0],
+        ...userShop,
+        shopId: userShop.id, // this or will missmatch in "schemas"
+      };
+    } catch (err: any) {
+      console.error(err);
+      if (err instanceof HttpError) throw err;
+      throw new HttpError(500, "error getting user");
+    }
+  },
+
+  /**
+   * Checks for the real id of a user.
+   * Trys to associated telegram_user_id with existing user inside of database
+   * @param id telegram_user_id
+   * @returns the userId associated in the database
+   */
+  async getUserId(id: number): Promise<string | null> {
     try {
       const user = await db
         .select({ id: users.id })
@@ -24,12 +67,13 @@ export const UserService = {
   },
 
   /**
-   * If user exists return user, If user doesnt exists creates one!
-   * @param id telegram_id
-   * @returns user_id
+   * Checks for an existing user or create a new user associted with telegram_user_id
+   * @param id telegram_user_id
+   * @returns the user
    */
   async tg_checkId(id: number): Promise<string> {
-    const user = await this.tg_getUserId(id);
+    // already an user?
+    const user = await this.getUserId(id);
     if (user) return user;
 
     try {
@@ -37,10 +81,10 @@ export const UserService = {
         telegramUserId: id,
       });
 
-      const userId = await this.tg_getUserId(id);
+      const userId = await this.getUserId(id);
 
       if (!userId) {
-        throw new HttpError(500, "error creating user");
+        throw new Error();
       }
 
       return userId;

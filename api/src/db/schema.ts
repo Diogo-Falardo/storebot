@@ -1,40 +1,34 @@
 import {
   mysqlTable,
+  tinyint,
   mysqlSchema,
   AnyMySqlColumn,
-  index,
   foreignKey,
   primaryKey,
   char,
-  datetime,
   varchar,
   decimal,
   text,
+  datetime,
+  index,
   mysqlEnum,
   unique,
   bigint,
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
-export const linkTokens = mysqlTable(
-  "link_tokens",
+export const category = mysqlTable(
+  "category",
   {
-    tokenHash: char("token_hash", { length: 36 })
+    id: char({ length: 36 })
       .default(sql`(uuid())`)
       .notNull(),
-    userId: char("user_id", { length: 36 })
+    shopId: char("shop_id", { length: 36 })
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    expiresAt: datetime("expires_at", { mode: "string", fsp: 3 }).notNull(),
-    usedAt: datetime("used_at", { mode: "string", fsp: 3 }),
-    createdAt: datetime("created_at", { mode: "string", fsp: 3 })
-      .default(sql`(CURRENT_TIMESTAMP(3))`)
-      .notNull(),
+      .references(() => shops.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    category: varchar({ length: 255 }).notNull(),
   },
-  (table) => [
-    index("idx_link_tokens_user_id").on(table.userId),
-    primaryKey({ columns: [table.tokenHash], name: "link_tokens_token_hash" }),
-  ],
+  (table) => [primaryKey({ columns: [table.id], name: "category_id" })],
 );
 
 export const products = mysqlTable(
@@ -42,8 +36,7 @@ export const products = mysqlTable(
   {
     id: char({ length: 36 })
       .default(sql`(uuid())`)
-      .notNull()
-      .primaryKey(),
+      .notNull(),
     shopId: char("shop_id", { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -56,6 +49,10 @@ export const products = mysqlTable(
     createdAt: datetime("created_at", { mode: "string", fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
       .notNull(),
+    visible: tinyint().default(1),
+    categoryId: char("category_id", { length: 36 }).references(
+      () => category.id,
+    ),
   },
   (table) => [primaryKey({ columns: [table.id], name: "products_id" })],
 );
@@ -69,13 +66,14 @@ export const shops = mysqlTable(
     userId: char("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    shopType: mysqlEnum("shop_type", ["public", "private", "telegram_only"])
+    shopType: mysqlEnum("shop_type", ["public", "private"])
       .default("public")
       .notNull(),
     shopName: varchar("shop_name", { length: 120 }).notNull(),
     createdAt: datetime("created_at", { mode: "string", fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
       .notNull(),
+    shopCurrency: varchar("ShopCurrency", { length: 3 }).default("EUR"),
   },
   (table) => [
     index("idx_shops_user_id").on(table.userId),
@@ -89,7 +87,6 @@ export const users = mysqlTable(
     id: char({ length: 36 })
       .default(sql`(uuid())`)
       .notNull(),
-    clerkUserId: varchar("clerk_user_id", { length: 191 }),
     telegramUserId: bigint("telegram_user_id", { mode: "number" }),
     createdAt: datetime("created_at", { mode: "string", fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
@@ -97,7 +94,6 @@ export const users = mysqlTable(
   },
   (table) => [
     primaryKey({ columns: [table.id], name: "users_id" }),
-    unique("uq_users_clerk_user_id").on(table.clerkUserId),
     unique("uq_users_telegram_user_id").on(table.telegramUserId),
   ],
 );

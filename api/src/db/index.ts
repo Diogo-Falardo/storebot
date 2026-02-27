@@ -7,6 +7,7 @@ if (!process.env.DATABASE_URL) {
 
 export const db = drizzle(process.env.DATABASE_URL);
 
+// telegram required verification
 import { z } from "zod";
 export const tgHeadersSchema = z.object({
   "x-tg-user-id": z.coerce.number().int().positive(),
