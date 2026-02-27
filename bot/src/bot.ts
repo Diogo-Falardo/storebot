@@ -12,7 +12,7 @@ import { getTelegramUserInfo } from "./shop/requests.js";
 const token = process.env.BOT_TOKEN;
 if (!token) throw new Error("BOT_TOKEN missing");
 
-const api = process.env.API_URL;
+const webUrl = process.env.WEB_URL;
 
 const bot = new Bot<ConversationFlavor<Context>>(token);
 bot.use(conversations());
@@ -62,7 +62,7 @@ bot.command("addDashboard", async (ctx) => {
       );
     }
 
-    const dashboardUrl = `${api}/dashboard/${user.shopId}`;
+    const dashboardUrl = `${webUrl}/dashboard/${user.shopId}`;
     const keyboard = new InlineKeyboard().webApp(
       "Open Shop Dashboard",
       dashboardUrl,

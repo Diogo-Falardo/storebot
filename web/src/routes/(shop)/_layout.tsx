@@ -66,11 +66,11 @@ const deleteShop = createServerFn({ method: 'POST' })
     try {
       await db
         .delete(shops)
-        .where(and(eq(shops.userId, data.userId), eq(shops.id, data.shopId)))
+        .where(and(eq(shops.userId, ids.userId), eq(shops.id, ids.shopId)))
 
       return true
     } catch (err: any) {
-      console.error(err.message)
+      console.error(err)
       toast.error(err.message ?? 'Error while deleting shop')
     }
   })
