@@ -5,7 +5,7 @@ import { HttpError } from "../utils/ErrorHandling";
 import { shopService } from "./shop.service";
 import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
-export const UserService = {
+export const userService = {
   /**
    * From the telegram_user_id trys to obtain all the info
    *

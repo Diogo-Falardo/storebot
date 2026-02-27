@@ -2,51 +2,37 @@ import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
 
-import {
-  shopCreateSchemaType,
-  shopViewSchema,
-  shopViewSchemaType,
-} from "../../db/schemas/shop.schema";
 import { shops } from "../../db/schema";
+import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema";
 
 export const shopService = {
   /**
-   * return a shop or null
-   * @param shopId
-   * @returns
+   * Gets the corresponding shop from an user
+   * @param userId [database]
+   * @returns The corresponding shop or null
    */
-  async getShopById(shopId: string): Promise<shopViewSchemaType | null> {
+  async getShopByUserId(userId: string) {
     try {
-      const _shop = await db
+      const shop = await db
         .select()
         .from(shops)
-        .where(eq(shops.id, shopId))
+        .where(eq(shops.userId, userId))
         .limit(1);
 
-      const shop = _shop[0];
+      if (!shop[0]) return null; // this means there is no shop from that user
 
-      if (!shop) return null;
-      return shopViewSchema.parse(shop);
+      return shop[0];
     } catch (err) {
       throw new HttpError(500, "error getting shop");
     }
   },
 
-  async getShopsByUserId(userId: string): Promise<Array<shopViewSchemaType>> {
-    try {
-      const userShops = await db
-        .select()
-        .from(shops)
-        .where(eq(shops.userId, userId));
-
-      return shopViewSchema.array().parse(userShops);
-    } catch (err) {
-      throw new HttpError(500, "error getting shops");
-    }
-  },
-
-  // creates a new shop
-  async createShop(userId: string, dto: shopCreateSchemaType) {
+  /**
+   * Creates a shop
+   * @param userId
+   * @param dto
+   */
+  async createShop(userId: string, dto: CREATE_SHOP_TYPE) {
     try {
       await db.insert(shops).values({
         userId: userId,

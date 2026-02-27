@@ -1,11 +1,9 @@
 import { Router } from "express";
 import { ShopController } from "../controller/shop.controller";
 
-// controllers
-
 const router = Router();
 
-// router to create a shop via telegram user id
-router.post("/tg/create", ShopController.createShop_tg);
+// create a shop associted to telegram_user_id
+router.post("/create", ShopController.createShop_For_Telegram);
 
 export default router;

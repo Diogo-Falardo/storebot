@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpError } from "../utils/ErrorHandling";
 import { tgHeadersSchema } from "../../db";
-import { UserService } from "../service/user.service";
+import { userService } from "../service/user.service";
 import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
 export const userController = {
@@ -22,7 +22,7 @@ export const userController = {
     const tgUserId = header["x-tg-user-id"];
 
     try {
-      const user = await UserService.getUserInfo(tgUserId);
+      const user = await userService.getUserInfo(tgUserId);
 
       if (user === "no shops") {
         return res.status(200).json("0");
