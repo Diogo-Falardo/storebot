@@ -4,7 +4,7 @@ var cors = require("cors");
 // express
 const express = require("express");
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../src/system/utils/ErrorHandling";
+import { HttpError } from "./system/utils/ErrorHandling";
 
 const app = express();
 app.use(express.json());
