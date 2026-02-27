@@ -16,7 +16,25 @@ const api = process.env.API_URL;
 const bot = new Bot<ConversationFlavor<Context>>(token);
 bot.use(conversations());
 
-bot.command("start", (ctx) => ctx.reply("Welcome! Up and running"));
+bot.command("start", (ctx) =>
+  ctx.reply(
+    `Welcome to Kira Bot!
+
+Kira Bot helps you create and manage your Telegram shop in seconds.
+
+Version: v1.0
+
+Available Commands:
+/create – Set up your personal Telegram shop.
+/addDashboard – Add your dashboard to the bot channel.
+/addShop – Integrate a shop into your Telegram channel.
+
+Website: kira.com
+For version details, visit: kira/versions
+
+If you need assistance, feel free to reach out.`,
+  ),
+);
 
 // create shop
 bot.use(createConversation(createShopConversation));
