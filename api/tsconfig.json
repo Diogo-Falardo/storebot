@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
 
-    "noEmit": true
+    "noEmit": false
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
