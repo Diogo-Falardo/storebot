@@ -31,6 +31,8 @@ export const ShopController = {
     // db user id
     const userId = await userService.tg_checkId(tg_userID);
 
+    console.log(userId);
+
     const shop = await shopService.getShopByUserId(userId);
 
     if (shop) {

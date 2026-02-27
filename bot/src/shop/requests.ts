@@ -7,6 +7,9 @@ const BOT_SECRET = process.env.BOT_SECRET!;
 // RELATED TO USERS ENDPOINTS
 // ----------
 
+/**
+ * **"true"**: Means user is allowed to create a shop
+ */
 type UserInfo =
   | {
       userId: string;
@@ -15,7 +18,7 @@ type UserInfo =
       shopType: string;
       shopCurrency?: string;
     }
-  | "0";
+  | "no shops";
 
 const urlUser = "/user";
 export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
@@ -27,6 +30,14 @@ export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
       "x-TG-USER-ID": String(tgUserId),
     },
   });
+
+  /**
+   * This means there is no user on db
+   * that is not a problem so we skip it
+   */
+  if (res.status === 404) {
+    return "no shops";
+  }
 
   if (!res.ok) {
     console.error(res);

@@ -6,23 +6,25 @@ import { shopService } from "./shop.service";
 import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
 export const userService = {
+  async createUser(telegramId: number) {},
+
   /**
    * From the telegram_user_id trys to obtain all the info
    *
    * **info**: user (table) + shop (table)
-   * @param id
+   * @param telegramId
    * @returns the entire user object or null
    */
-  async getUserInfo(id: number) {
+  async getUserInfo(telegramId: number) {
     try {
       const user = await db
         .select()
         .from(users)
-        .where(eq(users.telegramUserId, id))
+        .where(eq(users.telegramUserId, telegramId))
         .limit(1);
 
       if (!user[0]) {
-        throw new HttpError(404, "User not found");
+        throw new HttpError(404, "user not found");
       }
 
       const userShop = await shopService.getShopByUserId(user[0].id);
@@ -49,15 +51,15 @@ export const userService = {
   /**
    * Checks for the real id of a user.
    * Trys to associated telegram_user_id with existing user inside of database
-   * @param id telegram_user_id
+   * @param telegramId telegram_user_id
    * @returns the userId associated in the database
    */
-  async getUserId(id: number): Promise<string | null> {
+  async getUserId(telegramId: number): Promise<string | null> {
     try {
       const user = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.telegramUserId, id))
+        .where(eq(users.telegramUserId, telegramId))
         .limit(1);
 
       return user[0]?.id ?? null;
@@ -68,20 +70,20 @@ export const userService = {
 
   /**
    * Checks for an existing user or create a new user associted with telegram_user_id
-   * @param id telegram_user_id
+   * @param telegramId telegram_user_id
    * @returns the user
    */
-  async tg_checkId(id: number): Promise<string> {
+  async tg_checkId(telegramId: number): Promise<string> {
     // already an user?
-    const user = await this.getUserId(id);
+    const user = await this.getUserId(telegramId);
     if (user) return user;
 
     try {
       await db.insert(users).values({
-        telegramUserId: id,
+        telegramUserId: telegramId,
       });
 
-      const userId = await this.getUserId(id);
+      const userId = await this.getUserId(telegramId);
 
       if (!userId) {
         throw new Error();

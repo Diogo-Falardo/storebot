@@ -2,6 +2,7 @@ import type { Conversation } from "@grammyjs/conversations";
 import type { Context } from "grammy";
 import { getTelegramUserInfo, createShopTgOnly } from "./requests.js";
 
+// Creates a conversation to create a new shop
 export async function createShopConversation(
   conversation: Conversation,
   ctx: Context,
@@ -12,11 +13,10 @@ export async function createShopConversation(
 
   const user = await getTelegramUserInfo(tgUserId);
 
-  console.log(user);
-
-  if (user !== "0") {
+  // if there is shops
+  if (user !== "no shops") {
     await ctx.reply(
-      `Hello${username ? ` ${username}` : ""}, you already have a shop: ${user.shopName}.\n\n` +
+      `Hello${username ? ` ${username}` : ""}, you already have a shop: ${user?.shopName}.\n\n` +
         "Currently, creating multiple shops is not supported. Stay tuned for future updates!",
     );
     return;
@@ -37,6 +37,9 @@ export async function createShopConversation(
       await ctx.reply("No name received. Please send your shop name.");
       continue;
     }
+    if (shopName.charAt(0) === "/") {
+      return;
+    }
     if (shopName.length < 1 || shopName.length > 50) {
       await ctx.reply(
         "Shop name must be between 1 and 50 characters. Please try again.",
@@ -49,13 +52,13 @@ export async function createShopConversation(
   try {
     const result = await createShopTgOnly(tgUserId, shopName);
 
-    await ctx.reply(
+    return await ctx.reply(
       `Shop created: ${result.shopName ?? shopName}\n` +
         "Next step: activate it with /activate",
     );
   } catch (err: any) {
     console.error(err);
-    await ctx.reply(
+    return await ctx.reply(
       "An error occurred while creating your shop. Please try again later.\n" +
         (err.message ?? err),
     );
