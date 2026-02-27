@@ -7,6 +7,7 @@ import {
   createConversation,
 } from "@grammyjs/conversations";
 import { createShopConversation } from "./shop/shop.conversations.js";
+import { getTelegramUserInfo } from "./shop/requests.js";
 
 const token = process.env.BOT_TOKEN;
 if (!token) throw new Error("BOT_TOKEN missing");
@@ -16,6 +17,8 @@ const api = process.env.API_URL;
 const bot = new Bot<ConversationFlavor<Context>>(token);
 bot.use(conversations());
 
+// START COMMAND
+// start dialog
 bot.command("start", (ctx) =>
   ctx.reply(
     `Welcome to Kira Bot!
@@ -36,22 +39,45 @@ If you need assistance, feel free to reach out.`,
   ),
 );
 
-// create shop
+// CREATE SHOP COMMAND
+// command for shop creation: executes a "conversation"
 bot.use(createConversation(createShopConversation));
 bot.command("create", async (ctx) => {
   await ctx.conversation.enter("createShopConversation");
 });
 
 // add shop dashboard button to the chat conversation
-bot.command("shopDashboard", async (ctx) => {
-  const shopUrl =
-    "http://localhost:3000/dashboard/76ec1804-0792-11f1-a9f8-644ed72189d4";
+bot.command("addDashboard", async (ctx) => {
+  // get telegram user id
+  const tgUserId = ctx.from?.id;
+  if (!tgUserId) {
+    return ctx.reply("Unable to identify you. Please try again");
+  }
 
-  const keyboard = new InlineKeyboard().webApp("Shop Dashboard", shopUrl);
+  try {
+    const user = await getTelegramUserInfo(tgUserId);
+    if (user === "0" || !user.shopId) {
+      return ctx.reply(
+        "You don't have a shop yet. Please create one first with /create.",
+      );
+    }
 
-  await ctx.reply("Tap to open the shop:", {
-    reply_markup: keyboard,
-  });
+    const dashboardUrl = `${api}/dashboard/${user.shopId}`;
+    const keyboard = new InlineKeyboard().webApp(
+      "Open Shop Dashboard",
+      dashboardUrl,
+    );
+
+    return await ctx.reply(
+      "Click the button below to access your shop dashboard:",
+      { reply_markup: keyboard },
+    );
+  } catch (err: any) {
+    console.log(err);
+    return await ctx.reply(
+      "Sorry, something went wrong. Please try again later.",
+    );
+  }
 });
 
 bot.start();
