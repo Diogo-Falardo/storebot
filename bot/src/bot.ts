@@ -56,7 +56,7 @@ bot.command("addDashboard", async (ctx) => {
 
   try {
     const user = await getTelegramUserInfo(tgUserId);
-    if (user === "0" || !user.shopId) {
+    if (user === "no shops" || !user.shopId) {
       return ctx.reply(
         "You don't have a shop yet. Please create one first with /create.",
       );
