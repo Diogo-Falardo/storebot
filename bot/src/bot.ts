@@ -68,10 +68,14 @@ bot.command("addDashboard", async (ctx) => {
       dashboardUrl,
     );
 
-    return await ctx.reply(
-      "Click the button below to access your shop dashboard:",
-      { reply_markup: keyboard },
-    );
+    // This will show a button in the lower bar
+    await ctx.reply("Press the button below to request your shop dashboard:", {
+      reply_markup: {
+        keyboard: [[{ text: "Open Shop Dashboard" }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    });
   } catch (err: any) {
     console.log(err);
     return await ctx.reply(
