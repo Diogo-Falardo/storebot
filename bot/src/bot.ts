@@ -46,6 +46,7 @@ bot.command("create", async (ctx) => {
   await ctx.conversation.enter("createShopConversation");
 });
 
+// ADD DA
 // add shop dashboard button to the chat conversation
 bot.command("addDashboard", async (ctx) => {
   // get telegram user id
@@ -69,19 +70,39 @@ bot.command("addDashboard", async (ctx) => {
     );
 
     // This will show a button in the lower bar
-    await ctx.reply("Press the button below to request your shop dashboard:", {
+    await ctx.reply("", {
       reply_markup: {
         keyboard: [[{ text: "Open Shop Dashboard" }]],
         resize_keyboard: true,
-        one_time_keyboard: true,
       },
     });
+
+    return;
   } catch (err: any) {
     console.log(err);
     return await ctx.reply(
       "Sorry, something went wrong. Please try again later.",
     );
   }
+});
+
+bot.hears("Open Shop Dashboard", async (ctx) => {
+  const tgUserId = ctx.from?.id;
+  const user = await getTelegramUserInfo(tgUserId!);
+  if (user === "no shops" || !user.shopId) {
+    return ctx.reply(
+      "You don't have a shop yet. Please create one first with /create.",
+    );
+  }
+  const dashboardUrl = `${webUrl}/dashboard/${user.shopId}`;
+  const keyboard = new InlineKeyboard().webApp(
+    "Open Shop Dashboard",
+    dashboardUrl,
+  );
+  return await ctx.reply(
+    "Click the button below to access your shop dashboard:",
+    { reply_markup: keyboard },
+  );
 });
 
 bot.start();
