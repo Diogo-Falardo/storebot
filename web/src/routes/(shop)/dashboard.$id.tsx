@@ -44,7 +44,15 @@ import {
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+type ShopInfo = {
+  shopType: 'public' | 'private'
+  shopName: string
+  shopCurrency: 'USD' | 'EUR' | 'GBP' | 'CHF'
+  id: string
+  userId: string
+}
 
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return ''
@@ -54,6 +62,7 @@ export function getTelegramInitData() {
 export const shopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { shopId: string; initData?: string }) => data)
   .handler(async ({ data }) => {
+    console.log(data)
     if (!data.initData)
       throw new Error('What are you looking for couldnt be found')
 
@@ -78,7 +87,7 @@ export const shopLoader = createServerFn({ method: 'GET' })
             data: { userId: userId, shopId: data.shopId },
           })
           console.log(shopInfo)
-          return { shopInfo: shopInfo }
+          return { shopInfo: shopInfo, userId: userId }
         } catch (err: any) {
           throw new Error(err.message)
         }
@@ -106,33 +115,59 @@ export function DashboardErrorComponent({ error }: { error: Error }) {
 }
 
 export const Route = createFileRoute('/(shop)/dashboard/$id')({
-  loader: async ({ params }) => {
-    const shop = await shopLoader({
-      data: { shopId: params.id, initData: getTelegramInitData() },
-    })
-    console.log(shopLoader)
+  // loader: async ({ params }) => {
+  //   const shop = await shopLoader({
+  //     data: { shopId: params.id, initData: getTelegramInitData() },
+  //   })
+  //   console.log(shopLoader)
 
-    return shop
-  },
+  //   return shop
+  // },
   errorComponent: DashboardErrorComponent,
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const loaderData = Route.useLoaderData()
+  // const loaderData = Route.useLoaderData()
 
-  if (!loaderData) {
-    return (
-      <div className="w-full h-full flex justify-center items-center">
-        <Spinner /> Loading....
-      </div>
-    )
-  }
+  // if (!loaderData) {
+  //   return (
+  //     <div className="w-full h-full flex justify-center items-center">
+  //       <Spinner /> Loading....
+  //     </div>
+  //   )
+  // }
 
-  const { shopInfo } = loaderData
-  const { userId, id: shopId } = shopInfo
+  // const { shopInfo } = loaderData
+  // const { userId, id: shopId } = shopInfo
 
-  const { data, isLoading } = useGetShopProducts({ userId, shopId })
+  const { id } = Route.useParams()
+  const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchShop = async () => {
+      try {
+        const initData = getTelegramInitData()
+        if (!initData) throw new Error('Telegram initData missing')
+        const result = await shopLoader({ data: { shopId: id, initData } })
+        if (result) {
+          setShopInfo(result.shopInfo)
+        }
+      } catch (err: any) {
+        toast.error(err.message ?? 'Error loading shop')
+      }
+    }
+    fetchShop()
+  }, [id])
+
+  if (error) return <DashboardErrorComponent error={error} />
+  if (!shopInfo) return <Spinner />
+
+  const { data, isLoading } = useGetShopProducts({
+    userId: shopInfo.userId,
+    shopId: shopInfo.id,
+  })
 
   const [open, setOpen] = useState(false)
   // required hooks
@@ -264,8 +299,11 @@ function RouteComponent() {
                 {!isLoading && data && data.length > 0 ? (
                   <div className="flex flex-col gap-5">
                     <div className="flex justify-end gap-2">
-                      <ProductAdd userId={userId} shopId={shopId} />
-                      <ProductCategory shopId={shopId} />
+                      <ProductAdd
+                        userId={shopInfo.userId}
+                        shopId={shopInfo.id}
+                      />
+                      <ProductCategory shopId={shopInfo.id} />
                     </div>
                     {/* products display grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -287,7 +325,10 @@ function RouteComponent() {
                       </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
-                      <ProductAdd userId={userId} shopId={shopId} />
+                      <ProductAdd
+                        userId={shopInfo.userId}
+                        shopId={shopInfo.id}
+                      />
                     </EmptyContent>
                   </Empty>
                 )}
