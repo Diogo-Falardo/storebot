@@ -35,6 +35,8 @@ export const shopLoader = createServerFn({ method: 'GET' })
     if (!data.shopId)
       throw new Error('What are you looking for couldnt be found')
 
+    console.log(data)
+
     // if there is data
     if (typeof data.initData === 'string' && data.initData.length > 0) {
       // gets tgUser Object
@@ -50,6 +52,7 @@ export const shopLoader = createServerFn({ method: 'GET' })
           const shopInfo = await getUserShopInfo({
             data: { userId: userId, shopId: data.shopId },
           })
+          console.log(shopInfo)
           return { shopInfo: shopInfo }
         } catch (err: any) {
           throw new Error(err.message)

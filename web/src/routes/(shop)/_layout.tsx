@@ -78,6 +78,10 @@ const deleteShop = createServerFn({ method: 'POST' })
 function RouteComponent() {
   const data = useLoaderData({ from: '/(shop)/_layout/dashboard/$id' })
 
+  if (!data) {
+    return
+  }
+
   const [open, setOpen] = useState(false)
   // required hooks
   const queryClient = useQueryClient()
