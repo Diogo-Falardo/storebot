@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
-import { getTelegramInitData } from './_layout.dashboard.$id'
+import { getTelegramInitData } from './dashboard.$id'
 import { telegramVerification } from '@/server/telegram/telegram.function'
 import { verifyTelegramUser } from '@/server/telegram/telegram.server'
 import ErrorWrapper from '@/components/errorWrapper'

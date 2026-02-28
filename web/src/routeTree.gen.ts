@@ -11,9 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
-import { Route as shopLayoutRouteImport } from './routes/(shop)/_layout'
 import { Route as shopShopIdRouteImport } from './routes/(shop)/$shopId'
-import { Route as shopLayoutDashboardIdRouteImport } from './routes/(shop)/_layout.dashboard.$id'
+import { Route as shopDashboardIdRouteImport } from './routes/(shop)/dashboard.$id'
 
 const publicRouteRoute = publicRouteRouteImport.update({
   id: '/(public)',
@@ -24,38 +23,33 @@ const publicIndexRoute = publicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => publicRouteRoute,
 } as any)
-const shopLayoutRoute = shopLayoutRouteImport.update({
-  id: '/(shop)/_layout',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const shopShopIdRoute = shopShopIdRouteImport.update({
   id: '/(shop)/$shopId',
   path: '/$shopId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const shopLayoutDashboardIdRoute = shopLayoutDashboardIdRouteImport.update({
-  id: '/dashboard/$id',
+const shopDashboardIdRoute = shopDashboardIdRouteImport.update({
+  id: '/(shop)/dashboard/$id',
   path: '/dashboard/$id',
-  getParentRoute: () => shopLayoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/$shopId': typeof shopShopIdRoute
   '/': typeof publicIndexRoute
-  '/dashboard/$id': typeof shopLayoutDashboardIdRoute
+  '/dashboard/$id': typeof shopDashboardIdRoute
 }
 export interface FileRoutesByTo {
   '/$shopId': typeof shopShopIdRoute
   '/': typeof publicIndexRoute
-  '/dashboard/$id': typeof shopLayoutDashboardIdRoute
+  '/dashboard/$id': typeof shopDashboardIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(public)': typeof publicRouteRouteWithChildren
   '/(shop)/$shopId': typeof shopShopIdRoute
-  '/(shop)/_layout': typeof shopLayoutRouteWithChildren
   '/(public)/': typeof publicIndexRoute
-  '/(shop)/_layout/dashboard/$id': typeof shopLayoutDashboardIdRoute
+  '/(shop)/dashboard/$id': typeof shopDashboardIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -66,15 +60,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/(public)'
     | '/(shop)/$shopId'
-    | '/(shop)/_layout'
     | '/(public)/'
-    | '/(shop)/_layout/dashboard/$id'
+    | '/(shop)/dashboard/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   publicRouteRoute: typeof publicRouteRouteWithChildren
   shopShopIdRoute: typeof shopShopIdRoute
-  shopLayoutRoute: typeof shopLayoutRouteWithChildren
+  shopDashboardIdRoute: typeof shopDashboardIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -93,13 +86,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicIndexRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(shop)/_layout': {
-      id: '/(shop)/_layout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof shopLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(shop)/$shopId': {
       id: '/(shop)/$shopId'
       path: '/$shopId'
@@ -107,12 +93,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof shopShopIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(shop)/_layout/dashboard/$id': {
-      id: '/(shop)/_layout/dashboard/$id'
+    '/(shop)/dashboard/$id': {
+      id: '/(shop)/dashboard/$id'
       path: '/dashboard/$id'
       fullPath: '/dashboard/$id'
-      preLoaderRoute: typeof shopLayoutDashboardIdRouteImport
-      parentRoute: typeof shopLayoutRoute
+      preLoaderRoute: typeof shopDashboardIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -129,22 +115,10 @@ const publicRouteRouteWithChildren = publicRouteRoute._addFileChildren(
   publicRouteRouteChildren,
 )
 
-interface shopLayoutRouteChildren {
-  shopLayoutDashboardIdRoute: typeof shopLayoutDashboardIdRoute
-}
-
-const shopLayoutRouteChildren: shopLayoutRouteChildren = {
-  shopLayoutDashboardIdRoute: shopLayoutDashboardIdRoute,
-}
-
-const shopLayoutRouteWithChildren = shopLayoutRoute._addFileChildren(
-  shopLayoutRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   publicRouteRoute: publicRouteRouteWithChildren,
   shopShopIdRoute: shopShopIdRoute,
-  shopLayoutRoute: shopLayoutRouteWithChildren,
+  shopDashboardIdRoute: shopDashboardIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
