@@ -57,6 +57,7 @@ type ShopInfo = {
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return ''
   return (window as any)?.Telegram?.WebApp?.initData ?? ''
+  // return 'user={"id":7824653895,"first_name":"Test","last_name":"User","username":"testuser"}'
 }
 
 export const shopLoader = createServerFn({ method: 'GET' })
@@ -161,13 +162,16 @@ function RouteComponent() {
     fetchShop()
   }, [id])
 
+  // Always call the hook, but only pass valid args if shopInfo is available
+  const { data, isLoading } = useGetShopProducts(
+    shopInfo
+      ? { userId: shopInfo.userId, shopId: shopInfo.id }
+      : // fallback values to avoid undefined
+        { userId: '', shopId: '' },
+  )
+
   if (error) return <DashboardErrorComponent error={error} />
   if (!shopInfo) return <Spinner />
-
-  const { data, isLoading } = useGetShopProducts({
-    userId: shopInfo.userId,
-    shopId: shopInfo.id,
-  })
 
   const [open, setOpen] = useState(false)
   // required hooks
