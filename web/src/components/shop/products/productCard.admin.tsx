@@ -1,3 +1,14 @@
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { useServerFn } from '@tanstack/react-start'
+import { Eye, EyeOff, Trash2 } from 'lucide-react'
+import ProductUpdate from './productUpdate'
+import {
+  sf_DeleteProductFromShop,
+  sf_ToogleProductVisibilty,
+} from '@/server/shop/products/product.functions'
+import { Label } from '@/components/ui/label'
 import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,18 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import {
-  serverDeleteProductFromShop,
-  serverToogleProductVisibilty,
-  serverUpdateProductFromShop,
-} from '@/server/shop/products/product.functions'
-import { useQueryClient } from '@tanstack/react-query'
-import { useServerFn } from '@tanstack/react-start'
-import { Eye, EyeOff, ToolCaseIcon, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import ProductUpdate from './productUpdate'
 
 type productProps = {
   id: string
@@ -28,13 +27,14 @@ type productProps = {
   productName: string
   productPrice: string
   productDesc?: string | null
+  categoryId?: string | null
   visible: number
 }
 
 const ProductCardADM = (product: productProps) => {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
-  const deleted = useServerFn(serverDeleteProductFromShop)
-  const visibility = useServerFn(serverToogleProductVisibilty)
+  const deleted = useServerFn(sf_DeleteProductFromShop)
+  const visibility = useServerFn(sf_ToogleProductVisibilty)
 
   const queryClient = useQueryClient()
 

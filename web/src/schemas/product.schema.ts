@@ -8,7 +8,7 @@ export const VISUALIZE_PRODUCT_SCHEMA = z.object({
   shopId: z.uuid(),
   productName: z.string(),
   productPrice: z.string(),
-  productDesc: z.string().optional(),
+  productDesc: z.string().optional().nullable(),
   categoryId: z.uuid().nullable(),
   visible: z.number(),
 })

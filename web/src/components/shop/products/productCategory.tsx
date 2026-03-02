@@ -1,5 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
+import { useRef, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { CirclePlus, Package, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -16,8 +21,6 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { CirclePlus, Package, X } from 'lucide-react'
-import { addCategorySchema } from '@/db/schemas/category.schema'
 import {
   Field,
   FieldError,
@@ -25,35 +28,35 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { useGetShopCategorys } from '@/server/shop/products/category/productCategory.hook'
 import { Spinner } from '@/components/ui/spinner'
-import { useQueryClient } from '@tanstack/react-query'
-import { useServerFn } from '@tanstack/react-start'
 import {
-  createCategory,
-  serverDeleteCategory,
+  sf_CreateCategory,
+  sf_DeleteCategory,
 } from '@/server/shop/products/category/productCategory.functions'
-import { toast } from 'sonner'
-import { useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
+import { CREATE_CATEGORY_SCHEMA } from '@/schemas/category.schema'
 
 const ProductCategory = ({ shopId }: { shopId: string }) => {
+  // load current shops categorys
   const { data, isLoading } = useGetShopCategorys({ shopId })
+
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
+
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addCategory = useServerFn(createCategory)
-  const deleteCategory = useServerFn(serverDeleteCategory)
+  const addCategory = useServerFn(sf_CreateCategory)
+  const deleteCategory = useServerFn(sf_DeleteCategory)
 
   const form = useForm({
     defaultValues: {
       category: '',
     },
     validators: {
-      onSubmit: addCategorySchema,
+      onSubmit: CREATE_CATEGORY_SCHEMA,
     },
     onSubmit: async ({ value }) => {
       try {

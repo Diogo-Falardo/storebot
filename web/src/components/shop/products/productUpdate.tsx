@@ -1,4 +1,8 @@
+import { useServerFn } from '@tanstack/react-start'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRef } from 'react'
 import { useForm } from '@tanstack/react-form'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogClose,
@@ -10,8 +14,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useQueryClient } from '@tanstack/react-query'
-import { productUpdateFormSchema } from '@/db/schemas/product.schema'
 import {
   Field,
   FieldDescription,
@@ -21,11 +23,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { useServerFn } from '@tanstack/react-start'
-import { serverUpdateProductFromShop } from '@/server/shop/products/product.functions'
-import { toast } from 'sonner'
-import { useRouter } from '@tanstack/react-router'
-import { useRef } from 'react'
+import { sf_UpdateProductFromShop } from '@/server/shop/products/product.functions'
 import {
   Select,
   SelectContent,
@@ -33,7 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useGetShopCategorys } from '@/server/shop/products/category/productCategory.hook'
+import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
+import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
 
 type productProps = {
   id: string
@@ -41,35 +40,35 @@ type productProps = {
   productName?: string
   productPrice?: string
   productDesc?: string | null
+  categoryId?: string | null
 }
 
 const ProductUpdate = (product: productProps) => {
+  // get current shop categorys
   const { data, isLoading } = useGetShopCategorys({ shopId: product.shopId })
+
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const update = useServerFn(serverUpdateProductFromShop)
+  // server fn
+  const update = useServerFn(sf_UpdateProductFromShop)
 
   const form = useForm({
     defaultValues: {
-      productName: product.productName,
-      productPrice: product.productPrice,
+      productName: product.productName ?? '',
+      productPrice: product.productPrice ?? '',
       productDesc: product.productDesc ?? '',
-      categoryId: 'none',
-      id: product.id,
-      shopId: product.shopId,
+      categoryId: product.categoryId ?? 'null',
+      visible: 1,
     },
     validators: {
-      onSubmit: productUpdateFormSchema,
+      onSubmit: CREATE_PRODUCT_SCHEMA,
     },
     onSubmit: async ({ value }) => {
-      const _payload = {
-        ...value,
-      }
-      const payload = productUpdateFormSchema.parse(_payload)
-
       try {
-        const service = await update({ data: { dto: payload } })
+        const service = await update({
+          data: { shopId: product.shopId, productId: product.id, dto: value },
+        })
         toast.success(service)
         queryClient.invalidateQueries({ queryKey: ['products'] })
         closeDialogRef.current?.click()

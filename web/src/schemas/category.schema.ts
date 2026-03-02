@@ -11,6 +11,6 @@ export const VISUALIZE_CATEGORY_SCHEMA = z.object({
 /**
  * CREATE CATEGORY
  */
-export const CREATE_CATEGORY = z.object({
+export const CREATE_CATEGORY_SCHEMA = z.object({
   category: z.string().min(1, { message: 'Category must not be empty' }),
 })

@@ -1,4 +1,9 @@
+import { useRef } from 'react'
+import { useServerFn } from '@tanstack/react-start'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
+import { toast } from 'sonner'
+import { PackagePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,23 +22,9 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import {
-  productDto,
-  productDtoExtend,
-  productDtoExtendedType,
-  productExtendedSchema,
-  productExtendedSchemaType,
-} from '@/db/schemas/product.schema'
-import { addProductToShop } from '@/server/shop/products/products.server'
-import { useQueryClient } from '@tanstack/react-query'
-import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
-import { useRef } from 'react'
-import { PackagePlus } from 'lucide-react'
-import { useRouter } from '@tanstack/react-router'
-import { useGetShopCategorys } from '@/server/shop/products/category/productCategory.hook'
+
 import {
   Select,
   SelectContent,
@@ -41,21 +32,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-const addProduct = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (data: { userId: string; dto: productDtoExtendedType }) => data,
-  )
-  .handler(async ({ data }) => {
-    return await addProductToShop(data.userId, data.dto.shopId, data.dto)
-  })
+import { sf_AddProductToShop } from '@/server/shop/products/product.functions'
+import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
+import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
 
 const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
+  // load current categories
   const { data: categories, isLoading } = useGetShopCategorys({ shopId })
+
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const add = useServerFn(addProduct)
+  const add = useServerFn(sf_AddProductToShop)
 
   const form = useForm({
     defaultValues: {
@@ -66,23 +54,16 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       visible: 1,
     },
     validators: {
-      onSubmit: productDto,
+      onSubmit: CREATE_PRODUCT_SCHEMA,
     },
     onSubmit: async ({ value }) => {
-      const _payload = {
-        shopId,
-        ...value,
-      }
-
-      const payload = productDtoExtend.parse(_payload)
-
       try {
-        await add({ data: { userId, dto: payload } })
+        await add({ data: { userId, shopId, dto: value } })
         toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
         closeDialogRef.current?.click()
       } catch (err: any) {
-        console.error('Error: ', err)
+        console.error(err)
         toast.error(err.message ?? 'Error while adding product')
       }
     },
