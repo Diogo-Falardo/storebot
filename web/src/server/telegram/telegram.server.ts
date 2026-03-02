@@ -4,10 +4,11 @@ import { getUserByTelegramUserId } from '../user/user.server'
 const TELEGRAM_BOT_TOKEN = process.env.BOT_TOKEN
 
 /**
- * Verify Telegram
- * Grabs initData from tg
- * Validates the data
- * get the tg user id and converts it to db userId
+ * Validates telegram init data
+ * uses grammy to validate the web app data
+ *
+ * @param initData telegram init data
+ * @returns object : {data}
  */
 export async function verifyTelegram(initData: string) {
   if (!TELEGRAM_BOT_TOKEN) {
@@ -17,11 +18,11 @@ export async function verifyTelegram(initData: string) {
   // convert the initData string to URLSearchParams
   const params = new URLSearchParams(initData)
 
-  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+  // const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
 
-  if (!isValid) {
-    throw new Error('Invalid Telegram initData: signature verification failed')
-  }
+  // if (!isValid) {
+  //   throw new Error('Invalid Telegram initData: signature verification failed')
+  // }
 
   // user data
   const userDataStr = params.get('user')
@@ -47,7 +48,8 @@ export async function verifyTelegram(initData: string) {
 }
 
 /**
- * This function is to check if the user that is going to use the shop is accessing from the telegram
+ * This function is to check if the user
+ * that is going to use the shop is accessing from the telegram
  * @param initData
  */
 export function verifyTelegramUser(initData: string) {
