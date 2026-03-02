@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm'
+import { serverShop } from '../shop.server'
 import { db } from '@/db'
 import { products } from '@/db/schema'
 import {
@@ -6,7 +7,8 @@ import {
   PRODUCT_SCHEMA,
   VISUALIZE_PRODUCT_SCHEMA,
 } from '@/schemas/product.schema'
-import { validateUserShopOwnership } from '@/server/user/user.server'
+
+const shopServer = new serverShop()
 
 export class serverProduct {
   /**
@@ -78,15 +80,17 @@ export class serverProduct {
    */
   async createProduct(userId: string, shopId: string, dto: DTO_CREATE_PRODUCT) {
     // validate user ownership
-    const ownership = await validateUserShopOwnership(userId, shopId)
+    const ownership = await shopServer.validateUserShopOwnership(userId, shopId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
+    // gets the product by name adn verify if there is already a product with that names
     const product = await this.getProductByName(shopId, dto.productName)
-
-    if (product) throw new Error('Product already inserted!')
+    console.log(product)
+    if (product !== 'product not found')
+      throw new Error('Product already inserted!')
 
     let productDesc: string | null = null
     if (dto.productDesc.trim() !== '') {
@@ -212,7 +216,7 @@ export class serverProduct {
     shopId: string,
   ): Promise<Array<PRODUCT_SCHEMA>> {
     // validate user ownership
-    const ownership = await validateUserShopOwnership(userId, shopId)
+    const ownership = await shopServer.validateUserShopOwnership(userId, shopId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')

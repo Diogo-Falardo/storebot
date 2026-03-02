@@ -1,5 +1,4 @@
 import { and, eq } from 'drizzle-orm'
-import { validateUserShopOwnership } from '../user/user.server'
 import { db } from '@/db'
 import { shops } from '@/db/schema'
 import {
@@ -9,6 +8,33 @@ import {
 } from '@/schemas/shop.schema'
 
 export class serverShop {
+  /**
+   * Validates if a user is owner of the shop
+   *
+   * true: means its the owner
+   * false: means its not the user or simply the shop was not found...
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @returns boolean
+   */
+  async validateUserShopOwnership(
+    userId: string,
+    shopId: string,
+  ): Promise<boolean> {
+    try {
+      await this.getShopById(userId, shopId)
+      return true
+    } catch (err: any) {
+      // if server.getShopById
+      // returned the error Shop not found, means user is trying to access something that its not his..
+      if (err.message === 'Shop not found') {
+        return false
+      }
+      console.error(err.message)
+      throw new Error(err.message ?? 'Error validating shop ownership')
+    }
+  }
+
   /**
    * Obtain a shop by its shopId
    *
@@ -24,7 +50,7 @@ export class serverShop {
         .where(and(eq(shops.userId, userId), eq(shops.id, shopId)))
         .limit(1)
 
-      if (!shop[0]) throw new Error('Shop was not found|')
+      if (!shop[0]) throw new Error('Shop was not found!')
 
       return VISUALIZE_SHOP_SCHEMA.parse(shop[0])
     } catch (err: any) {
@@ -64,7 +90,7 @@ export class serverShop {
    */
   async updateShop(userId: string, shopId: string, dto: DTO_CREATE_SHOP) {
     // validate user ownership
-    const ownership = await validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
@@ -109,7 +135,7 @@ export class serverShop {
 
   async deleteShop(userId: string, shopId: string) {
     // validate user ownership
-    const ownership = await validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')

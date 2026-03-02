@@ -18,6 +18,20 @@ export const sf_ProductsFromShop = createServerFn({ method: 'GET' })
 
 /**
  * "POST"
+ * create a product
+ *
+ * required: userId, shopId, product objects
+ */
+export const sf_AddProductToShop = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; dto: DTO_CREATE_PRODUCT }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await productServer.createProduct(data.userId, data.shopId, data.dto)
+  })
+
+/**
+ * "POST"
  * update a product from a shop
  *
  * required: shopId, productId, product object

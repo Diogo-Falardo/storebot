@@ -32,6 +32,20 @@ export const sf_CreateShop = createServerFn({ method: 'POST' })
 
 /**
  * "POST"
+ * update a shop
+ *
+ * required: userId, shopId & dto [create shop]
+ */
+export const sf_UpdateShop = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; dto: DTO_CREATE_SHOP }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await shopServer.updateShop(data.userId, data.shopId, data.dto)
+  })
+
+/**
+ * "POST"
  * delete shop
  *
  * required: userId & shopId
