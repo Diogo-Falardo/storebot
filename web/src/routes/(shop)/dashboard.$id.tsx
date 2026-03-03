@@ -50,7 +50,7 @@ function DashboardErrorComponent({ error }: { error: Error }) {
 
 export const Route = createFileRoute('/(shop)/dashboard/$id')({
   errorComponent: DashboardErrorComponent,
-  ssr: 'data-only',
+  ssr: false,
   component: RouteComponent,
 })
 
