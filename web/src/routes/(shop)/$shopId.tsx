@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'

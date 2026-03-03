@@ -45,7 +45,7 @@ export const shopLoader = createServerFn({ method: 'GET' })
     }
   })
 
-export function DashboardErrorComponent({ error }: { error: Error }) {
+function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
 }
 
@@ -102,7 +102,7 @@ function RouteComponent() {
 
   if (error) return <DashboardErrorComponent error={error} />
   if (shopError) return <DashboardErrorComponent error={shopError} />
-  if (!userId || shopLoading || !shopInfo) return <Spinner />
+  if (!userId || shopLoading || !shopInfo || !userId) return <Spinner />
 
   return (
     <div className="min-h-screen flex flex-col">

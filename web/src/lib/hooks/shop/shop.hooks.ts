@@ -17,6 +17,7 @@ export function useGetUserShopInfo({
   return useQuery({
     queryKey: ['shop', shopId],
     queryFn: () => sf_ShopInfo({ data: { userId, shopId } }),
+    enabled: !!userId,
   })
 }
 
