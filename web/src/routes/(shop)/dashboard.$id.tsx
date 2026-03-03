@@ -60,6 +60,7 @@ function RouteComponent() {
   // shop data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   // server fn
   const loader = useServerFn(shopLoader)
 
@@ -67,9 +68,12 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        const initData = getTelegramInitData()
-        console.log(initData)
-        if (!initData) throw new Error('App only available on telegram!')
+        setIsLoading(true)
+
+        // getTelegramInitData now returns a Promise
+        const initData = await getTelegramInitData()
+
+        console.log('[Auth] Got initData:', initData.substring(0, 50) + '...')
 
         const result = await loader({ data: { initData } })
         if (result) {
@@ -77,6 +81,8 @@ function RouteComponent() {
         }
       } catch (err: any) {
         setError(err ?? 'Error loading your shop')
+      } finally {
+        setIsLoading(false)
       }
     }
     authenticate()
