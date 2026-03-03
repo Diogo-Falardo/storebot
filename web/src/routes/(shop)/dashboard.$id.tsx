@@ -40,28 +40,84 @@ function RouteComponent() {
 
   const verifyTelegram = useServerFn(sf_telegramVerification)
 
-  // auto renders
+  // // auto renders
+  // useEffect(() => {
+  //   const authenticate = async () => {
+  //     try {
+  //       console.log('Running authenticate() on client')
+  //       const { WebApp } = await import('@grammyjs/web-app')
+  //       WebApp.ready()
+
+  //       const initData = WebApp.initData
+
+  //       if (!initData) {
+  //         throw new Error('App can only be used inside telegram')
+  //       }
+
+  //       console.log('INIT DATA' + initData)
+  //       const user = await verifyTelegram({ data: { initData } })
+
+  //       setUserId(user.userId)
+  //     } catch (err: any) {
+  //       console.error(err)
+  //       setError(err ?? new Error('Authentication failed'))
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+
+  //   authenticate()
+  // }, [])
+
   useEffect(() => {
     const authenticate = async () => {
       try {
-        console.log('Running authenticate() on client')
+        // 1. Confirm the effect is running
+        alert('authenticate() started')
+
+        // 2. Dynamic import
         const { WebApp } = await import('@grammyjs/web-app')
-        WebApp.ready()
+        alert('WebApp imported')
 
-        const initData = WebApp.initData
+        // 3. Check if Telegram injected anything
+        const tg = window.Telegram
+        alert('window.Telegram = ' + JSON.stringify(tg))
 
-        if (!initData) {
-          throw new Error('App can only be used inside telegram')
+        if (!tg || !tg.WebApp) {
+          alert(
+            '❌ Telegram WebApp API NOT FOUND.\nYou are NOT inside Telegram.',
+          )
+          throw new Error('Telegram API missing')
         }
 
-        console.log('INIT DATA' + initData)
-        const user = await verifyTelegram({ data: { initData } })
+        // 4. Call ready()
+        WebApp.ready()
+        alert('WebApp.ready() called')
 
+        // 5. Show initData and initDataUnsafe
+        alert('initData = ' + WebApp.initData)
+        alert('initDataUnsafe = ' + JSON.stringify(WebApp.initDataUnsafe))
+
+        // 6. Validate initData
+        if (!WebApp.initData || WebApp.initData === '') {
+          alert('❌ initData is EMPTY.\nTelegram did NOT inject auth data.')
+          throw new Error('Empty initData')
+        }
+
+        // 7. Send to server
+        alert('Sending initData to server...')
+        const user = await verifyTelegram({
+          data: { initData: WebApp.initData },
+        })
+
+        alert('Server returned userId = ' + user.userId)
         setUserId(user.userId)
       } catch (err: any) {
+        alert('ERROR: ' + err.message)
         console.error(err)
         setError(err ?? new Error('Authentication failed'))
       } finally {
+        alert('authenticate() finished')
         setIsLoading(false)
       }
     }
