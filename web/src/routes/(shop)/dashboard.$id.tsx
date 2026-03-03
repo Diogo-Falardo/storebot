@@ -21,7 +21,7 @@ import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'
+import { getTelegramInitData, initTelegram } from '@/lib/telegram'
 
 export const shopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { initData?: string }) => data)
@@ -57,6 +57,7 @@ export const Route = createFileRoute('/(shop)/dashboard/$id')({
 function RouteComponent() {
   // shopId
   const { id: shopId } = Route.useParams()
+
   // shop data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
