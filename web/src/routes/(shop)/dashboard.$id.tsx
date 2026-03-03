@@ -20,7 +20,7 @@ import ProductCardADM from '@/components/shop/products/productCard.admin'
 import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
-import { useTelegramWebApp } from '@/lib/telegram.client'
+import { useTelegramWebApp } from '@/lib/telegram'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />

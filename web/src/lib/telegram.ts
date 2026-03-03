@@ -1,12 +1,3 @@
-// // Only runs on the client, returns undefined on the server
-// import { createClientOnlyFn } from '@tanstack/react-start'
-// import { WebApp } from '@grammyjs/web-app'
-
-// export const getTelegramInitData = createClientOnlyFn(() => {
-//   WebApp.ready()
-//   return WebApp.initData
-// })
-
 import { useEffect, useState } from 'react'
 
 interface TelegramUser {
@@ -38,9 +29,11 @@ export function useTelegramWebApp(): TelegramWebAppData {
   })
 
   useEffect(() => {
-    // Wait for DOM and Telegram SDK to be fully loaded
+    // This only runs on client, so window is safe here
     const init = () => {
-      const tg = window.Telegram?.WebApp
+      if (typeof window === 'undefined') return
+
+      const tg = (window as any).Telegram?.WebApp
 
       if (!tg) {
         setData((prev) => ({
@@ -66,12 +59,11 @@ export function useTelegramWebApp(): TelegramWebAppData {
     }
 
     // Check if script is already loaded
-    if (window.Telegram?.WebApp) {
+    if ((window as any).Telegram?.WebApp) {
       init()
     } else {
       // Wait for the script to load
       window.addEventListener('load', init)
-      // Also try after a delay in case load already fired
       const timeout = setTimeout(init, 1000)
 
       return () => {
