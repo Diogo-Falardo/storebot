@@ -1,8 +1,8 @@
+import { useServerFn } from '@tanstack/react-start'
 import { createFileRoute } from '@tanstack/react-router'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'
-import { verifyTelegramUser } from '@/server/telegram/telegram.server'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
 import {
@@ -28,6 +28,7 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
 import { usePublicShop } from '@/lib/hooks/shop/shop.hooks'
+import { sf_PublicTelegramVerification } from '@/server/telegram/telegram.function'
 
 type TelegramUser = {
   telegramId: string
@@ -50,6 +51,8 @@ function RouteComponent() {
   const [user, setUser] = useState<TelegramUser | null>()
   const [error, setError] = useState<Error | null>(null)
 
+  const verifyUser = useServerFn(sf_PublicTelegramVerification)
+
   useEffect(() => {
     const authenticate = async () => {
       try {
@@ -59,7 +62,7 @@ function RouteComponent() {
         // Get initData from Telegram
         const initData = getTelegramInitData()
 
-        const tgUser = verifyTelegramUser(initData)
+        const tgUser = await verifyUser({ data: { initData } })
 
         setUser(tgUser)
       } catch (err: any) {
