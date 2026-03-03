@@ -20,6 +20,7 @@ import ProductCardADM from '@/components/shop/products/productCard.admin'
 import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
+import { useTelegramWebApp } from '@/lib/telegram.client'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -36,94 +37,41 @@ function RouteComponent() {
   // shop data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticating, setIsAuthenticating] = useState(true)
 
+  const telegram = useTelegramWebApp()
   const verifyTelegram = useServerFn(sf_telegramVerification)
 
-  // // auto renders
-  // useEffect(() => {
-  //   const authenticate = async () => {
-  //     try {
-  //       console.log('Running authenticate() on client')
-  //       const { WebApp } = await import('@grammyjs/web-app')
-  //       WebApp.ready()
-
-  //       const initData = WebApp.initData
-
-  //       if (!initData) {
-  //         throw new Error('App can only be used inside telegram')
-  //       }
-
-  //       console.log('INIT DATA' + initData)
-  //       const user = await verifyTelegram({ data: { initData } })
-
-  //       setUserId(user.userId)
-  //     } catch (err: any) {
-  //       console.error(err)
-  //       setError(err ?? new Error('Authentication failed'))
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   }
-
-  //   authenticate()
-  // }, [])
-
+  // auto renders
   useEffect(() => {
+    // Wait for Telegram hook to be ready
+    if (!telegram.isReady) return
+
     const authenticate = async () => {
       try {
-        // 1. Confirm the effect is running
-        alert('authenticate() started')
-
-        // 2. Dynamic import
-        const { WebApp } = await import('@grammyjs/web-app')
-        alert('WebApp imported')
-
-        // 3. Check if Telegram injected anything
-        const tg = window.Telegram
-        alert('window.Telegram = ' + JSON.stringify(tg))
-
-        if (!tg || !tg.WebApp) {
-          alert(
-            '❌ Telegram WebApp API NOT FOUND.\nYou are NOT inside Telegram.',
-          )
-          throw new Error('Telegram API missing')
+        if (telegram.error) {
+          throw new Error(telegram.error)
         }
 
-        // 4. Call ready()
-        WebApp.ready()
-        alert('WebApp.ready() called')
-
-        // 5. Show initData and initDataUnsafe
-        alert('initData = ' + WebApp.initData)
-        alert('initDataUnsafe = ' + JSON.stringify(WebApp.initDataUnsafe))
-
-        // 6. Validate initData
-        if (!WebApp.initData || WebApp.initData === '') {
-          alert('❌ initData is EMPTY.\nTelegram did NOT inject auth data.')
-          throw new Error('Empty initData')
+        if (!telegram.initData) {
+          throw new Error('No initData available. Open this app from Telegram.')
         }
 
-        // 7. Send to server
-        alert('Sending initData to server...')
         const user = await verifyTelegram({
-          data: { initData: WebApp.initData },
+          data: { initData: telegram.initData },
         })
 
-        alert('Server returned userId = ' + user.userId)
         setUserId(user.userId)
       } catch (err: any) {
-        alert('ERROR: ' + err.message)
-        console.error(err)
+        console.error('Auth error:', err)
         setError(err ?? new Error('Authentication failed'))
       } finally {
-        alert('authenticate() finished')
-        setIsLoading(false)
+        setIsAuthenticating(false)
       }
     }
 
     authenticate()
-  }, [])
+  }, [telegram.isReady, telegram.initData, telegram.error])
 
   const {
     data: shopInfo,
@@ -139,6 +87,16 @@ function RouteComponent() {
       ? { userId: shopInfo.userId, shopId: shopInfo.id }
       : { userId: '', shopId: '' },
   )
+
+  // Show loading while Telegram SDK initializes or authenticating
+  if (!telegram.isReady || isAuthenticating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+        <Spinner />
+        <p>Connecting to Telegram...</p>
+      </div>
+    )
+  }
 
   if (error) return <DashboardErrorComponent error={error} />
   if (shopError) return <DashboardErrorComponent error={shopError} />
