@@ -41,7 +41,6 @@ function ErrorComponent({ error }: { error: Error }) {
 
 export const Route = createFileRoute('/(shop)/$shopId')({
   errorComponent: ErrorComponent,
-  ssr: false,
   component: RouteComponent,
 })
 
@@ -56,24 +55,11 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // This runs **only in browser**
-        if (typeof window === 'undefined') return
-
         const { WebApp } = await import('@grammyjs/web-app')
         WebApp.ready()
 
-        const initData = WebApp.initData || ''
+        const initData = WebApp.initData
 
-        console.log(
-          '[Telegram Debug] initData from WebApp:',
-          initData ? 'present' : 'MISSING',
-        )
-
-        if (!initData) {
-          throw new Error(
-            'Telegram initData is empty. Are you running inside Telegram Mini App?',
-          )
-        }
         const tgUser = await verifyUser({ data: { initData } })
 
         setUser(tgUser)

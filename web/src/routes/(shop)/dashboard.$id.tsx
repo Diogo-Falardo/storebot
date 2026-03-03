@@ -1,8 +1,8 @@
-import { z } from 'zod'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { createServerFn, useServerFn } from '@tanstack/react-start'
+import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
+import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
 import { sf_telegramVerification } from '@/server/telegram/telegram.function'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,29 +20,6 @@ import ProductCardADM from '@/components/shop/products/productCard.admin'
 import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
-import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-
-export const shopLoader = createServerFn({ method: 'GET' })
-  .inputValidator((data: { initData?: string }) => data)
-  .handler(async ({ data }) => {
-    console.log(data)
-    if (!data.initData)
-      throw new Error('What are you looking for couldnt be found')
-
-    // if there is data
-    if (typeof data.initData === 'string' && data.initData.length > 0) {
-      // gets tgUser Object and validates its data
-      const tgUser = await sf_telegramVerification({
-        data: { initData: data.initData },
-      })
-      const uuidValidation = z.uuid().safeParse(tgUser.userId)
-      if (!uuidValidation.success) {
-        throw new Error('Invalid user')
-      }
-
-      return { userId: uuidValidation.data }
-    }
-  })
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -50,48 +27,37 @@ function DashboardErrorComponent({ error }: { error: Error }) {
 
 export const Route = createFileRoute('/(shop)/dashboard/$id')({
   errorComponent: DashboardErrorComponent,
-  ssr: false,
   component: RouteComponent,
 })
 
 function RouteComponent() {
   // shopId
   const { id: shopId } = Route.useParams()
-
   // shop data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  // server fn
-  const loader = useServerFn(shopLoader)
+
+  const verifyTelegram = useServerFn(sf_telegramVerification)
 
   // auto renders
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // This runs **only in browser**
-        if (typeof window === 'undefined') return
-
+        console.log('Running authenticate() on client')
         const { WebApp } = await import('@grammyjs/web-app')
         WebApp.ready()
 
-        const initData = WebApp.initData || ''
-
-        console.log(
-          '[Telegram Debug] initData from WebApp:',
-          initData ? 'present' : 'MISSING',
-        )
+        const initData = WebApp.initData
 
         if (!initData) {
-          throw new Error(
-            'Telegram initData is empty. Are you running inside Telegram Mini App?',
-          )
+          throw new Error('App can only be used inside telegram')
         }
 
-        const result = await loader({ data: { initData } })
-        if (result?.userId) {
-          setUserId(result.userId)
-        }
+        console.log('INIT DATA' + initData)
+        const user = await verifyTelegram({ data: { initData } })
+
+        setUserId(user.userId)
       } catch (err: any) {
         console.error(err)
         setError(err ?? new Error('Authentication failed'))
