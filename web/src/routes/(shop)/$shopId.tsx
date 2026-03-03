@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getTelegramInitData } from '@/lib/telegram'
+import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'
 import { verifyTelegramUser } from '@/server/telegram/telegram.server'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
@@ -71,8 +71,11 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
+        // Tell Telegram the app is ready
+        initTelegram()
+
+        // Get initData from Telegram
         const initData = getTelegramInitData()
-        if (!initData) throw new Error('App only available on telegram!')
 
         const result = await publicShopLoader({ data: { shopId, initData } })
         if (result) {
