@@ -21,13 +21,7 @@ import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-
-export function getTelegramInitData() {
-  if (typeof window === 'undefined') return ''
-  return (window as any)?.Telegram?.WebApp?.initData ?? ''
-  // fake data for test
-  // return 'user={"id":7824653895,"first_name":"Test","last_name":"User","username":"testuser"}'
-}
+import { getTelegramInitData } from '@/lib/telegram'
 
 export const shopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { initData?: string }) => data)
@@ -74,6 +68,7 @@ function RouteComponent() {
     const authenticate = async () => {
       try {
         const initData = getTelegramInitData()
+        console.log(initData)
         if (!initData) throw new Error('App only available on telegram!')
 
         const result = await loader({ data: { initData } })

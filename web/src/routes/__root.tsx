@@ -43,6 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <script src="https://telegram.org/js/telegram-web-app.js?60"></script>
         <HeadContent />
       </head>
       <body>
