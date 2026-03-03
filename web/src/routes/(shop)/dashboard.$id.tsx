@@ -44,17 +44,14 @@ function RouteComponent() {
 
   // auto renders
   useEffect(() => {
-    // Wait for Telegram hook to be ready
     if (!telegram.isReady) return
 
     const authenticate = async () => {
       try {
-        if (telegram.error) {
-          throw new Error(telegram.error)
-        }
-
         if (!telegram.initData) {
-          throw new Error('No initData available. Open this app from Telegram.')
+          // Don't throw error yet, show debug instead
+          setIsAuthenticating(false)
+          return
         }
 
         const user = await verifyTelegram({
@@ -71,7 +68,7 @@ function RouteComponent() {
     }
 
     authenticate()
-  }, [telegram.isReady, telegram.initData, telegram.error])
+  }, [telegram.isReady, telegram.initData])
 
   const {
     data: shopInfo,
@@ -88,7 +85,56 @@ function RouteComponent() {
       : { userId: '', shopId: '' },
   )
 
-  // Show loading while Telegram SDK initializes or authenticating
+  if (telegram.isReady && !telegram.initData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4 p-4">
+        <h1 className="text-xl font-bold text-red-500">initData is empty</h1>
+
+        <div className="bg-gray-800 p-4 rounded-lg max-w-lg w-full">
+          <h2 className="font-bold mb-2">Debug Info:</h2>
+          <pre className="text-xs whitespace-pre-wrap text-green-400">
+            {telegram.debug}
+          </pre>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded-lg max-w-lg w-full">
+          <h2 className="font-bold mb-2">How to fix:</h2>
+          <ol className="text-sm list-decimal list-inside space-y-2">
+            <li>
+              Make sure you're opening from a <strong>web_app button</strong> in
+              Telegram
+            </li>
+            <li>
+              Use <code>/dashboard</code> or <code>/newDashboard</code> command
+            </li>
+            <li>Click the inline button that appears</li>
+            <li>Do NOT open the URL directly in browser</li>
+          </ol>
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded-lg max-w-lg w-full">
+          <h2 className="font-bold mb-2">Current URL:</h2>
+          <pre className="text-xs break-all">
+            {typeof window !== 'undefined' ? window.location.href : 'SSR'}
+          </pre>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 rounded"
+          >
+            Try to reload
+          </button>
+          <a href="/" className="px-4 py-2 bg-gray-600 rounded">
+            Go Home
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  // ...existing code for loading states and main content...
   if (!telegram.isReady || isAuthenticating) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
