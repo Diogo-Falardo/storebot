@@ -36,23 +36,6 @@ type TelegramUser = {
   username: string
 }
 
-const publicShopLoader = createServerFn({ method: 'GET' })
-  .inputValidator((data: { shopId: string; initData?: string }) => data)
-  .handler(({ data }) => {
-    if (!data.initData)
-      throw new Error('What are you looking for couldnt be found')
-
-    if (!data.shopId)
-      throw new Error('What are you looking for couldnt be found')
-
-    // accessing from telegram verification
-    if (typeof data.initData === 'string' && data.initData.length > 0) {
-      // gets tgUser Object
-      const tgUser = verifyTelegramUser(data.initData)
-      return { user: tgUser }
-    }
-  })
-
 function ErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription="" />
 }
@@ -77,10 +60,9 @@ function RouteComponent() {
         // Get initData from Telegram
         const initData = getTelegramInitData()
 
-        const result = await publicShopLoader({ data: { shopId, initData } })
-        if (result) {
-          setUser(result.user)
-        }
+        const tgUser = verifyTelegramUser(initData)
+
+        setUser(tgUser)
       } catch (err: any) {
         setError(err ?? 'Error loading shop')
       }
