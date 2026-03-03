@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { WebApp } from '@grammyjs/web-app'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
@@ -21,7 +22,6 @@ import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-import { getTelegramInitData, initTelegram } from '@/lib/telegram'
 
 export const shopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { initData?: string }) => data)
@@ -69,9 +69,11 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        initTelegram()
+        WebApp.ready()
 
-        const initData = getTelegramInitData()
+        const initData = WebApp.initData
+
+        console.log(initData)
 
         const result = await loader({ data: { initData } })
         if (result) {

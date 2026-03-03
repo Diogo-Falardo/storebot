@@ -1,8 +1,8 @@
 import { useServerFn } from '@tanstack/react-start'
 import { createFileRoute } from '@tanstack/react-router'
+import { WebApp } from '@grammyjs/web-app'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getTelegramInitData, initTelegram } from '@/lib/telegram'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
 import {
@@ -57,10 +57,12 @@ function RouteComponent() {
     const authenticate = async () => {
       try {
         // Tell Telegram the app is ready
-        initTelegram()
+        WebApp.ready()
 
         // Get initData from Telegram
-        const initData = getTelegramInitData()
+        const initData = WebApp.initData
+
+        console.log(initData)
 
         const tgUser = await verifyUser({ data: { initData } })
 
