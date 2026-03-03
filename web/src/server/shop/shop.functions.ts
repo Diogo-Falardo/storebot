@@ -1,6 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
-import { serverShop } from './shop.server'
+import { publicShop, serverShop } from './shop.server'
+import { getProductsFromPublicShop } from './products/products.server'
 import { DTO_CREATE_SHOP } from '@/schemas/shop.schema'
+import { PRODUCT_SCHEMA } from '@/schemas/product.schema'
 
 const shopServer = new serverShop()
 
@@ -54,4 +56,30 @@ export const sf_DeleteShop = createServerFn({ method: 'POST' })
   .inputValidator((data: { shopId: string; userId: string }) => data)
   .handler(async ({ data }) => {
     return await shopServer.deleteShop(data.userId, data.shopId)
+  })
+
+type PublicShopResponse = {
+  shop: {
+    shopName: string
+    shopCurrency: string | null
+  }
+  products: Array<PRODUCT_SCHEMA>
+}
+/**
+ * "GET"
+ * public shop
+ *
+ * required: shopId
+ */
+
+export const sf_PublicShop = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string }) => data)
+  .handler(async ({ data }): Promise<PublicShopResponse> => {
+    const shop = await publicShop(data.shopId)
+    const products = await getProductsFromPublicShop(data.shopId)
+
+    return {
+      shop: shop,
+      products: products,
+    }
   })

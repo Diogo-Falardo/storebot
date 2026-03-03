@@ -1,13 +1,10 @@
-import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn, useServerFn } from '@tanstack/react-start'
+import { createServerFn } from '@tanstack/react-start'
+import { Camera, Info, Package } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { getTelegramInitData } from './dashboard.$id'
-import { telegramVerification } from '@/server/telegram/telegram.function'
 import { verifyTelegramUser } from '@/server/telegram/telegram.server'
 import ErrorWrapper from '@/components/errorWrapper'
-import { getNameByShopId } from '@/server/shop/shop.server'
-import { getProductsFromShop } from '@/server/shop/products/products.server'
-import { useGetShopProductsPublic } from '@/server/shop/products/product.hook'
 import { Spinner } from '@/components/ui/spinner'
 import {
   Empty,
@@ -16,11 +13,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Camera, Info, Package } from 'lucide-react'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -33,12 +28,19 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
+import { usePublicShop } from '@/lib/hooks/shop/shop.hooks'
+
+type TelegramUser = {
+  telegramId: string
+  firstName: string
+  username: string
+}
 
 const publicShopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { shopId: string; initData?: string }) => data)
-  .handler(async ({ data }) => {
-    // if (!data.initData)
-    //   throw new Error('What are you looking for couldnt be found')
+  .handler(({ data }) => {
+    if (!data.initData)
+      throw new Error('What are you looking for couldnt be found')
 
     if (!data.shopId)
       throw new Error('What are you looking for couldnt be found')
@@ -47,53 +49,51 @@ const publicShopLoader = createServerFn({ method: 'GET' })
     if (typeof data.initData === 'string' && data.initData.length > 0) {
       // gets tgUser Object
       const tgUser = verifyTelegramUser(data.initData)
-      try {
-        const shopName = await getNameByShopId(data.shopId)
-        return { shopName: shopName, user: tgUser }
-      } catch (err: any) {
-        throw new Error(err.message)
-      }
-    }
-
-    try {
-      const shopInfo = await getNameByShopId(data.shopId)
-      return { shopName: shopInfo }
-    } catch (err: any) {
-      throw new Error(err.message)
+      return { user: tgUser }
     }
   })
 
-function errorComponent({ error }: { error: Error }) {
-  return (
-    <ErrorWrapper
-      errorTitle={error.message}
-      errorDescription="Shop not found"
-    />
-  )
+function ErrorComponent({ error }: { error: Error }) {
+  return <ErrorWrapper errorTitle={error.message} errorDescription="" />
 }
 
 export const Route = createFileRoute('/(shop)/$shopId')({
-  loader: async ({ params }) => {
-    return await publicShopLoader({
-      data: { shopId: params.shopId, initData: getTelegramInitData() },
-    })
-  },
-  errorComponent: errorComponent,
+  errorComponent: ErrorComponent,
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const shop = Route.useLoaderData()
   const { shopId } = Route.useParams()
+  const { data, isLoading } = usePublicShop({ shopId })
+  const [user, setUser] = useState<TelegramUser | null>()
+  const [error, setError] = useState<Error | null>(null)
 
-  const { data, isLoading } = useGetShopProductsPublic({ shopId })
+  useEffect(() => {
+    const authenticate = async () => {
+      try {
+        const initData = getTelegramInitData()
+        if (!initData) throw new Error('App only available on telegram!')
 
-  const visibleProducts = data?.filter((product) => product.visible === 1) || []
+        const result = await publicShopLoader({ data: { shopId, initData } })
+        if (result) {
+          setUser(result.user)
+        }
+      } catch (err: any) {
+        setError(err ?? 'Error loading shop')
+      }
+    }
+    authenticate()
+  }, [])
+
+  if (error) return <ErrorComponent error={error} />
+
+  const visibleProducts =
+    data?.products.filter((product) => product.visible === 1) ?? []
   return (
     <div className="flex flex-col">
       {/* header - shop name */}
       <header className="flex justify-center items-center p-4 border-b">
-        <h1 className="font-mono font-bold text-3xl">{shop.shopName}</h1>
+        <h1 className="font-mono font-bold text-3xl">{data?.shop.shopName}</h1>
       </header>
       {/* products */}
       <main className="">
@@ -103,7 +103,7 @@ function RouteComponent() {
             Loading your products
           </div>
         )}
-        {!isLoading && data && data.length > 0 ? (
+        {!isLoading && data?.products && data.products.length > 0 ? (
           <div className="flex flex-col gap-4">
             <div className="flex justify-end p-2">
               <Cart />

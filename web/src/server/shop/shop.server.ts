@@ -152,6 +152,31 @@ export class serverShop {
   }
 }
 
+/**
+ * Obtains the shop and product information about a shop
+ *
+ * SHOULD ONLY BE RENDERER on **SHOP VIEW ROUTE**,
+ * THIS FUNCTION SHOULD ONLY BE USED TO RENDER WHEN ACTUALY NEEDED
+ *
+ * @param shopId uuid
+ */
+export async function publicShop(shopId: string) {
+  try {
+    const shop = await db
+      .select({ shopName: shops.shopName, shopCurrency: shops.shopCurrency })
+      .from(shops)
+      .where(eq(shops.id, shopId))
+      .limit(1)
+
+    if (!shop[0]) throw new Error('Shop was not found')
+
+    return shop[0]
+  } catch (err: any) {
+    console.error(err)
+    throw new Error(err.message ?? 'Error finding shop')
+  }
+}
+
 // get all the user shops from its id
 // export async function getUserShopsByUserId(
 //   userId: string,
