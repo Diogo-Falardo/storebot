@@ -21,7 +21,7 @@ import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-import { getTelegramInitData } from '@/lib/telegram'
+import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'
 
 export const shopLoader = createServerFn({ method: 'GET' })
   .inputValidator((data: { initData?: string }) => data)
@@ -68,12 +68,9 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        setIsLoading(true)
+        initTelegram()
 
-        // getTelegramInitData now returns a Promise
-        const initData = await getTelegramInitData()
-
-        console.log('[Auth] Got initData:', initData.substring(0, 50) + '...')
+        const initData = getTelegramInitData()
 
         const result = await loader({ data: { initData } })
         if (result) {
