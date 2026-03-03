@@ -41,6 +41,7 @@ function ErrorComponent({ error }: { error: Error }) {
 
 export const Route = createFileRoute('/(shop)/$shopId')({
   errorComponent: ErrorComponent,
+  ssr: 'data-only',
   component: RouteComponent,
 })
 
