@@ -2,7 +2,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { createFileRoute } from '@tanstack/react-router'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getTelegramInitData, initTelegram } from '@/lib/telegram.client'
+import { getTelegramInitData, initTelegram } from '@/lib/telegram'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
 import {
