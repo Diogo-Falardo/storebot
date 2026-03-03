@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { WebApp } from '@grammyjs/web-app'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
@@ -69,22 +68,37 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
+        // This runs **only in browser**
+        if (typeof window === 'undefined') return
+
+        const { WebApp } = await import('@grammyjs/web-app')
         WebApp.ready()
 
-        const initData = WebApp.initData
+        const initData = WebApp.initData || ''
 
-        console.log(initData)
+        console.log(
+          '[Telegram Debug] initData from WebApp:',
+          initData ? 'present' : 'MISSING',
+        )
+
+        if (!initData) {
+          throw new Error(
+            'Telegram initData is empty. Are you running inside Telegram Mini App?',
+          )
+        }
 
         const result = await loader({ data: { initData } })
-        if (result) {
+        if (result?.userId) {
           setUserId(result.userId)
         }
       } catch (err: any) {
-        setError(err ?? 'Error loading your shop')
+        console.error(err)
+        setError(err ?? new Error('Authentication failed'))
       } finally {
         setIsLoading(false)
       }
     }
+
     authenticate()
   }, [])
 

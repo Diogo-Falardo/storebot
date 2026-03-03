@@ -1,6 +1,5 @@
 import { useServerFn } from '@tanstack/react-start'
 import { createFileRoute } from '@tanstack/react-router'
-import { WebApp } from '@grammyjs/web-app'
 import { Camera, Info, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ErrorWrapper from '@/components/errorWrapper'
@@ -56,14 +55,24 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // Tell Telegram the app is ready
+        // This runs **only in browser**
+        if (typeof window === 'undefined') return
+
+        const { WebApp } = await import('@grammyjs/web-app')
         WebApp.ready()
 
-        // Get initData from Telegram
-        const initData = WebApp.initData
+        const initData = WebApp.initData || ''
 
-        console.log(initData)
+        console.log(
+          '[Telegram Debug] initData from WebApp:',
+          initData ? 'present' : 'MISSING',
+        )
 
+        if (!initData) {
+          throw new Error(
+            'Telegram initData is empty. Are you running inside Telegram Mini App?',
+          )
+        }
         const tgUser = await verifyUser({ data: { initData } })
 
         setUser(tgUser)
