@@ -51,6 +51,7 @@ export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
 // ----------
 
 const urlShops = "/shop";
+// create a shop to a user
 export async function createShopTgOnly(tgUserId: number, shopName: string) {
   const res = await fetch(`${API_URL}${urlShops}/create`, {
     method: "POST",

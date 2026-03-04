@@ -17,6 +17,7 @@ const webUrl = process.env.WEB_URL;
 const bot = new Bot<ConversationFlavor<Context>>(token);
 bot.use(conversations());
 
+// ------------------------------------------------------
 // START COMMAND
 // start dialog
 bot.command("start", (ctx) =>
@@ -39,6 +40,7 @@ If you need assistance, feel free to reach out.`,
   ),
 );
 
+// ------------------------------------------------------
 // CREATE SHOP COMMAND
 // command for shop creation: executes a "conversation"
 bot.use(createConversation(createShopConversation));
@@ -46,13 +48,13 @@ bot.command("create", async (ctx) => {
   await ctx.conversation.enter("createShopConversation");
 });
 
-// ADD DA
+// ------------------------------------------------------
+// OPEN DASHBOARD COMMAND
 // add shop dashboard button to the chat conversation
-bot.command("addDashboard", async (ctx) => {
-  // get telegram user id
+bot.command("dashboard", async (ctx) => {
   const tgUserId = ctx.from?.id;
   if (!tgUserId) {
-    return ctx.reply("Unable to identify you. Please try again");
+    return ctx.reply("Unable to identify you. Please try again.");
   }
 
   try {
@@ -64,45 +66,28 @@ bot.command("addDashboard", async (ctx) => {
     }
 
     const dashboardUrl = `${webUrl}/dashboard/${user.shopId}`;
-    const keyboard = new InlineKeyboard().webApp(
-      "Open Shop Dashboard",
-      dashboardUrl,
-    );
 
-    // This will show a button in the lower bar
-    await ctx.reply("", {
+    console.log(dashboardUrl);
+    console.log("ID:" + user.shopId);
+
+    await ctx.reply("Click to open your shop dashboard:", {
       reply_markup: {
-        keyboard: [[{ text: "Open Shop Dashboard" }]],
-        resize_keyboard: true,
+        inline_keyboard: [
+          [
+            {
+              text: "Open Shop Dashboard",
+              web_app: { url: dashboardUrl },
+            },
+          ],
+        ],
       },
     });
-
-    return;
   } catch (err: any) {
     console.log(err);
     return await ctx.reply(
       "Sorry, something went wrong. Please try again later.",
     );
   }
-});
-
-bot.hears("Open Shop Dashboard", async (ctx) => {
-  const tgUserId = ctx.from?.id;
-  const user = await getTelegramUserInfo(tgUserId!);
-  if (user === "no shops" || !user.shopId) {
-    return ctx.reply(
-      "You don't have a shop yet. Please create one first with /create.",
-    );
-  }
-  const dashboardUrl = `${webUrl}/dashboard/${user.shopId}`;
-  const keyboard = new InlineKeyboard().webApp(
-    "Open Shop Dashboard",
-    dashboardUrl,
-  );
-  return await ctx.reply(
-    "Click the button below to access your shop dashboard:",
-    { reply_markup: keyboard },
-  );
 });
 
 bot.start();
