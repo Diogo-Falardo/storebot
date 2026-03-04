@@ -60,6 +60,8 @@ function RouteComponent() {
 
         const initData = WebApp.initData
 
+        console.log('SHOP-INIt: ' + initData)
+
         const tgUser = await verifyUser({ data: { initData } })
 
         setUser(tgUser)
