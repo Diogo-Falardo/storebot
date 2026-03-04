@@ -10,6 +10,7 @@ export const VISUALIZE_PRODUCT_SCHEMA = z.object({
   productPrice: z.string(),
   productDesc: z.string().optional().nullable(),
   categoryId: z.uuid().nullable(),
+  imageUrl: z.string().nullable(),
   visible: z.number(),
 })
 /**

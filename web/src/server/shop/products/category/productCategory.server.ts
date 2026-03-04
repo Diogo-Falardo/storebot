@@ -105,4 +105,24 @@ export class serverCategory {
       throw new Error(err.message ?? 'Error deleting category')
     }
   }
+
+  /**
+   * Converts category id into name
+   *
+   * @param shopId uuid
+   * @param categoryId uuid
+   */
+  async getCategoryName(shopId: string, categoryId: string) {
+    try {
+      const categoryName = await db
+        .select()
+        .from(category)
+        .where(and(eq(category.shopId, shopId), eq(category.id, categoryId)))
+
+      return categoryName[0].category
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error finding category')
+    }
+  }
 }

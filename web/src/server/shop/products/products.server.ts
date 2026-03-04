@@ -248,6 +248,27 @@ export class serverProduct {
       throw new Error(err.message ?? 'Error changing visibility')
     }
   }
+
+  /**
+   * Adds an image to a product
+   *
+   * @param productId uuid
+   * @param imgUrl string -> url
+   * @returns "msg"
+   */
+  async insertImage(productId: string, imgUrl: string) {
+    try {
+      await db
+        .update(products)
+        .set({ imageUrl: imgUrl })
+        .where(eq(products.id, productId))
+
+      return 'image inserted!'
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error adding image')
+    }
+  }
 }
 
 /**

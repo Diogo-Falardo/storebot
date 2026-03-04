@@ -86,11 +86,16 @@ export const sf_ToogleProductVisibilty = createServerFn({
     return await productServer.toogleVisibility(data.productId, newVisibility)
   })
 
-// // function to get products from a shop
-// export const serverGetProductsFromShop = createServerFn({
-//   method: 'GET',
-// })
-//   .inputValidator((data: { shopId: string }) => data)
-//   .handler(async ({ data }) => {
-//     return await getProductsFromShopPublic(data.shopId)
-//   })
+/**
+ * "POST"
+ * add image
+ *
+ * required: productId & img url
+ */
+export const sf_AddProductImage = createServerFn({
+  method: 'POST',
+})
+  .inputValidator((data: { productId: string; imageUrl: string }) => data)
+  .handler(async ({ data }) => {
+    return await productServer.insertImage(data.productId, data.imageUrl)
+  })

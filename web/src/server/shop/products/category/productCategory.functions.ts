@@ -44,3 +44,17 @@ export const sf_DeleteCategory = createServerFn({
   .handler(async ({ data }) => {
     return await categoryServer.deleteCategory(data.shopId, data.categoryId)
   })
+
+/**
+ * "GET"
+ * retrieve category name
+ *
+ * required: shopId & categoryId
+ */
+export const sf_ConvertCategoryIdIntoName = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((data: { shopId: string; categoryId: string }) => data)
+  .handler(async ({ data }) => {
+    return await categoryServer.getCategoryName(data.shopId, data.categoryId)
+  })

@@ -1,16 +1,16 @@
 import {
   mysqlTable,
   mysqlSchema,
+  tinyint,
   AnyMySqlColumn,
   foreignKey,
-  tinyint,
   primaryKey,
   char,
   varchar,
+  index,
   decimal,
   text,
   datetime,
-  index,
   mysqlEnum,
   unique,
   bigint,
@@ -39,22 +39,25 @@ export const products = mysqlTable(
       .notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
-      .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' })
+      .references(() => shops.id, { onDelete: 'cascade' }),
     productName: varchar('product_name', { length: 120 }).notNull(),
     productPrice: decimal('product_price', {
       precision: 10,
       scale: 2,
     }).notNull(),
     productDesc: text('product_desc'),
+    imageUrl: varchar('image_url', { length: 512 }),
     createdAt: datetime('created_at', { mode: 'string', fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
       .notNull(),
     visible: tinyint().default(1),
-    categoryId: char('category_id', { length: 36 }).references(
-      () => category.id,
-    ),
+    categoryId: char('category_id', { length: 36 }),
   },
-  (table) => [primaryKey({ columns: [table.id], name: 'products_id' })],
+  (table) => [
+    index('fk_category').on(table.categoryId),
+    primaryKey({ columns: [table.id], name: 'products_id' }),
+  ],
 )
 
 export const shops = mysqlTable(
