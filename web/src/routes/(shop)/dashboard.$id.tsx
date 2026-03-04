@@ -44,6 +44,8 @@ function RouteComponent() {
 
   // auto renders
   useEffect(() => {
+    if (!telegram.isReady) return
+
     const authenticate = async () => {
       try {
         if (!telegram.initData) {
@@ -52,7 +54,7 @@ function RouteComponent() {
           return
         }
 
-        console.log('DASHBOARD INIT DATA:' + telegram.initData)
+        console.log('DASHBOARD' + telegram.initData)
 
         const user = await verifyTelegram({
           data: { initData: telegram.initData },
