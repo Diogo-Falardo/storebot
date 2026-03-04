@@ -43,12 +43,14 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        const { WebApp } = await import('@grammyjs/web-app')
-        WebApp.ready()
+        // const { WebApp } = await import('@grammyjs/web-app')
+        // WebApp.ready()
 
-        const initData = WebApp.initData
+        // const initData = WebApp.initData
 
-        console.log('DASHBOARD' + initData)
+        // Example for mocking in your test
+        const initData =
+          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
 
         const user = await verifyTelegram({
           data: { initData: initData },
@@ -135,7 +137,11 @@ function RouteComponent() {
                     {/* products display grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {products.map((product) => (
-                        <ProductCardADM key={product.id} {...product} />
+                        <ProductCardADM
+                          key={product.id}
+                          {...product}
+                          shopCurrency={shopInfo.shopCurrency}
+                        />
                       ))}
                     </div>
                   </div>

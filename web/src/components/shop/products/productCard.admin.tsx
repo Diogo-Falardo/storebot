@@ -13,13 +13,13 @@ import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import ImgUploader from '@/components/imgUploader'
 
 type productProps = {
   id: string
@@ -29,6 +29,8 @@ type productProps = {
   productDesc?: string | null
   categoryId?: string | null
   visible: number
+  imageUrl: string | null
+  shopCurrency: string | null
 }
 
 const ProductCardADM = (product: productProps) => {
@@ -71,13 +73,25 @@ const ProductCardADM = (product: productProps) => {
       )
     }
   }
-
+  const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <Card>
+    <Card className="relative mx-auto w-full max-w-sm pt-0">
+      <img
+        src={product.imageUrl || PLACEHOLDER_IMG}
+        alt={product.productName}
+        className="w-full h-45 object-cover rounded-t-lg"
+      />
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-xl">{product.productName}</CardTitle>
-        {/* visibility toogler */}
-        <CardAction>
+        <CardDescription>
+          {product.productPrice} {product.shopCurrency}
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="flex-col gap-2">
+        <div className="flex w-full items-center justify-between">
+          <ImgUploader productId={product.id} />
+          {/* visibility toogler */}
+
           <Button
             variant={'ghost'}
             className="text-sm"
@@ -95,17 +109,12 @@ const ProductCardADM = (product: productProps) => {
               </>
             )}
           </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <CardDescription>{product.productDesc ?? ''}</CardDescription>
-        <div className="flex justify-end">
-          <Label className="text-xl">{product.productPrice}</Label>
         </div>
-      </CardContent>
-      <CardFooter className="flex items-end justify-end gap-2">
+        {/* update */}
+        <ProductUpdate {...product} />
         {/* delete */}
         <Button
+          className="w-full"
           variant={'destructive'}
           onClick={() => setOpenConfirmDelete(true)}
         >
@@ -122,8 +131,6 @@ const ProductCardADM = (product: productProps) => {
           cancelText="Cancel"
           onConfirm={() => deleteProduct()}
         />
-        {/* update */}
-        <ProductUpdate {...product} />
       </CardFooter>
     </Card>
   )

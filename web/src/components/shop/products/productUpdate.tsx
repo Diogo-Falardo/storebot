@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/select'
 import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
 import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
-import ImgUploader from '@/components/imgUploader'
 
 type productProps = {
   id: string
@@ -81,7 +80,7 @@ const ProductUpdate = (product: productProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>update product</Button>
+        <Button className="w-full">update product</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -219,9 +218,6 @@ const ProductUpdate = (product: productProps) => {
             />
           </FieldGroup>
         </form>
-        <div className="flex w-full justify-center">
-          <ImgUploader productId={product.id} />
-        </div>
         <DialogFooter>
           <DialogClose asChild>
             <Button ref={closeDialogRef} variant={'outline'}>

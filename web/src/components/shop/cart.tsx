@@ -60,7 +60,7 @@ const Cart = () => {
   return (
     <Sheet onOpenChange={(open) => open && refreshCart()}>
       <SheetTrigger asChild>
-        <Button variant={'outline'}>
+        <Button>
           <ShoppingBag /> My Cart
         </Button>
       </SheetTrigger>

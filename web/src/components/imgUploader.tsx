@@ -48,7 +48,7 @@ const ImgUploader = ({ productId }: { productId: string }) => {
   return (
     <>
       <label htmlFor="product-image">
-        <Button asChild variant={'secondary'}>
+        <Button asChild>
           <span>{uploading ? 'Uploading...' : 'Add product image'}</span>
         </Button>
       </label>

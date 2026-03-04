@@ -21,15 +21,12 @@ import {
 } from '@/components/ui/card'
 import CartAdd from '@/components/shop/cartAdd'
 import Cart from '@/components/shop/cart'
-
 import { usePublicShop } from '@/lib/hooks/shop/shop.hooks'
 import { sf_PublicTelegramVerification } from '@/server/telegram/telegram.function'
 import { Badge } from '@/components/ui/badge'
 import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/productCategory.functions'
-
 import { ProductInfo } from '@/components/shop/products/productInfo'
 import ShopFilters from '@/components/shop/shopFilters'
-import { products } from '@/db/schema'
 
 type TelegramUser = {
   telegramId: string
@@ -154,7 +151,6 @@ function RouteComponent() {
               {filteredProducts.map((product) => (
                 <Card
                   key={product.id}
-                  onClick={() => console.log(product)}
                   className="relative mx-auto w-full max-w-sm pt-0"
                 >
                   <img

@@ -24,6 +24,7 @@ const CartAdd = ({ productId, productName, productPrice }: CartAddProps) => {
   return (
     <Button onClick={addItemToStorage}>
       <ShoppingCart />
+      Add to cart
     </Button>
   )
 }
