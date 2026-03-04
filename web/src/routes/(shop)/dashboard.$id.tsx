@@ -20,6 +20,7 @@ import ProductCardADM from '@/components/shop/products/productCard.admin'
 import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
+import { ModeToggle } from '@/components/mode-toggle'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -98,6 +99,7 @@ function RouteComponent() {
               {shopInfo.shopName}
             </Link>
             <div className="flex items-center gap-3">
+              <ModeToggle />
               <ShopUpdate userId={shopInfo.userId} shopId={shopInfo.id} />
             </div>
           </div>

@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge'
 import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/productCategory.functions'
 import { ProductInfo } from '@/components/shop/products/productInfo'
 import ShopFilters from '@/components/shop/shopFilters'
+import { ModeToggle } from '@/components/mode-toggle'
 
 type TelegramUser = {
   telegramId: string
@@ -124,8 +125,11 @@ function RouteComponent() {
   return (
     <div className="flex flex-col">
       {/* header - shop name */}
-      <header className="flex justify-center items-center p-4 border-b">
+      <header className="relative flex justify-center items-center p-4 border-b">
         <h1 className="font-mono font-bold text-3xl">{data?.shop.shopName}</h1>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <ModeToggle />
+        </div>
       </header>
       {/* products */}
       <main className="">

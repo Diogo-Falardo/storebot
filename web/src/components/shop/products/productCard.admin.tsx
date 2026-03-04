@@ -8,12 +8,10 @@ import {
   sf_DeleteProductFromShop,
   sf_ToogleProductVisibilty,
 } from '@/server/shop/products/product.functions'
-import { Label } from '@/components/ui/label'
 import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
