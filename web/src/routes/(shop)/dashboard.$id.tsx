@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
@@ -44,14 +44,14 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
-        // const initData = WebApp.initData
+        const initData = WebApp.initData
 
         // Example for mocking in your test
-        const initData =
-          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        // const initData =
+        //   'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
 
         const user = await verifyTelegram({
           data: { initData: initData },
@@ -99,7 +99,9 @@ function RouteComponent() {
               {shopInfo.shopName}
             </Link>
             <div className="flex items-center gap-3">
-              <ModeToggle />
+              {/* <ClientOnly>
+                <ModeToggle />
+              </ClientOnly> */}
               <ShopUpdate userId={shopInfo.userId} shopId={shopInfo.id} />
             </div>
           </div>

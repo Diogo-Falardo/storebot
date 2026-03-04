@@ -1,5 +1,5 @@
 import { useServerFn } from '@tanstack/react-start'
-import { createFileRoute } from '@tanstack/react-router'
+import { ClientOnly, createFileRoute } from '@tanstack/react-router'
 import { Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ErrorWrapper from '@/components/errorWrapper'
@@ -64,13 +64,13 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
-        // const initData = WebApp.initData
+        const initData = WebApp.initData
         // Example for mocking in your test
-        const initData =
-          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        // const initData =
+        //   'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
 
         const tgUser = await verifyUser({ data: { initData } })
 
@@ -128,7 +128,9 @@ function RouteComponent() {
       <header className="relative flex justify-center items-center p-4 border-b">
         <h1 className="font-mono font-bold text-3xl">{data?.shop.shopName}</h1>
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <ModeToggle />
+          {/* <ClientOnly>
+            <ModeToggle />
+          </ClientOnly> */}
         </div>
       </header>
       {/* products */}

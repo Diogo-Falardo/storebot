@@ -49,9 +49,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Toaster />
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          {children}
-        </ThemeProvider>
+        {/* <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme"> */}
+        {children}
+        {/* </ThemeProvider> */}
         <TanStackDevtools
           config={{
             position: 'bottom-right',
