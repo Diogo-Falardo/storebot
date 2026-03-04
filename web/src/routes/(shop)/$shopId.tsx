@@ -1,6 +1,6 @@
 import { useServerFn } from '@tanstack/react-start'
 import { createFileRoute } from '@tanstack/react-router'
-import { Info, Package } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
@@ -21,21 +21,15 @@ import {
 } from '@/components/ui/card'
 import CartAdd from '@/components/shop/cartAdd'
 import Cart from '@/components/shop/cart'
-import { Button } from '@/components/ui/button'
 
 import { usePublicShop } from '@/lib/hooks/shop/shop.hooks'
 import { sf_PublicTelegramVerification } from '@/server/telegram/telegram.function'
 import { Badge } from '@/components/ui/badge'
 import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/productCategory.functions'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+
 import { ProductInfo } from '@/components/shop/products/productInfo'
+import ShopFilters from '@/components/shop/shopFilters'
+import { products } from '@/db/schema'
 
 type TelegramUser = {
   telegramId: string
@@ -57,7 +51,13 @@ function RouteComponent() {
   const { data, isLoading } = usePublicShop({ shopId })
   const [user, setUser] = useState<TelegramUser | null>()
   const [error, setError] = useState<Error | null>(null)
+  // categorys
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({})
+  // filters state
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
+  const [selectedCategories, setSelectedCategories] = useState<Array<string>>(
+    [],
+  )
 
   // server fn
   const verifyUser = useServerFn(sf_PublicTelegramVerification)
@@ -102,6 +102,25 @@ function RouteComponent() {
     fetchCategoryNames()
   }, [visibleProducts])
 
+  const availableCategories = Object.values(categoryNames).filter(Boolean)
+
+  // rendering filters
+
+  const filteredProducts = visibleProducts.filter((product) => {
+    // price filters
+    const price = Number(product.productPrice)
+    const inPriceRange = price >= priceRange[0] && price <= priceRange[1]
+
+    // category filter
+    const _categoryName =
+      product.categoryId && categoryNames[product.categoryId]
+    const inCategory =
+      selectedCategories.length === 0 ||
+      (_categoryName && selectedCategories.includes(_categoryName))
+
+    return inPriceRange && inCategory
+  })
+
   if (error) return <ErrorComponent error={error} />
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
@@ -121,11 +140,18 @@ function RouteComponent() {
         )}
         {!isLoading && data?.products && data.products.length > 0 ? (
           <div className="flex flex-col gap-4">
-            <div className="flex justify-end p-4">
+            <div className="flex justify-end p-4 gap-2">
+              <ShopFilters
+                categoryNames={availableCategories}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+              />
               <Cart />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 auto-rows-max">
-              {visibleProducts.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card
                   key={product.id}
                   onClick={() => console.log(product)}
