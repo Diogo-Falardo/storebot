@@ -1,5 +1,6 @@
 import { useState } from 'react'
 // ui
+import { ShoppingBag, Trash2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   Sheet,
@@ -9,7 +10,6 @@ import {
   SheetTrigger,
 } from '../ui/sheet'
 import { Card } from '../ui/card'
-import { ShoppingBag } from 'lucide-react'
 
 type StoredItem = {
   productId: string
@@ -38,7 +38,7 @@ function getItemFromStorage(): Array<StoredItem> {
   return stored
 }
 
-const Cart = () => {
+const Cart = ({ shopCurrency }: { shopCurrency: string | null }) => {
   const [stored, setStored] = useState<Array<StoredItem>>(() =>
     getItemFromStorage(),
   )
@@ -52,6 +52,22 @@ const Cart = () => {
   }))
 
   const total = cartProducts.reduce((sum, item) => sum + item.total, 0)
+
+  function removeItemFromStorage(productId: string) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key?.startsWith(CART_PREFIX)) continue
+
+      const value = localStorage.getItem(key)
+      if (!value) continue
+
+      const item = JSON.parse(value)
+      if (item.productId === productId) {
+        localStorage.removeItem(key)
+        refreshCart()
+      }
+    }
+  }
 
   const sendDataToApi = () => {
     return console.log(JSON.stringify(cartProducts))
@@ -72,12 +88,27 @@ const Cart = () => {
             </SheetHeader>
             <div className="flex flex-col gap-2">
               {cartProducts.map((item) => (
-                <Card key={item.productId} className="p-2">
-                  <h1>{item.productName}</h1>
-                  <h1 className="flex gap-4">{item.productPrice}</h1>
-                  <h2>
-                    Total: <span>{item.total}</span>
-                  </h2>
+                <Card
+                  key={item.productId}
+                  className="p-2 bg-transparent rounded-sm border flex-col gap-2"
+                >
+                  <div className="flex flex-col gap-1">
+                    <h1 className="text-xl">{item.productName}</h1>
+                    <h1 className="flex gap-1 text-lg">
+                      {item.productPrice}
+                      <span>{shopCurrency}</span>
+                    </h1>
+                  </div>
+                  <div className="flex w-full justify-end">
+                    <Button
+                      variant={'ghost'}
+                      className="text-destructive cursor-pointer"
+                      size={'icon'}
+                      onClick={() => removeItemFromStorage(item.productId)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>

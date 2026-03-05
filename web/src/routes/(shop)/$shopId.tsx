@@ -64,13 +64,13 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        const { WebApp } = await import('@grammyjs/web-app')
-        WebApp.ready()
+        // const { WebApp } = await import('@grammyjs/web-app')
+        // WebApp.ready()
 
-        const initData = WebApp.initData
+        // const initData = WebApp.initData
         // Example for mocking in your test
-        // const initData =
-        //   'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        const initData =
+          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
 
         const tgUser = await verifyUser({ data: { initData } })
 
@@ -151,7 +151,7 @@ function RouteComponent() {
                 selectedCategories={selectedCategories}
                 setSelectedCategories={setSelectedCategories}
               />
-              <Cart />
+              <Cart shopCurrency={data.shop.shopCurrency} />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 auto-rows-max">
               {filteredProducts.map((product) => (
