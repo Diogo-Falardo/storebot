@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "2d254bb6-8ee8-412f-b615-04b42953c880",
+  "id": "7cf7d669-fc87-4e06-a114-1344e9340633",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "category": {
@@ -49,6 +49,196 @@
       "compositePrimaryKeys": {
         "category_id": {
           "name": "category_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "orders": {
+      "name": "orders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "shop_id": {
+          "name": "shop_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_status": {
+          "name": "order_status",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_custom_message": {
+          "name": "order_custom_message",
+          "type": "varchar(2500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "order_shipping_method": {
+          "name": "order_shipping_method",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_payment_method": {
+          "name": "order_payment_method",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_orders_shop_id": {
+          "name": "idx_orders_shop_id",
+          "columns": [
+            "shop_id"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_status": {
+          "name": "idx_orders_status",
+          "columns": [
+            "order_status"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_shipping_method": {
+          "name": "idx_orders_shipping_method",
+          "columns": [
+            "order_shipping_method"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_payment_method": {
+          "name": "idx_orders_payment_method",
+          "columns": [
+            "order_payment_method"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "orders_shop_id_shops_id_fk": {
+          "name": "orders_shop_id_shops_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "shops",
+          "columnsFrom": [
+            "shop_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orders_order_shipping_method_shipping_methods_id_fk": {
+          "name": "orders_order_shipping_method_shipping_methods_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "shipping_methods",
+          "columnsFrom": [
+            "order_shipping_method"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orders_order_payment_method_payment_methods_id_fk": {
+          "name": "orders_order_payment_method_payment_methods_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "payment_methods",
+          "columnsFrom": [
+            "order_payment_method"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "orders_id": {
+          "name": "orders_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "payment_methods": {
+      "name": "payment_methods",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "shop_id": {
+          "name": "shop_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_paymentMethods_shop_id": {
+          "name": "idx_paymentMethods_shop_id",
+          "columns": [
+            "shop_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "payment_methods_shop_id_shops_id_fk": {
+          "name": "payment_methods_shop_id_shops_id_fk",
+          "tableFrom": "payment_methods",
+          "tableTo": "shops",
+          "columnsFrom": [
+            "shop_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "paymentMethods_id": {
+          "name": "paymentMethods_id",
           "columns": [
             "id"
           ]
@@ -154,6 +344,148 @@
       "compositePrimaryKeys": {
         "products_id": {
           "name": "products_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "products_orders": {
+      "name": "products_orders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_orders_id": {
+          "name": "idx_orders_id",
+          "columns": [
+            "order_id"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_product_id": {
+          "name": "idx_orders_product_id",
+          "columns": [
+            "product_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "products_orders_order_id_orders_id_fk": {
+          "name": "products_orders_order_id_orders_id_fk",
+          "tableFrom": "products_orders",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "products_orders_product_id_products_id_fk": {
+          "name": "products_orders_product_id_products_id_fk",
+          "tableFrom": "products_orders",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "productsOrders_id": {
+          "name": "productsOrders_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "shipping_methods": {
+      "name": "shipping_methods",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(uuid())"
+        },
+        "shop_id": {
+          "name": "shop_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_shippingMethods_shop_id": {
+          "name": "idx_shippingMethods_shop_id",
+          "columns": [
+            "shop_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "shipping_methods_shop_id_shops_id_fk": {
+          "name": "shipping_methods_shop_id_shops_id_fk",
+          "tableFrom": "shipping_methods",
+          "tableTo": "shops",
+          "columnsFrom": [
+            "shop_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "shippingMethods_id": {
+          "name": "shippingMethods_id",
           "columns": [
             "id"
           ]
