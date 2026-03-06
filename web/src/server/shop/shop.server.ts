@@ -1,9 +1,10 @@
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { shops } from '@/db/schema'
+import { paymentMethods, shippingMethods, shops } from '@/db/schema'
 import {
   DTO_CREATE_SHOP,
   SHOP_SCHEMA,
+  VISUALIZE_METHOD_SCHEMA,
   VISUALIZE_SHOP_SCHEMA,
 } from '@/schemas/shop.schema'
 
@@ -133,6 +134,14 @@ export class serverShop {
     }
   }
 
+  /**
+   * ANNIQUILATION OF A SHOP......
+   * GOODBYESHOP NEVER SEEN AGAIN
+   *
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @returns bool
+   */
   async deleteShop(userId: string, shopId: string) {
     // validate user ownership
     const ownership = await this.validateUserShopOwnership(userId, shopId)
@@ -148,6 +157,271 @@ export class serverShop {
       return true
     } catch (err: any) {
       console.error(err)
+      throw new Error(err.message ?? 'Error deleting shop')
+    }
+  }
+
+  /**
+   * Obtain the list of shipping methods from a shop
+   *
+   * @param shopId uuid
+   * @returns "0" methods string || array of methods
+   */
+  async getShopShippingMethods(shopId: string) {
+    try {
+      const methods = await db
+        .select()
+        .from(shippingMethods)
+        .where(eq(shippingMethods.shopId, shopId))
+
+      if (methods.length === 0) {
+        return `There are a total of 0 Shipping Methods...`
+      }
+
+      return VISUALIZE_METHOD_SCHEMA.array().parse(methods)
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error finding methods')
+    }
+  }
+
+  /**
+   * Validate if a shipping method already exists on db
+   *
+   * valid means its availables
+   * invalid means its already in use
+   *
+   * @param shopId uuid
+   * @param shippingMethodName string
+   * @returns valid | invalid
+   */
+  async ValidateShippingMethodName(
+    shopId: string,
+    shippingMethodName: string,
+  ): Promise<'valid' | 'invalid'> {
+    try {
+      const method = await db
+        .select()
+        .from(shippingMethods)
+        .where(
+          and(
+            eq(shippingMethods.shopId, shopId),
+            eq(shippingMethods.method, shippingMethodName),
+          ),
+        )
+        .limit(1)
+
+      if (method[0]) return 'invalid'
+      return 'valid'
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error validating shipping method')
+    }
+  }
+
+  /**
+   * Add a shipping method to a shop
+   *
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @param shippingMethod string
+   * @returns "msg"
+   */
+  async addShippingMethod(
+    userId: string,
+    shopId: string,
+    shippingMethod: string,
+  ) {
+    // validate user ownership
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    // returned false
+    if (!ownership) {
+      throw new Error('Ups... This is restricted area! - not authorized')
+    }
+
+    const validMethod = await this.ValidateShippingMethodName(
+      shopId,
+      shippingMethod,
+    )
+
+    if (validMethod === 'invalid') {
+      throw new Error('Shipping Method already exists!')
+    }
+
+    try {
+      await db.insert(shippingMethods).values({
+        shopId: shopId,
+        method: shippingMethod,
+      })
+
+      return `New shipping method: ${shippingMethod}`
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error adding shipping method')
+    }
+  }
+
+  /**
+   * Delete a shipping method
+   *
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @param methodId uuid
+   * @returns "msg"
+   */
+  async deleteShippingMethod(userId: string, shopId: string, methodId: string) {
+    // validate user ownership
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    // returned false
+    if (!ownership) {
+      throw new Error('Ups... This is restricted area! - not authorized')
+    }
+    try {
+      await db
+        .delete(shippingMethods)
+        .where(
+          and(
+            eq(shippingMethods.shopId, shopId),
+            eq(shippingMethods.id, methodId),
+          ),
+        )
+
+      return `Shipping method deleted!`
+    } catch (err: any) {
+      console.log(err)
+      throw new Error(err.message ?? 'Error deleting shipping method')
+    }
+  }
+
+  /**
+   * Obtain the list of  payment methods from a shop
+   *
+   * @param shopId uuid
+   * @returns "0" methods string || array of methods
+   */
+  async getShopPaymentMethods(shopId: string) {
+    try {
+      const methods = await db
+        .select()
+        .from(paymentMethods)
+        .where(eq(paymentMethods.shopId, shopId))
+
+      if (methods.length === 0) {
+        return `There are a total of 0 Payment Methods...`
+      }
+
+      return VISUALIZE_METHOD_SCHEMA.array().parse(methods)
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error finding methods')
+    }
+  }
+
+  /**
+   * Validate if a payment method already exists on db
+   *
+   * valid means its availables
+   * invalid means its already in use
+   *
+   * @param shopId uuid
+   * @param shippingMethodName string
+   * @returns valid | invalid
+   */
+  async ValidatePaymentMethodName(
+    shopId: string,
+    shippingMethodName: string,
+  ): Promise<'valid' | 'invalid'> {
+    try {
+      const method = await db
+        .select()
+        .from(paymentMethods)
+        .where(
+          and(
+            eq(paymentMethods.shopId, shopId),
+            eq(paymentMethods.method, shippingMethodName),
+          ),
+        )
+        .limit(1)
+
+      if (method[0]) return 'invalid'
+      return 'valid'
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error validating payment method')
+    }
+  }
+
+  /**
+   * add a payment method to a shop
+   *
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @param paymentMethod shopid
+   * @returns "msg"
+   */
+  async addPaymentMethod(
+    userId: string,
+    shopId: string,
+    paymentMethod: string,
+  ) {
+    // validate user ownership
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    // returned false
+    if (!ownership) {
+      throw new Error('Ups... This is restricted area! - not authorized')
+    }
+
+    const validMethod = await this.ValidatePaymentMethodName(
+      shopId,
+      paymentMethod,
+    )
+
+    if (validMethod === 'invalid') {
+      throw new Error('Shipping Method already exists!')
+    }
+
+    try {
+      await db.insert(paymentMethods).values({
+        shopId: shopId,
+        method: paymentMethod,
+      })
+
+      return `New shipping method: ${paymentMethod}`
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error adding shipping method')
+    }
+  }
+
+  /**
+   * Delete a Payment method
+   *
+   * @param userId uuid internal user id
+   * @param shopId uuid
+   * @param methodId uuid
+   * @returns "msg"
+   */
+  async deletePaymentMethod(userId: string, shopId: string, methodId: string) {
+    // validate user ownership
+    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    // returned false
+    if (!ownership) {
+      throw new Error('Ups... This is restricted area! - not authorized')
+    }
+    try {
+      await db
+        .delete(paymentMethods)
+        .where(
+          and(
+            eq(paymentMethods.shopId, shopId),
+            eq(paymentMethods.id, methodId),
+          ),
+        )
+
+      return `Payment method deleted!`
+    } catch (err: any) {
+      console.log(err)
+      throw new Error(err.message ?? 'Error deleting shipping method')
     }
   }
 }

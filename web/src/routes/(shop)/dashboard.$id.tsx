@@ -21,6 +21,7 @@ import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { ModeToggle } from '@/components/mode-toggle'
+import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -44,14 +45,14 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        const { WebApp } = await import('@grammyjs/web-app')
-        WebApp.ready()
+        // const { WebApp } = await import('@grammyjs/web-app')
+        // WebApp.ready()
 
-        const initData = WebApp.initData
+        // const initData = WebApp.initData
 
         // Example for mocking in your test
-        // const initData =
-        //   'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        const initData =
+          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
 
         const user = await verifyTelegram({
           data: { initData: initData },
@@ -121,7 +122,11 @@ function RouteComponent() {
             </TabsList>
             {/* page products */}
             <TabsContent value="product">
-              <div className="w-full h-full p-4">
+              <div className="flex flex-col gap-5">
+                <div className="flex justify-end gap-2 mt-2 mb-4">
+                  <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
+                  <ProductCategory shopId={shopInfo.id} />
+                </div>
                 {/* while products are loading */}
                 {productsLoading && (
                   <div>
@@ -130,24 +135,15 @@ function RouteComponent() {
                   </div>
                 )}
                 {!productsLoading && products && products.length > 0 ? (
-                  <div className="flex flex-col gap-5">
-                    <div className="flex justify-end gap-2">
-                      <ProductAdd
-                        userId={shopInfo.userId}
-                        shopId={shopInfo.id}
+                  // products display grid
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {products.map((product) => (
+                      <ProductCardADM
+                        key={product.id}
+                        {...product}
+                        shopCurrency={shopInfo.shopCurrency}
                       />
-                      <ProductCategory shopId={shopInfo.id} />
-                    </div>
-                    {/* products display grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {products.map((product) => (
-                        <ProductCardADM
-                          key={product.id}
-                          {...product}
-                          shopCurrency={shopInfo.shopCurrency}
-                        />
-                      ))}
-                    </div>
+                    ))}
                   </div>
                 ) : (
                   <Empty>
@@ -171,7 +167,15 @@ function RouteComponent() {
                 )}
               </div>
             </TabsContent>
-            <TabsContent value="orders"></TabsContent>
+            {/* page orders */}
+            <TabsContent value="orders">
+              <div className="flex flex-col gap-5">
+                <div className="flex justify-end gap-2 mt-2 mb-4">
+                  <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
+                  <ProductCategory shopId={shopInfo.id} />
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </main>

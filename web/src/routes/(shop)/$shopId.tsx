@@ -95,7 +95,10 @@ function RouteComponent() {
           })
         }
       }
-      setCategoryNames(names)
+      // only update if changed
+      if (JSON.stringify(names) !== JSON.stringify(categoryNames)) {
+        setCategoryNames(names)
+      }
     }
     fetchCategoryNames()
   }, [visibleProducts])
@@ -151,7 +154,7 @@ function RouteComponent() {
                 selectedCategories={selectedCategories}
                 setSelectedCategories={setSelectedCategories}
               />
-              <Cart shopCurrency={data.shop.shopCurrency} />
+              <Cart shopId={shopId} shopCurrency={data.shop.shopCurrency} />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 auto-rows-max">
               {filteredProducts.map((product) => (

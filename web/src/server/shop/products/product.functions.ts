@@ -99,3 +99,22 @@ export const sf_AddProductImage = createServerFn({
   .handler(async ({ data }) => {
     return await productServer.insertImage(data.productId, data.imageUrl)
   })
+
+/**
+ * "GET"
+ * validate if a product still exists in shop
+ *
+ * required: shopId & productId
+ */
+export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .handler(async ({ data }): Promise<'invalid' | 'valid'> => {
+    const res = await productServer.validateIfProductExists(
+      data.shopId,
+      data.productId,
+    )
+
+    if (!res) return 'invalid'
+
+    return 'valid'
+  })

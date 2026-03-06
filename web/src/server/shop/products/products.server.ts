@@ -269,6 +269,34 @@ export class serverProduct {
       throw new Error(err.message ?? 'Error adding image')
     }
   }
+
+  /**
+   * Validates if a product id is still in shop
+   *
+   * @param shopId uuid
+   * @param productId uuid
+   * @returns boolean
+   */
+  async validateIfProductExists(
+    shopId: string,
+    productId: string,
+  ): Promise<boolean> {
+    try {
+      const product = await db
+        .select()
+        .from(products)
+        .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+
+      if (!product[0]) {
+        return false
+      }
+
+      return true
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error validating product')
+    }
+  }
 }
 
 /**

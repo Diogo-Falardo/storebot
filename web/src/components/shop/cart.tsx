@@ -1,5 +1,5 @@
 import { useState } from 'react'
-// ui
+import { useServerFn } from '@tanstack/react-start'
 import { ShoppingBag, Trash2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -10,6 +10,8 @@ import {
   SheetTrigger,
 } from '../ui/sheet'
 import { Card } from '../ui/card'
+import { sf_ValidateIfProductExists } from '@/server/shop/products/product.functions'
+import { toast } from 'sonner'
 
 type StoredItem = {
   productId: string
@@ -38,10 +40,19 @@ function getItemFromStorage(): Array<StoredItem> {
   return stored
 }
 
-const Cart = ({ shopCurrency }: { shopCurrency: string | null }) => {
+const Cart = ({
+  shopId,
+  shopCurrency,
+}: {
+  shopId: string
+  shopCurrency: string | null
+}) => {
+  // stored localhost items
   const [stored, setStored] = useState<Array<StoredItem>>(() =>
     getItemFromStorage(),
   )
+  // serverFn
+  const validProduct = useServerFn(sf_ValidateIfProductExists)
 
   // refreshes the cart everytime the user opens it
   const refreshCart = () => setStored(getItemFromStorage())
@@ -51,6 +62,7 @@ const Cart = ({ shopCurrency }: { shopCurrency: string | null }) => {
     total: Number(item.productPrice) * item.quantity,
   }))
 
+  // counts the total of the cart
   const total = cartProducts.reduce((sum, item) => sum + item.total, 0)
 
   function removeItemFromStorage(productId: string) {
@@ -69,8 +81,29 @@ const Cart = ({ shopCurrency }: { shopCurrency: string | null }) => {
     }
   }
 
-  const sendDataToApi = () => {
-    return console.log(JSON.stringify(cartProducts))
+  const sendOrder = async () => {
+    // store invalid products and remove them
+    const invalid: Array<string> = []
+    for (const i of stored) {
+      const valid = await validProduct({
+        data: { shopId, productId: i.productId },
+      })
+
+      if (valid === 'invalid') {
+        invalid.push(i.productId)
+        removeItemFromStorage(i.productId)
+      }
+    }
+
+    // return so user needs to make checkout again
+    if (invalid.length > 0) {
+      toast.info(
+        `A total of ${invalid.length} products were removed because were invalid!`,
+      )
+      return
+    }
+
+    // create an order
   }
 
   return (
@@ -118,9 +151,9 @@ const Cart = ({ shopCurrency }: { shopCurrency: string | null }) => {
         )}
         <div className="flex justify-between px-2">
           <h1 className="text-lg">Total:</h1>
-          <p>{total ? `${total.toFixed(2)}` : ''}</p>
+          <p>{total ? `${total.toFixed(2)} ${shopCurrency}` : ''}</p>
         </div>
-        <Button onClick={sendDataToApi}>Checkout</Button>
+        <Button onClick={sendOrder}>Checkout</Button>
       </SheetContent>
     </Sheet>
   )

@@ -83,3 +83,96 @@ export const sf_PublicShop = createServerFn({ method: 'GET' })
       products: products,
     }
   })
+
+/**
+ * "GET"
+ * obtain the shipping methods from a shop
+ *
+ * required: shopId
+ */
+export const sf_GetShopShippingMethods = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string }) => data)
+  .handler(async ({ data }) => {
+    return await shopServer.getShopShippingMethods(data.shopId)
+  })
+
+/**
+ * "GET"
+ * obtain the payment methods from a shop
+ *
+ * required: shopId
+ */
+export const sf_GetShopPaymentMethods = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string }) => data)
+  .handler(async ({ data }) => {
+    return await shopServer.getShopPaymentMethods(data.shopId)
+  })
+
+/**
+   * "POST"
+   * create a shipping method to a shop
+
+   */
+export const sf_CreateShopShippingMethod = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; shippingMethod: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await shopServer.addShippingMethod(
+      data.userId,
+      data.shopId,
+      data.shippingMethod,
+    )
+  })
+
+/**
+ * "POST"
+ * create a payment method to a shop
+ */
+export const sf_CreateShopPaymentMethod = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; paymentMethod: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await shopServer.addPaymentMethod(
+      data.userId,
+      data.shopId,
+      data.paymentMethod,
+    )
+  })
+
+/**
+ * "POST"
+ * delete a shipping method from a shop
+ *
+ * required: userId, shopId, methodId
+ */
+export const sf_DeleteShopShippingMethod = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; methodId: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await shopServer.deleteShippingMethod(
+      data.userId,
+      data.shopId,
+      data.methodId,
+    )
+  })
+
+/**
+ * "POST"
+ * delete a payment method from a shop
+ *
+ * required: userId, shopId, methodId
+ */
+export const sf_DeleteShopPaymentMethod = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; shopId: string; methodId: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    return await shopServer.deleteShippingMethod(
+      data.userId,
+      data.shopId,
+      data.methodId,
+    )
+  })
