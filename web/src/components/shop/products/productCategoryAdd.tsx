@@ -3,70 +3,64 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
-import { Plane, X } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Button } from '../ui/button'
-import { Field, FieldError, FieldGroup } from '../ui/field'
-import InputEndInlineButtonDemo from '../shadcn-studio/input/input-31'
-import { Spinner } from '../ui/spinner'
-import { ScrollArea } from '../ui/scroll-area'
-import { Empty, EmptyDescription, EmptyTitle } from '../ui/empty'
-import { Card, CardTitle } from '../ui/card'
-import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/shop.schema'
-import { useGetShopShippingMethods } from '@/lib/hooks/shop/shop.hooks'
+import { PackageSearch, X } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover'
+import { Button } from '../../ui/button'
+import { Field, FieldError, FieldGroup } from '../../ui/field'
+import InputEndInlineButtonDemo from '../../shadcn-studio/input/input-31'
+import { Spinner } from '../../ui/spinner'
+import { ScrollArea } from '../../ui/scroll-area'
+import { Empty, EmptyDescription, EmptyTitle } from '../../ui/empty'
+import { Card, CardTitle } from '../../ui/card'
+import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
 import {
-  sf_CreateShopShippingMethod,
-  sf_DeleteShopShippingMethod,
-} from '@/server/shop/shop.functions'
+  sf_CreateCategory,
+  sf_DeleteCategory,
+} from '@/server/shop/products/category/productCategory.functions'
+import { CREATE_CATEGORY_SCHEMA } from '@/schemas/category.schema'
 
-const ShippingMethodAdd = ({
-  userId,
-  shopId,
-}: {
-  userId: string
-  shopId: string
-}) => {
-  // load current shipping methods
-  const { data, isLoading } = useGetShopShippingMethods({ shopId })
+const ProductCategoryAdd = ({ shopId }: { shopId: string }) => {
+  // load current payment methods
+  const { data, isLoading } = useGetShopCategorys({ shopId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateShopShippingMethod)
-  const deleteMethod = useServerFn(sf_DeleteShopShippingMethod)
+  const addCategory = useServerFn(sf_CreateCategory)
+  const deleteCategory = useServerFn(sf_DeleteCategory)
 
   const form = useForm({
     defaultValues: {
-      method: '',
+      category: '',
     },
     validators: {
-      onSubmit: CREATE_SHIPPING_METHOD_SCHEMA,
+      onSubmit: CREATE_CATEGORY_SCHEMA,
     },
     onSubmit: async ({ value }) => {
       try {
-        await addMethod({
-          data: { userId, shopId, shippingMethod: value.method },
+        await addCategory({
+          data: { shopId, category: value.category },
         })
-        toast.success(`NEW Shipping Method: ${value.method}`)
-        queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
+        toast.success(`NEW Category: ${value.category}`)
+        queryClient.invalidateQueries({ queryKey: ['categorys', shopId] })
       } catch (err: any) {
-        toast.error(err.message ?? 'Error adding shipping method.')
+        toast.error(err.message ?? 'Error adding category.')
       }
     },
   })
 
-  const useDeleteMethod = async (methodId: string) => {
-    setDeletingId(methodId)
+  const useDeleteCategory = async (categoryId: string) => {
+    setDeletingId(categoryId)
     try {
-      await deleteMethod({
-        data: { userId, shopId, methodId },
+      await deleteCategory({
+        data: { shopId, categoryId },
       })
-      queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
-      toast.success('Method deleted!')
+      queryClient.invalidateQueries({ queryKey: ['categorys', shopId] })
+      toast.success('Category deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {
-      toast.error('Error deleting method!')
+      toast.error('Error deleting category!')
     } finally {
       setDeletingId(null)
     }
@@ -76,16 +70,16 @@ const ShippingMethodAdd = ({
     <Popover>
       <PopoverTrigger asChild>
         <Button>
-          <Plane />
-          Shipping Methods
+          <PackageSearch />
+          Product Categorys
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end">
-        {/* new shipping method */}
+        {/* new category */}
         <div className="flex items-center gap-2">
           <form
             className="flex-1"
-            id="add-shipping-method-form"
+            id="add-payment-method-form"
             onSubmit={(e) => {
               e.preventDefault()
               form.handleSubmit()
@@ -93,7 +87,7 @@ const ShippingMethodAdd = ({
           >
             <FieldGroup>
               <form.Field
-                name="method"
+                name="category"
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid
@@ -106,9 +100,9 @@ const ShippingMethodAdd = ({
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
-                        placeholder="New Shipping Method"
+                        placeholder="New Category"
                         autoComplete="off"
-                        icon={<Plane />}
+                        icon={<PackageSearch />}
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -120,31 +114,31 @@ const ShippingMethodAdd = ({
             </FieldGroup>
           </form>
         </div>
-        {/* current shipping methods */}
+        {/* current categorys */}
         <div className="flex justify-center pt-2">
           {isLoading && (
             <div>
               <Spinner />
-              Loading Shipping Methods
+              Loading Categorys
             </div>
           )}
           {data && typeof data !== 'string' && data.length > 0 ? (
             <ScrollArea className="max-h-50 w-full">
               <div className="flex flex-col gap-2">
-                {data.map((method) => (
-                  <Card key={method.id} className="w-full p-1 rounded-sm">
+                {data.map((category) => (
+                  <Card key={category.id} className="w-full p-1 rounded-sm">
                     <div className="px-0.5 flex flex-row justify-between items-center">
                       <CardTitle className="capitalize font-medium">
-                        {method.method}
+                        {category.category}
                       </CardTitle>
                       <Button
                         variant={'ghost'}
                         className="text-destructive"
                         size={'icon-xs'}
-                        onClick={() => useDeleteMethod(method.id)}
-                        disabled={deletingId === method.id}
+                        onClick={() => useDeleteCategory(category.id)}
+                        disabled={deletingId === category.id}
                       >
-                        {deletingId === method.id ? <Spinner /> : <X />}
+                        {deletingId === category.id ? <Spinner /> : <X />}
                       </Button>
                     </div>
                   </Card>
@@ -153,11 +147,11 @@ const ShippingMethodAdd = ({
             </ScrollArea>
           ) : (
             <Empty>
-              <EmptyTitle className="text-base">No Shipping Methods</EmptyTitle>
+              <EmptyTitle className="text-base">No Categories</EmptyTitle>
               <EmptyDescription className="">
-                Please add at least one shipping method so your customers can
-                understand how their orders will be delivered. Clear shipping
-                options help set expectations and improve the overall shopping
+                Please add at least one product category so your customers can
+                easily browse and discover your products. Well-organized
+                categories improve navigation and enhance the overall shopping
                 experience.
               </EmptyDescription>
             </Empty>
@@ -168,4 +162,4 @@ const ShippingMethodAdd = ({
   )
 }
 
-export default ShippingMethodAdd
+export default ProductCategoryAdd

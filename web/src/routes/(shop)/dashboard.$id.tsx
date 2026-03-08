@@ -17,11 +17,12 @@ import {
 } from '@/components/ui/empty'
 import ProductAdd from '@/components/shop/products/productAdd'
 import ProductCardADM from '@/components/shop/products/productCard.admin'
-import ProductCategory from '@/components/shop/products/productCategory'
 import ShopUpdate from '@/components/shop/shopUpdate'
 import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
 import { ModeToggle } from '@/components/mode-toggle'
 import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
+import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
+import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -125,7 +126,7 @@ function RouteComponent() {
               <div className="flex flex-col gap-5">
                 <div className="flex justify-end gap-2 mt-2 mb-4">
                   <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
-                  <ProductCategory shopId={shopInfo.id} />
+                  <ProductCategoryAdd shopId={shopInfo.id} />
                 </div>
                 {/* while products are loading */}
                 {productsLoading && (
@@ -172,7 +173,7 @@ function RouteComponent() {
               <div className="flex flex-col gap-5">
                 <div className="flex justify-end gap-2 mt-2 mb-4">
                   <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
-                  <ProductCategory shopId={shopInfo.id} />
+                  <PaymentMethodAdd userId={userId} shopId={shopInfo.id} />
                 </div>
               </div>
             </TabsContent>

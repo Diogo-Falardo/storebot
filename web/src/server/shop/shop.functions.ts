@@ -170,7 +170,7 @@ export const sf_DeleteShopPaymentMethod = createServerFn({ method: 'POST' })
     (data: { userId: string; shopId: string; methodId: string }) => data,
   )
   .handler(async ({ data }) => {
-    return await shopServer.deleteShippingMethod(
+    return await shopServer.deletePaymentMethod(
       data.userId,
       data.shopId,
       data.methodId,

@@ -60,7 +60,7 @@ export function useGetShopShippingMethods({ shopId }: { shopId: string }) {
  */
 export function useGetShopPaymentMethods({ shopId }: { shopId: string }) {
   return useQuery({
-    queryKey: ['shippingMethods', shopId],
+    queryKey: ['paymentMethods', shopId],
     queryFn: () => sf_GetShopPaymentMethods({ data: { shopId } }),
   })
 }

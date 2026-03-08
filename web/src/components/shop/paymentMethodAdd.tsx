@@ -3,7 +3,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
-import { Plane, X } from 'lucide-react'
+import { Bitcoin, X } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Button } from '../ui/button'
 import { Field, FieldError, FieldGroup } from '../ui/field'
@@ -12,46 +12,46 @@ import { Spinner } from '../ui/spinner'
 import { ScrollArea } from '../ui/scroll-area'
 import { Empty, EmptyDescription, EmptyTitle } from '../ui/empty'
 import { Card, CardTitle } from '../ui/card'
-import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/shop.schema'
-import { useGetShopShippingMethods } from '@/lib/hooks/shop/shop.hooks'
+import { CREATE_PAYMENT_METHOD_SCHEMA } from '@/schemas/shop.schema'
+import { useGetShopPaymentMethods } from '@/lib/hooks/shop/shop.hooks'
 import {
-  sf_CreateShopShippingMethod,
-  sf_DeleteShopShippingMethod,
+  sf_CreateShopPaymentMethod,
+  sf_DeleteShopPaymentMethod,
 } from '@/server/shop/shop.functions'
 
-const ShippingMethodAdd = ({
+const PaymentMethodAdd = ({
   userId,
   shopId,
 }: {
   userId: string
   shopId: string
 }) => {
-  // load current shipping methods
-  const { data, isLoading } = useGetShopShippingMethods({ shopId })
+  // load current payment methods
+  const { data, isLoading } = useGetShopPaymentMethods({ shopId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateShopShippingMethod)
-  const deleteMethod = useServerFn(sf_DeleteShopShippingMethod)
+  const addMethod = useServerFn(sf_CreateShopPaymentMethod)
+  const deleteMethod = useServerFn(sf_DeleteShopPaymentMethod)
 
   const form = useForm({
     defaultValues: {
       method: '',
     },
     validators: {
-      onSubmit: CREATE_SHIPPING_METHOD_SCHEMA,
+      onSubmit: CREATE_PAYMENT_METHOD_SCHEMA,
     },
     onSubmit: async ({ value }) => {
       try {
         await addMethod({
-          data: { userId, shopId, shippingMethod: value.method },
+          data: { userId, shopId, paymentMethod: value.method },
         })
-        toast.success(`NEW Shipping Method: ${value.method}`)
-        queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
+        toast.success(`NEW Payment Method: ${value.method}`)
+        queryClient.invalidateQueries({ queryKey: ['paymentMethods', shopId] })
       } catch (err: any) {
-        toast.error(err.message ?? 'Error adding shipping method.')
+        toast.error(err.message ?? 'Error adding payment method.')
       }
     },
   })
@@ -62,7 +62,7 @@ const ShippingMethodAdd = ({
       await deleteMethod({
         data: { userId, shopId, methodId },
       })
-      queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
+      queryClient.invalidateQueries({ queryKey: ['paymentMethods', shopId] })
       toast.success('Method deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {
@@ -76,16 +76,16 @@ const ShippingMethodAdd = ({
     <Popover>
       <PopoverTrigger asChild>
         <Button>
-          <Plane />
-          Shipping Methods
+          <Bitcoin />
+          Payment Methods
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end">
-        {/* new shipping method */}
+        {/* new payment method */}
         <div className="flex items-center gap-2">
           <form
             className="flex-1"
-            id="add-shipping-method-form"
+            id="add-payment-method-form"
             onSubmit={(e) => {
               e.preventDefault()
               form.handleSubmit()
@@ -106,9 +106,9 @@ const ShippingMethodAdd = ({
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
-                        placeholder="New Shipping Method"
+                        placeholder="New Payment Method"
                         autoComplete="off"
-                        icon={<Plane />}
+                        icon={<Bitcoin />}
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -120,12 +120,12 @@ const ShippingMethodAdd = ({
             </FieldGroup>
           </form>
         </div>
-        {/* current shipping methods */}
+        {/* current payment methods */}
         <div className="flex justify-center pt-2">
           {isLoading && (
             <div>
               <Spinner />
-              Loading Shipping Methods
+              Loading Payment Methods
             </div>
           )}
           {data && typeof data !== 'string' && data.length > 0 ? (
@@ -153,12 +153,12 @@ const ShippingMethodAdd = ({
             </ScrollArea>
           ) : (
             <Empty>
-              <EmptyTitle className="text-base">No Shipping Methods</EmptyTitle>
+              <EmptyTitle className="text-base">No Payment Methods</EmptyTitle>
               <EmptyDescription className="">
-                Please add at least one shipping method so your customers can
-                understand how their orders will be delivered. Clear shipping
-                options help set expectations and improve the overall shopping
-                experience.
+                Please add at least one payment method so your customers know
+                how they can pay for their orders. Offering clear payment
+                options builds trust and ensures a smooth and transparent
+                checkout experience.
               </EmptyDescription>
             </Empty>
           )}
@@ -168,4 +168,4 @@ const ShippingMethodAdd = ({
   )
 }
 
-export default ShippingMethodAdd
+export default PaymentMethodAdd
