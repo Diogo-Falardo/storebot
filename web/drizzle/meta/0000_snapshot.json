@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "7cf7d669-fc87-4e06-a114-1344e9340633",
+  "id": "6066264e-b4c7-4a0b-8648-2e5648980e0b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "category": {
@@ -78,6 +78,20 @@
         "order_status": {
           "name": "order_status",
           "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_identifier": {
+          "name": "order_identifier",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_delivery_instruction": {
+          "name": "order_delivery_instruction",
+          "type": "varchar(1000)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

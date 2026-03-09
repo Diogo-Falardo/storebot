@@ -146,6 +146,10 @@ export const orders = mysqlTable(
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade' }),
     orderStatus: varchar('order_status', { length: 120 }).notNull(),
+    orderIdentifier: varchar('order_identifier', { length: 255 }).notNull(),
+    orderDeliveryInstruction: varchar('order_delivery_instruction', {
+      length: 1000,
+    }).notNull(),
     orderCustomMessage: varchar('order_custom_message', { length: 2500 }),
     orderShippingMethod: char('order_shipping_method', { length: 36 })
       .notNull()

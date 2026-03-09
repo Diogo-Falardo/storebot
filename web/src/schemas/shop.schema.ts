@@ -1,4 +1,4 @@
-import { uuid, z } from 'zod'
+import { z } from 'zod'
 
 export const SHOP_TYPE_ENUM = z.enum(['public', 'private'], {
   message: 'Please select a shop type',
@@ -15,7 +15,7 @@ export const SHOP_CURRENCY_ENUM = z.enum(['USD', 'EUR', 'GBP', 'CHF'], {
  */
 export const VISUALIZE_SHOP_SCHEMA = z.object({
   userId: z.uuid(),
-  id: uuid(),
+  id: z.uuid(),
   shopName: z.string(),
   shopType: SHOP_TYPE_ENUM,
   shopCurrency: SHOP_CURRENCY_ENUM,

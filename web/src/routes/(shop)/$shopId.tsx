@@ -198,7 +198,7 @@ function RouteComponent() {
                       <span>{data.shop.shopCurrency}</span>
                     </h1>
                   </CardContent>
-                  <CardFooter className="flex items-center justify-center sm:justify-end gap-2">
+                  <CardFooter className="flex items-center justify-end sm:justify-end gap-2">
                     {/* more info external visualizer */}
                     <ProductInfo
                       productName={product.productName}

@@ -9,6 +9,8 @@ CREATE TABLE `orders` (
 	`id` char(36) NOT NULL DEFAULT (uuid()),
 	`shop_id` char(36) NOT NULL,
 	`order_status` varchar(120) NOT NULL,
+	`order_identifier` varchar(255) NOT NULL,
+	`order_delivery_instruction` varchar(1000) NOT NULL,
 	`order_custom_message` varchar(2500),
 	`order_shipping_method` char(36) NOT NULL,
 	`order_payment_method` char(36) NOT NULL,

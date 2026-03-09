@@ -1,6 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { serverProduct } from './products.server'
-import { DTO_CREATE_PRODUCT } from '@/schemas/product.schema'
+import {
+  DTO_CREATE_PRODUCT,
+  PRODUCT_SCHEMA,
+  VISUALIZE_PRODUCT_SCHEMA,
+} from '@/schemas/product.schema'
 
 const productServer = new serverProduct()
 
@@ -117,4 +121,16 @@ export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
     if (!res) return 'invalid'
 
     return 'valid'
+  })
+
+/**
+ * "GET"
+ * return a product from its id
+ *
+ * required shopId & productId
+ */
+export const sf_GetProductFromId = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .handler(async ({ data }): Promise<PRODUCT_SCHEMA> => {
+    return await productServer.getProductById(data.shopId, data.productId)
   })

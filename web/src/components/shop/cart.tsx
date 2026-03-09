@@ -12,6 +12,7 @@ import {
 import { Card } from '../ui/card'
 import { sf_ValidateIfProductExists } from '@/server/shop/products/product.functions'
 import { toast } from 'sonner'
+import Checkout from './orders/checkout'
 
 type StoredItem = {
   productId: string
@@ -51,6 +52,8 @@ const Cart = ({
   const [stored, setStored] = useState<Array<StoredItem>>(() =>
     getItemFromStorage(),
   )
+  const [validatedProducts, setValidatedProducts] = useState<Array<string>>([])
+
   // serverFn
   const validProduct = useServerFn(sf_ValidateIfProductExists)
 
@@ -81,33 +84,45 @@ const Cart = ({
     }
   }
 
-  const sendOrder = async () => {
-    // store invalid products and remove them
-    const invalid: Array<string> = []
-    for (const i of stored) {
-      const valid = await validProduct({
-        data: { shopId, productId: i.productId },
-      })
+  // validate cart products
+  async function validateCartProducts() {
+    const results = await Promise.all(
+      cartProducts.map(async (product) => {
+        const valid = await validProduct({
+          data: { shopId, productId: product.productId },
+        })
+        return { productId: product.productId, valid }
+      }),
+    )
 
-      if (valid === 'invalid') {
-        invalid.push(i.productId)
-        removeItemFromStorage(i.productId)
+    const validIds: Array<string> = []
+    let removed = false
+
+    for (const result of results) {
+      if (result.valid === 'valid') {
+        validIds.push(result.productId)
+      } else {
+        removeItemFromStorage(result.productId)
+        removed = true
       }
     }
 
-    // return so user needs to make checkout again
-    if (invalid.length > 0) {
-      toast.info(
-        `A total of ${invalid.length} products were removed because were invalid!`,
-      )
-      return
+    if (removed) {
+      toast.info(`Some products were removed because they were outdated!`)
     }
 
-    // create an order
+    setValidatedProducts(validIds)
   }
 
   return (
-    <Sheet onOpenChange={(open) => open && refreshCart()}>
+    <Sheet
+      onOpenChange={async (open) => {
+        if (open) {
+          refreshCart()
+          await validateCartProducts()
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <Button>
           <ShoppingBag /> My Cart
@@ -153,7 +168,7 @@ const Cart = ({
           <h1 className="text-lg">Total:</h1>
           <p>{total ? `${total.toFixed(2)} ${shopCurrency}` : ''}</p>
         </div>
-        <Button onClick={sendOrder}>Checkout</Button>
+        <Checkout shopId={shopId} productsId={validatedProducts} />
       </SheetContent>
     </Sheet>
   )

@@ -2,6 +2,7 @@
 // ui
 import { ShoppingCart } from 'lucide-react'
 import { Button } from '../ui/button'
+import { toast } from 'sonner'
 
 type CartAddProps = {
   productId: string
@@ -19,12 +20,12 @@ const CartAdd = ({ productId, productName, productPrice }: CartAddProps) => {
       quantity: 1,
     })
     localStorage.setItem(key, cartItem)
+    toast.success(`${productName} added to the cart`)
   }
 
   return (
-    <Button onClick={addItemToStorage}>
+    <Button size={'icon'} onClick={addItemToStorage}>
       <ShoppingCart />
-      Add to cart
     </Button>
   )
 }
