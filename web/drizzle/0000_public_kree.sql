@@ -10,6 +10,7 @@ CREATE TABLE `orders` (
 	`shop_id` char(36) NOT NULL,
 	`order_status` varchar(120) NOT NULL,
 	`order_identifier` varchar(255) NOT NULL,
+	`telegram_user_id` bigint NOT NULL,
 	`order_delivery_instruction` varchar(1000) NOT NULL,
 	`order_custom_message` varchar(2500),
 	`order_shipping_method` char(36) NOT NULL,
@@ -74,7 +75,7 @@ ALTER TABLE `orders` ADD CONSTRAINT `orders_shop_id_shops_id_fk` FOREIGN KEY (`s
 ALTER TABLE `orders` ADD CONSTRAINT `orders_order_shipping_method_shipping_methods_id_fk` FOREIGN KEY (`order_shipping_method`) REFERENCES `shipping_methods`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `orders` ADD CONSTRAINT `orders_order_payment_method_payment_methods_id_fk` FOREIGN KEY (`order_payment_method`) REFERENCES `payment_methods`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `payment_methods` ADD CONSTRAINT `payment_methods_shop_id_shops_id_fk` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `products` ADD CONSTRAINT `products_shop_id_shops_id_fk` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `products` ADD CONSTRAINT `products_shop_id_shops_id_fk` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE `products_orders` ADD CONSTRAINT `products_orders_order_id_orders_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `products_orders` ADD CONSTRAINT `products_orders_product_id_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `shipping_methods` ADD CONSTRAINT `shipping_methods_shop_id_shops_id_fk` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
 import { Input } from './ui/input'
@@ -8,9 +10,17 @@ import { sf_AddProductImage } from '@/server/shop/products/product.functions'
 const CLOUD_NAME = 'ddpkwh9th'
 const UPLOAD_PRESET = 'KiraBot'
 
-const ImgUploader = ({ productId }: { productId: string }) => {
+const ImgUploader = ({
+  shopId,
+  productId,
+}: {
+  shopId: string
+  productId: string
+}) => {
   const [uploading, setUploading] = useState(false)
   const uploadImg = useServerFn(sf_AddProductImage)
+  const queryClient = useQueryClient()
+  const router = useRouter()
 
   // upload image
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +28,6 @@ const ImgUploader = ({ productId }: { productId: string }) => {
     if (!file) return
 
     setUploading(true)
-
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', UPLOAD_PRESET)
@@ -41,19 +50,23 @@ const ImgUploader = ({ productId }: { productId: string }) => {
       })
       if (ok) {
         toast.success('Image updated!')
+        queryClient.invalidateQueries({ queryKey: ['products', shopId] })
+        router.invalidate()
       }
     }
   }
 
+  const inputId = `product-image-${productId}`
+
   return (
     <>
-      <label htmlFor="product-image">
+      <label htmlFor={inputId}>
         <Button asChild>
           <span>{uploading ? 'Uploading...' : 'Add product image'}</span>
         </Button>
       </label>
       <Input
-        id="product-image"
+        id={inputId}
         type="file"
         className="hidden"
         accept="image/*"

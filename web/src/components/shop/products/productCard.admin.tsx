@@ -46,7 +46,9 @@ const ProductCardADM = (product: productProps) => {
 
       if (result) {
         toast.success('Product got deleted!')
-        queryClient.invalidateQueries({ queryKey: ['products'] })
+        queryClient.invalidateQueries({
+          queryKey: ['products', product.shopId],
+        })
       }
     } catch (err: any) {
       toast.error(err.message ?? 'Error while deleting product')
@@ -63,7 +65,9 @@ const ProductCardADM = (product: productProps) => {
         toast.success(
           product.visible === 1 ? 'Product hidden!' : 'Product shown!',
         )
-        queryClient.invalidateQueries({ queryKey: ['products'] })
+        queryClient.invalidateQueries({
+          queryKey: ['products', product.shopId],
+        })
       }
     } catch (err: any) {
       toast.error(
@@ -71,6 +75,7 @@ const ProductCardADM = (product: productProps) => {
       )
     }
   }
+
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
     <Card className="relative mx-auto w-full max-w-sm pt-0">
@@ -87,9 +92,8 @@ const ProductCardADM = (product: productProps) => {
       </CardHeader>
       <CardFooter className="flex-col gap-2">
         <div className="flex w-full items-center justify-between">
-          <ImgUploader productId={product.id} />
+          <ImgUploader shopId={product.shopId} productId={product.id} />
           {/* visibility toogler */}
-
           <Button
             variant={'ghost'}
             className="text-sm"

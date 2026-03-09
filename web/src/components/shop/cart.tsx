@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingBag, Trash2 } from 'lucide-react'
 import { Button } from '../ui/button'
@@ -10,9 +11,8 @@ import {
   SheetTrigger,
 } from '../ui/sheet'
 import { Card } from '../ui/card'
-import { sf_ValidateIfProductExists } from '@/server/shop/products/product.functions'
-import { toast } from 'sonner'
 import Checkout from './orders/checkout'
+import { sf_ValidateIfProductExists } from '@/server/shop/products/product.functions'
 
 type StoredItem = {
   productId: string
@@ -49,13 +49,15 @@ const Cart = ({
   shopCurrency: string | null
 }) => {
   // stored localhost items
-  const [stored, setStored] = useState<Array<StoredItem>>(() =>
-    getItemFromStorage(),
-  )
+  const [stored, setStored] = useState<Array<StoredItem>>([])
   const [validatedProducts, setValidatedProducts] = useState<Array<string>>([])
 
   // serverFn
   const validProduct = useServerFn(sf_ValidateIfProductExists)
+
+  useEffect(() => {
+    setStored(getItemFromStorage())
+  }, [])
 
   // refreshes the cart everytime the user opens it
   const refreshCart = () => setStored(getItemFromStorage())

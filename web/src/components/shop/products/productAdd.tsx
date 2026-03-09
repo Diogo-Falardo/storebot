@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
+import { useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
@@ -24,7 +25,6 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
 import {
   Select,
   SelectContent,
@@ -37,6 +37,7 @@ import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
 import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
 
 const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
+  const router = useRouter()
   // load current categories
   const { data: categories, isLoading } = useGetShopCategorys({ shopId })
 
@@ -60,7 +61,15 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       try {
         await add({ data: { userId, shopId, dto: value } })
         toast.success('Added' + value.productName)
+        console.log(`
+          
+          ADDED THE CURRENT PRODUCT:
+          
+          PRODUCT NAME: ${value.productName}
+          
+          `)
         queryClient.invalidateQueries({ queryKey: ['products'] })
+        router.invalidate()
         closeDialogRef.current?.click()
       } catch (err: any) {
         console.error(err)

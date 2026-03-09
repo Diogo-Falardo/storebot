@@ -138,13 +138,16 @@ function RouteComponent() {
                 {!productsLoading && products && products.length > 0 ? (
                   // products display grid
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products.map((product) => (
-                      <ProductCardADM
-                        key={product.id}
-                        {...product}
-                        shopCurrency={shopInfo.shopCurrency}
-                      />
-                    ))}
+                    {products
+                      .slice()
+                      .sort((a, b) => a.id.localeCompare(b.id))
+                      .map((product) => (
+                        <ProductCardADM
+                          key={product.id}
+                          {...product}
+                          shopCurrency={shopInfo.shopCurrency}
+                        />
+                      ))}
                   </div>
                 ) : (
                   <Empty>

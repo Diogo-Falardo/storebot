@@ -1,18 +1,14 @@
-import { table } from 'console'
 import {
-  AnyMySqlColumn,
   bigint,
   char,
   datetime,
   decimal,
   index,
-  foreignKey,
-  tinyint,
   unique,
   varchar,
+  tinyint,
   text,
   primaryKey,
-  mysqlSchema,
   mysqlTable,
   mysqlEnum,
 } from 'drizzle-orm/mysql-core'
@@ -40,8 +36,7 @@ export const products = mysqlTable(
       .notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
-      .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' })
-      .references(() => shops.id, { onDelete: 'cascade' }),
+      .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     productName: varchar('product_name', { length: 120 }).notNull(),
     productPrice: decimal('product_price', {
       precision: 10,
@@ -147,6 +142,7 @@ export const orders = mysqlTable(
       .references(() => shops.id, { onDelete: 'cascade' }),
     orderStatus: varchar('order_status', { length: 120 }).notNull(),
     orderIdentifier: varchar('order_identifier', { length: 255 }).notNull(),
+    telegramUserId: bigint('telegram_user_id', { mode: 'number' }).notNull(),
     orderDeliveryInstruction: varchar('order_delivery_instruction', {
       length: 1000,
     }).notNull(),
