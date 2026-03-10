@@ -17,9 +17,7 @@ import { sql } from 'drizzle-orm'
 export const category = mysqlTable(
   'category',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -31,9 +29,7 @@ export const category = mysqlTable(
 export const products = mysqlTable(
   'products',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -59,9 +55,7 @@ export const products = mysqlTable(
 export const shops = mysqlTable(
   'shops',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     userId: char('user_id', { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -83,9 +77,7 @@ export const shops = mysqlTable(
 export const users = mysqlTable(
   'users',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     telegramUserId: bigint('telegram_user_id', { mode: 'number' }),
     createdAt: datetime('created_at', { mode: 'string', fsp: 3 })
       .default(sql`(CURRENT_TIMESTAMP(3))`)
@@ -100,9 +92,7 @@ export const users = mysqlTable(
 export const shippingMethods = mysqlTable(
   'shipping_methods',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade' }),
@@ -117,9 +107,7 @@ export const shippingMethods = mysqlTable(
 export const paymentMethods = mysqlTable(
   'payment_methods',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade' }),
@@ -134,9 +122,7 @@ export const paymentMethods = mysqlTable(
 export const orders = mysqlTable(
   'orders',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     shopId: char('shop_id', { length: 36 })
       .notNull()
       .references(() => shops.id, { onDelete: 'cascade' }),
@@ -153,6 +139,9 @@ export const orders = mysqlTable(
     orderPaymentMethod: char('order_payment_method', { length: 36 })
       .notNull()
       .references(() => paymentMethods.id, { onDelete: 'cascade' }),
+    createdAt: datetime('created_at', { mode: 'string', fsp: 3 })
+      .default(sql`(CURRENT_TIMESTAMP(3))`)
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.id], name: 'orders_id' }),
@@ -166,9 +155,7 @@ export const orders = mysqlTable(
 export const productsOrders = mysqlTable(
   'products_orders',
   {
-    id: char({ length: 36 })
-      .default(sql`(uuid())`)
-      .notNull(),
+    id: char({ length: 36 }).notNull(),
     orderId: char('order_id', { length: 36 })
       .notNull()
       .references(() => orders.id, { onDelete: 'cascade' }),

@@ -61,18 +61,10 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
       try {
         await add({ data: { userId, shopId, dto: value } })
         toast.success('Added' + value.productName)
-        console.log(`
-          
-          ADDED THE CURRENT PRODUCT:
-          
-          PRODUCT NAME: ${value.productName}
-          
-          `)
         queryClient.invalidateQueries({ queryKey: ['products'] })
         router.invalidate()
         closeDialogRef.current?.click()
       } catch (err: any) {
-        console.error(err)
         toast.error(err.message ?? 'Error while adding product')
       }
     },

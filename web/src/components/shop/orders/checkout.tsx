@@ -42,6 +42,7 @@ import {
 } from '@/server/shop/products/product.functions'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
+import { sf_PlaceOrder } from '@/server/shop/orders/order.function'
 
 type ProductInfo = {
   id: string
@@ -52,9 +53,11 @@ type ProductInfo = {
 }
 
 const Checkout = ({
+  telegramUserId,
   shopId,
   productsId,
 }: {
+  telegramUserId: number
   shopId: string
   productsId: Array<string>
 }) => {
@@ -64,6 +67,9 @@ const Checkout = ({
     useGetShopPaymentMethods({ shopId })
   const { data: shippingMethods, isLoading: loadingShippingMethods } =
     useGetShopShippingMethods({ shopId })
+
+  // server fn
+  const placeOrder = useServerFn(sf_PlaceOrder)
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
@@ -103,7 +109,9 @@ const Checkout = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        console.log(value)
+        await placeOrder({ data: { telegramUserId, shopId, dto: value } })
+        closeDialogRef.current?.click()
+        toast.success(`Your order has been placed!`)
       } catch (err: any) {
         toast.error(err.message ?? 'Order failed!')
       }
@@ -213,7 +221,7 @@ const Checkout = ({
                             paymentMethods &&
                             typeof paymentMethods !== 'string' &&
                             paymentMethods.map((method) => (
-                              <SelectItem key={method.id} value={method.method}>
+                              <SelectItem key={method.id} value={method.id}>
                                 {method.method}
                               </SelectItem>
                             ))}
@@ -251,7 +259,7 @@ const Checkout = ({
                             shippingMethods &&
                             typeof shippingMethods !== 'string' &&
                             shippingMethods.map((method) => (
-                              <SelectItem key={method.id} value={method.method}>
+                              <SelectItem key={method.id} value={method.id}>
                                 {method.method}
                               </SelectItem>
                             ))}
@@ -308,7 +316,7 @@ const Checkout = ({
                   {displayProducts.map((product) => (
                     <Card
                       key={product.id}
-                      className="flex p-3 rounded-lg bg-black/5"
+                      className="flex flex-row p-3 rounded-lg bg-black/5"
                     >
                       {/* image on left side if there is image */}
                       {product.imageUrl && (

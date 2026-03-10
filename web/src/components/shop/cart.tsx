@@ -44,10 +44,24 @@ function getItemFromStorage(): Array<StoredItem> {
 const Cart = ({
   shopId,
   shopCurrency,
+  telegramUserId,
 }: {
   shopId: string
   shopCurrency: string | null
+  telegramUserId: number | null
 }) => {
+  console.log(`
+    
+    ENTERING CART WITH TELEGRA USER:
+    ${telegramUserId}
+    
+    
+    `)
+
+  if (typeof telegramUserId !== 'number' || telegramUserId === null) {
+    throw new Error('Couldnt validate telegram session!')
+  }
+
   // stored localhost items
   const [stored, setStored] = useState<Array<StoredItem>>([])
   const [validatedProducts, setValidatedProducts] = useState<Array<string>>([])
@@ -170,7 +184,11 @@ const Cart = ({
           <h1 className="text-lg">Total:</h1>
           <p>{total ? `${total.toFixed(2)} ${shopCurrency}` : ''}</p>
         </div>
-        <Checkout shopId={shopId} productsId={validatedProducts} />
+        <Checkout
+          telegramUserId={telegramUserId}
+          shopId={shopId}
+          productsId={validatedProducts}
+        />
       </SheetContent>
     </Sheet>
   )

@@ -23,6 +23,8 @@ import { ModeToggle } from '@/components/mode-toggle'
 import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
 import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
 import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
+import { useGetShopOrders } from '@/lib/hooks/order.hooks'
+import OrderCardADM from '@/components/shop/orders/orderCard.admin'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -83,6 +85,10 @@ function RouteComponent() {
       ? { userId: shopInfo.userId, shopId: shopInfo.id }
       : { userId: '', shopId: '' },
   )
+
+  const { data: orders, isLoading: ordersLoading } = useGetShopOrders({
+    shopId,
+  })
 
   if (error) return <DashboardErrorComponent error={error} />
   if (shopError) return <DashboardErrorComponent error={shopError} />
@@ -178,6 +184,28 @@ function RouteComponent() {
                   <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
                   <PaymentMethodAdd userId={userId} shopId={shopInfo.id} />
                 </div>
+                {/* while orders are loading */}
+                {ordersLoading && (
+                  <div>
+                    <Spinner />
+                    Loading your orders
+                  </div>
+                )}
+
+                {!ordersLoading && orders && orders.length > 0 ? (
+                  <div className="flex flex-col">
+                    {orders.map((order) => (
+                      <OrderCardADM
+                        key={order.id}
+                        shopId={shopId}
+                        shopCurrency={shopInfo.shopCurrency}
+                        order={order}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Empty></Empty>
+                )}
               </div>
             </TabsContent>
           </Tabs>
