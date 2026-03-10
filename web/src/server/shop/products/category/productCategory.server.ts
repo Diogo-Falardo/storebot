@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { category } from '@/db/schema'
@@ -75,6 +76,7 @@ export class serverCategory {
 
     try {
       await db.insert(category).values({
+        id: uuidv4(),
         shopId: shopId,
         category: categoryName,
       })

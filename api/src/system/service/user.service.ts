@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { users } from "../../db/schema";
 import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
@@ -80,6 +81,7 @@ export const userService = {
 
     try {
       await db.insert(users).values({
+        id: uuidv4(),
         telegramUserId: telegramId,
       });
 

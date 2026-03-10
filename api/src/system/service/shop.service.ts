@@ -1,7 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
 import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
-
 import { shops } from "../../db/schema";
 import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema";
 
@@ -35,6 +35,7 @@ export const shopService = {
   async createShop(userId: string, dto: CREATE_SHOP_TYPE) {
     try {
       await db.insert(shops).values({
+        id: uuidv4(),
         userId: userId,
         shopName: dto.shopName,
         shopType: dto.shopType,

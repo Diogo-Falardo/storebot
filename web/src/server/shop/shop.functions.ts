@@ -176,3 +176,27 @@ export const sf_DeleteShopPaymentMethod = createServerFn({ method: 'POST' })
       data.methodId,
     )
   })
+
+/**
+ * "GET"
+ * from an shipping method id return the method name
+ */
+export const sf_GetShippingMethodName = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((data: { shippingMethodId: string }) => data)
+  .handler(async ({ data }) => {
+    return await shopServer.getShopShippingMethodFromId(data.shippingMethodId)
+  })
+
+/**
+ * "GET"
+ * from an payment method id return the method name
+ */
+export const sf_GetPaymentMethodName = createServerFn({
+  method: 'POST',
+})
+  .inputValidator((data: { paymentMethodId: string }) => data)
+  .handler(async ({ data }) => {
+    return await shopServer.getShopPaymentMethodFromId(data.paymentMethodId)
+  })

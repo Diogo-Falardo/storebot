@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { paymentMethods, shippingMethods, shops } from '@/db/schema'
@@ -7,6 +8,7 @@ import {
   VISUALIZE_METHOD_SCHEMA,
   VISUALIZE_SHOP_SCHEMA,
 } from '@/schemas/shop.schema'
+import { th } from 'zod/v4/locales'
 
 export class serverShop {
   /**
@@ -69,6 +71,7 @@ export class serverShop {
   async createShop(userId: string, dto: DTO_CREATE_SHOP) {
     try {
       await db.insert(shops).values({
+        id: uuidv4(),
         userId: userId,
         shopName: dto.shopName,
         shopType: dto.shopType,
@@ -250,6 +253,7 @@ export class serverShop {
 
     try {
       await db.insert(shippingMethods).values({
+        id: uuidv4(),
         shopId: shopId,
         method: shippingMethod,
       })
@@ -290,6 +294,29 @@ export class serverShop {
     } catch (err: any) {
       console.log(err)
       throw new Error(err.message ?? 'Error deleting shipping method')
+    }
+  }
+
+  /**
+   * Returns the method name from its id
+   *
+   * @param shippingMethodId
+   * @returns method name
+   */
+  async getShopShippingMethodFromId(shippingMethodId: string) {
+    try {
+      const method = await db
+        .select()
+        .from(shippingMethods)
+        .where(eq(shippingMethods.id, shippingMethodId))
+        .limit(1)
+
+      if (!method[0]) throw new Error('Shipping method not found!')
+
+      return method[0].method
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error retrieving shipping method')
     }
   }
 
@@ -382,6 +409,7 @@ export class serverShop {
 
     try {
       await db.insert(paymentMethods).values({
+        id: uuidv4(),
         shopId: shopId,
         method: paymentMethod,
       })
@@ -421,7 +449,30 @@ export class serverShop {
       return `Payment method deleted!`
     } catch (err: any) {
       console.log(err)
-      throw new Error(err.message ?? 'Error deleting shipping method')
+      throw new Error(err.message ?? 'Error deleting payment method')
+    }
+  }
+
+  /**
+   * Returns the method name from its id
+   *
+   * @param paymentMethodId
+   * @returns method name
+   */
+  async getShopPaymentMethodFromId(paymentMethodId: string) {
+    try {
+      const method = await db
+        .select()
+        .from(paymentMethods)
+        .where(eq(paymentMethods.id, paymentMethodId))
+        .limit(1)
+
+      if (!method[0]) throw new Error('Payment method not found!')
+
+      return method[0].method
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error retrieving payment method')
     }
   }
 }
