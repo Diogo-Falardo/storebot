@@ -14,6 +14,7 @@ import {
   CREATE_ORDER_CUSTOM_MESSGE,
   ORDER_SCHEMA,
   ORDER_STATUS_ENUM,
+  OrderStatus,
 } from '@/schemas/order.schema'
 import {
   sf_GetPaymentMethodName,
@@ -41,7 +42,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { sf_AddCustomOrderMessage } from '@/server/shop/orders/order.function'
+import {
+  sf_AddCustomOrderMessage,
+  sf_UpdateOrderStatus,
+} from '@/server/shop/orders/order.function'
+import { ca } from 'zod/v4/locales'
 
 const OrderCardADM = ({
   shopId,
@@ -55,6 +60,7 @@ const OrderCardADM = ({
   // serverFn
   const shippingMethod = useServerFn(sf_GetShippingMethodName)
   const paymentMethod = useServerFn(sf_GetPaymentMethodName)
+  const updateOrderStatus = useServerFn(sf_UpdateOrderStatus)
 
   // states
   const [shippingMethodName, setShippingMethodName] = useState<string>('')
@@ -62,6 +68,8 @@ const OrderCardADM = ({
   const [status, setStatus] = useState<string>(order.orderStatus)
   // ui states
   const [sheetOpen, setSheetOpen] = useState(false)
+
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     // fetch shipping method name
@@ -74,7 +82,20 @@ const OrderCardADM = ({
     }).then(setPaymentMethodName)
   }, [order.orderShippingMethod, order.orderPaymentMethod])
 
-  return (
+  const updateStatus = async (newStatus: OrderStatus) => {
+    setStatus(newStatus)
+    try {
+      await updateOrderStatus({
+        data: { shopId, orderId: order.id, status: newStatus },
+      })
+      toast.success(`Status changed to: ${newStatus}!`)
+      queryClient.invalidateQueries({ queryKey: ['orders', shopId, order.id] })
+    } catch (err: any) {
+      toast.error(err.message ?? 'Error updating order status')
+    }
+  }
+
+  // return (
     <>
       <Card className="p-2" onClick={() => setSheetOpen(true)}>
         {/* CARD HEADER
@@ -87,7 +108,7 @@ const OrderCardADM = ({
           <div className="flex justify-center items-center gap-1">
             <h1>Status:</h1>
             {/* SELECT to: change the order status  */}
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={updateStatus}>
               <SelectTrigger className={`uppercase dark:bg-black`}>
                 <SelectValue placeholder={status.replace('_', ' ')} />
               </SelectTrigger>
