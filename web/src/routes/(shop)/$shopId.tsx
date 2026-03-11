@@ -1,6 +1,6 @@
 import { useServerFn } from '@tanstack/react-start'
 import { ClientOnly, createFileRoute } from '@tanstack/react-router'
-import { Package } from 'lucide-react'
+import { Package, ReceiptText } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
@@ -28,6 +28,8 @@ import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/pr
 import { ProductInfo } from '@/components/shop/products/productInfo'
 import ShopFilters from '@/components/shop/shopFilters'
 import { ModeToggle } from '@/components/mode-toggle'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type TelegramUser = {
   telegramId: string
@@ -126,52 +128,59 @@ function RouteComponent() {
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <div className="flex flex-col">
-      {/* header - shop name */}
-      <header className="relative flex justify-center items-center p-4 border-b">
+    <div className="h-screen flex flex-col">
+      {/* header */}
+      {/* following code should only render the shop name and theme switcher */}
+      <header className="flex w-full justify-center items-center p-3 border-b">
         <h1 className="font-mono font-bold text-3xl">{data?.shop.shopName}</h1>
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          {/* TODO: put theme swithcer working */}
           {/* <ClientOnly>
             <ModeToggle />
           </ClientOnly> */}
         </div>
       </header>
-      {/* products */}
-      <main className="">
-        {isLoading && (
-          <div className="flex justify-center p-10">
-            <Spinner />
-            Loading your products
+      {/* container number 1 */}
+      {/* part 2 of the container one renders: shop filters & cart */}
+      <div className="w-full shrink-0">
+        {user?.telegramId && data?.products && data.products.length > 0 && (
+          <div className="flex justify-end p-3 gap-2">
+            <ShopFilters
+              categoryNames={availableCategories}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
+            <Cart
+              telegramUserId={user.telegramId ? Number(user.telegramId) : null}
+              shopId={shopId}
+              shopCurrency={data.shop.shopCurrency}
+            />
           </div>
         )}
+      </div>
+
+      {/* container number 2 */}
+      {/* the following container displays the shop products inside a scroll area or an Empty "Object" */}
+      <div className="flex-1 min-h-0 w-full">
         {!isLoading && data?.products && data.products.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-end p-4 gap-2">
-              <ShopFilters
-                categoryNames={availableCategories}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                selectedCategories={selectedCategories}
-                setSelectedCategories={setSelectedCategories}
-              />
-              <Cart
-                telegramUserId={
-                  user?.telegramId ? Number(user.telegramId) : null
-                }
-                shopId={shopId}
-                shopCurrency={data.shop.shopCurrency}
-              />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 auto-rows-max">
-              {filteredProducts.map((product) => (
-                <Card
-                  key={product.id}
-                  className="relative mx-auto w-full max-w-sm pt-0"
-                >
-                  <img
-                    src={product.imageUrl || PLACEHOLDER_IMG}
-                    alt={product.productName}
-                    className="
+          // scroll area should ocupate the fr space (remaining space of the screen)
+          <ScrollArea className="h-full">
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 p-1 auto-rows-max">
+                {filteredProducts.map((product) => (
+                  <Card
+                    key={product.id}
+                    className="relative mx-auto w-full max-w-sm pt-0 p-1"
+                  >
+                    <div className="flex h-full flex-col justify-between">
+                      {/* header of the product */}
+                      <div className="relative">
+                        <img
+                          src={product.imageUrl || PLACEHOLDER_IMG}
+                          alt={product.productName}
+                          className="
     w-full
     aspect-4/3       // Default: 4:3 aspect ratio
     sm:aspect-video    // On small screens and up: 16:9
@@ -180,53 +189,66 @@ function RouteComponent() {
     brightness-80
     rounded-t-lg
   "
-                  />
-                  <CardHeader>
-                    <CardTitle>{product.productName}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      {product.categoryId ? (
-                        <Badge variant="outline" className="rounded-sm">
-                          {categoryNames[product.categoryId]}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="rounded-sm opacity-0"
-                        >
-                          placeholder
-                        </Badge>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-end">
-                    <h1 className="flex gap-1">
-                      {product.productPrice}
-                      <span>{data.shop.shopCurrency}</span>
-                    </h1>
-                  </CardContent>
-                  <CardFooter className="flex items-center justify-end sm:justify-end gap-2">
-                    {/* more info external visualizer */}
-                    <ProductInfo
-                      productName={product.productName}
-                      productDesc={product.productDesc}
-                      productPrice={product.productPrice}
-                      productCategory={
-                        product.categoryId && categoryNames[product.categoryId]
-                      }
-                      productImage={product.imageUrl}
-                      shopCurrency={data.shop.shopCurrency}
-                    />
-                    {/* add product to cart */}
-                    <CartAdd
-                      productId={product.id}
-                      productName={product.productName}
-                      productPrice={product.productPrice}
-                    />
-                  </CardFooter>
-                </Card>
-              ))}
+                        />
+
+                        {product.categoryId ? (
+                          <Badge
+                            variant="outline"
+                            className="absolute top-2 right-2 z-20 bg-black rounded-sm"
+                          >
+                            {categoryNames[product.categoryId]}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm opacity-0"
+                          >
+                            placeholder
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* container 1 */}
+                      <CardHeader className="flex flex-col p-1 gap-0">
+                        <CardTitle className="text-lg">
+                          {product.productName}
+                        </CardTitle>
+                        <h1 className="flex gap-1">
+                          {product.productPrice}
+                          <span>{data.shop.shopCurrency}</span>
+                        </h1>
+                        <CardDescription className="flex items-center gap-2"></CardDescription>
+                      </CardHeader>
+                      {/* container */}
+                      <CardContent className="flex flex-col justify-end p-0">
+                        <CardFooter className="flex items-center justify-end sm:justify-end p-1 gap-2 ">
+                          {/* more info external visualizer */}
+                          <ProductInfo
+                            productName={product.productName}
+                            productDesc={product.productDesc}
+                            productPrice={product.productPrice}
+                            productCategory={
+                              product.categoryId &&
+                              categoryNames[product.categoryId]
+                            }
+                            productImage={product.imageUrl}
+                            shopCurrency={data.shop.shopCurrency}
+                          />
+                          {/* add product to cart */}
+                          <CartAdd
+                            productId={product.id}
+                            productImg={product.imageUrl}
+                            productName={product.productName}
+                            productPrice={product.productPrice}
+                          />
+                        </CardFooter>
+                      </CardContent>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         ) : (
           <Empty>
             <EmptyHeader>
@@ -238,7 +260,17 @@ function RouteComponent() {
             </EmptyHeader>
           </Empty>
         )}
-      </main>
+      </div>
+
+      {/* container number 3 */}
+      {/* the following container is used to display actions in row */}
+      {/* is showed on the end of the page */}
+      <div className="w-full p-5 flex justify-center items-center">
+        <Button>
+          <ReceiptText />
+          Orders
+        </Button>
+      </div>
     </div>
   )
 }

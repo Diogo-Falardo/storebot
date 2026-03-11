@@ -56,10 +56,12 @@ const Checkout = ({
   telegramUserId,
   shopId,
   productsId,
+  isCartEmpty = false,
 }: {
   telegramUserId: number
   shopId: string
   productsId: Array<string>
+  isCartEmpty?: boolean
 }) => {
   const [displayProducts, setDisplayProducts] = useState<Array<ProductInfo>>([])
   // load current methods
@@ -147,7 +149,9 @@ const Checkout = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button>Checkout</Button>
+        <Button disabled={isCartEmpty} className="w-full">
+          Checkout
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

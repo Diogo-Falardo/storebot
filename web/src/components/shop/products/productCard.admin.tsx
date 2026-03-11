@@ -14,7 +14,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -79,9 +78,9 @@ const ProductCardADM = (product: productProps) => {
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <Card className="w-full max-w-sm p-2">
+    <Card className="p-2 w-full max-w-sm">
       <CardContent className="flex flex-col w-full justify-between p-0 gap-4">
-        <div className="flex flex-col  gap-2">
+        <div className="flex flex-col gap-2">
           {/* PRODUCT HEADER
         
         - productName
@@ -103,17 +102,17 @@ const ProductCardADM = (product: productProps) => {
         - delete product
         
         */}
-        <div className="flex justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           {/* left */}
-          <div>
+          <div className="flex w-full justify-center items-center">
             <img
               src={product.imageUrl || PLACEHOLDER_IMG}
               alt={product.productName}
-              className="w-40 h-40 object-cover rounded"
+              className="w-full h-40 object-cover rounded"
             />
           </div>
           {/* right */}
-          <div className="flex flex-col gap-1 min-w-max ">
+          <div className="flex flex-col gap-1">
             {/* visibility toogler */}
             <Button
               variant={'outline'}
@@ -122,13 +121,13 @@ const ProductCardADM = (product: productProps) => {
             >
               {product.visible === 1 ? (
                 <>
-                  <Eye className="h-3 w-3" />
-                  Show
+                  <EyeOff className="h-3 w-3" />
+                  Hide
                 </>
               ) : (
                 <>
-                  <EyeOff className="h-3 w-3" />
-                  Hide
+                  <Eye className="h-3 w-3" />
+                  show
                 </>
               )}
             </Button>

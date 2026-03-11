@@ -25,21 +25,22 @@ export const ProductInfo = (product: ProductInfoProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size={'icon'} variant="secondary">
+        <Button variant="secondary">
           <Info />
+          info
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="max-w-md p-0 bg-transparent border-none"
+        className="max-w-md bg-transparent border-none"
         showCloseButton={false}
       >
-        <Card className="relative mx-auto w-full max-w-md pt-0">
+        <Card className="flex flex-col w-full max-w-md p-0">
           <img
             src={product.productImage || PLACEHOLDER_IMG}
             alt={product.productName}
-            className="w-full object-cover  rounded-t-lg"
+            className="w-full h-80 object-cover rounded-t-lg"
           />
-          <div className="p-4">
+          <div className="px-2">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">
                 {product.productName}
