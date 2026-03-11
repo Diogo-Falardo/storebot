@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
+import { Image } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
@@ -61,8 +62,17 @@ const ImgUploader = ({
   return (
     <>
       <label htmlFor={inputId}>
-        <Button asChild>
-          <span>{uploading ? 'Uploading...' : 'Add product image'}</span>
+        <Button asChild variant={'outline'}>
+          <span className="flex items-center gap-1">
+            {uploading ? (
+              'Uploading...'
+            ) : (
+              <>
+                <Image className="w-4 h-4" />
+                Update image
+              </>
+            )}
+          </span>
         </Button>
       </label>
       <Input

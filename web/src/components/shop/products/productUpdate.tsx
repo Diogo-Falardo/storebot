@@ -1,6 +1,7 @@
 import { useServerFn } from '@tanstack/react-start'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
+import { Pencil } from 'lucide-react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import {
@@ -80,7 +81,10 @@ const ProductUpdate = (product: productProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full">update product</Button>
+        <Button variant="outline" className="flex  items-center gap-2">
+          <Pencil />
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -25,6 +25,7 @@ import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
 import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
 import { useGetShopOrders } from '@/lib/hooks/order.hooks'
 import OrderCardADM from '@/components/shop/orders/orderCard.admin'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -143,18 +144,20 @@ function RouteComponent() {
                 )}
                 {!productsLoading && products && products.length > 0 ? (
                   // products display grid
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products
-                      .slice()
-                      .sort((a, b) => a.id.localeCompare(b.id))
-                      .map((product) => (
-                        <ProductCardADM
-                          key={product.id}
-                          {...product}
-                          shopCurrency={shopInfo.shopCurrency}
-                        />
-                      ))}
-                  </div>
+                  <ScrollArea>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {products
+                        .slice()
+                        .sort((a, b) => a.id.localeCompare(b.id))
+                        .map((product) => (
+                          <ProductCardADM
+                            key={product.id}
+                            {...product}
+                            shopCurrency={shopInfo.shopCurrency}
+                          />
+                        ))}
+                    </div>
+                  </ScrollArea>
                 ) : (
                   <Empty>
                     <EmptyHeader>

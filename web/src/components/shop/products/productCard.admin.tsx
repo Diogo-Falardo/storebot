@@ -12,6 +12,7 @@ import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -78,62 +79,84 @@ const ProductCardADM = (product: productProps) => {
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <Card className="relative mx-auto w-full max-w-sm pt-0">
-      <img
-        src={product.imageUrl || PLACEHOLDER_IMG}
-        alt={product.productName}
-        className="w-full h-45 object-cover rounded-t-lg"
-      />
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle className="text-xl">{product.productName}</CardTitle>
-        <CardDescription>
-          {product.productPrice} {product.shopCurrency}
-        </CardDescription>
-      </CardHeader>
-      <CardFooter className="flex-col gap-2">
-        <div className="flex w-full items-center justify-between">
-          <ImgUploader shopId={product.shopId} productId={product.id} />
-          {/* visibility toogler */}
-          <Button
-            variant={'ghost'}
-            className="text-sm"
-            onClick={() => visibilityToogler()}
-          >
-            {product.visible === 1 ? (
-              <>
-                <Eye className="h-3 w-3" />
-                Hide product
-              </>
-            ) : (
-              <>
-                <EyeOff className="h-3 w-3" />
-                Show product
-              </>
-            )}
-          </Button>
+    <Card className="w-full max-w-sm p-2">
+      <CardContent className="flex flex-col w-full justify-between p-0 gap-4">
+        <div className="flex flex-col  gap-2">
+          {/* PRODUCT HEADER
+        
+        - productName
+        - productPrice and shopCurrency
+        */}
+
+          <CardHeader className="w-full flex flex-col gap-0 p-0">
+            <CardTitle className="text-xl">{product.productName}</CardTitle>
+            <CardDescription>
+              {product.productPrice} {product.shopCurrency}
+            </CardDescription>
+          </CardHeader>
         </div>
-        {/* update */}
-        <ProductUpdate {...product} />
-        {/* delete */}
-        <Button
-          className="w-full"
-          variant={'destructive'}
-          onClick={() => setOpenConfirmDelete(true)}
-        >
-          <Trash2 />
-          Delete
-        </Button>
-        {/* confirm delete pop up */}
-        <ConfirmationDialog
-          open={openConfirmDelete}
-          onOpenChange={setOpenConfirmDelete}
-          title={`Delete ${product.productName}? `}
-          description={`This will delete the ${product.productName} product from your shop!`}
-          confirmText="Delete"
-          cancelText="Cancel"
-          onConfirm={() => deleteProduct()}
-        />
-      </CardFooter>
+        {/* PRODUCT BODY
+
+        - add a product image
+        - update product
+        - hide product
+        - delete product
+        
+        */}
+        <div className="flex justify-between gap-4">
+          {/* left */}
+          <div>
+            <img
+              src={product.imageUrl || PLACEHOLDER_IMG}
+              alt={product.productName}
+              className="w-40 h-40 object-cover rounded"
+            />
+          </div>
+          {/* right */}
+          <div className="flex flex-col gap-1 min-w-max ">
+            {/* visibility toogler */}
+            <Button
+              variant={'outline'}
+              className="text-sm"
+              onClick={() => visibilityToogler()}
+            >
+              {product.visible === 1 ? (
+                <>
+                  <Eye className="h-3 w-3" />
+                  Show
+                </>
+              ) : (
+                <>
+                  <EyeOff className="h-3 w-3" />
+                  Hide
+                </>
+              )}
+            </Button>
+            <ImgUploader shopId={product.shopId} productId={product.id} />
+            {/* update */}
+            <ProductUpdate {...product} />
+            {/* delete */}
+            <Button
+              className=""
+              variant={'destructive'}
+              onClick={() => setOpenConfirmDelete(true)}
+            >
+              <Trash2 />
+              Delete
+            </Button>
+            {/* confirm delete pop up */}
+            <ConfirmationDialog
+              open={openConfirmDelete}
+              onOpenChange={setOpenConfirmDelete}
+              title={`Delete ${product.productName}? `}
+              description={`This will delete the ${product.productName} product from your shop!`}
+              confirmText="Delete"
+              cancelText="Cancel"
+              onConfirm={() => deleteProduct()}
+            />
+          </div>
+        </div>
+      </CardContent>
     </Card>
   )
 }
