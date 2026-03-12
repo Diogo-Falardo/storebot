@@ -1,7 +1,7 @@
 import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
-import { Package } from 'lucide-react'
+import { Package, ReceiptText } from 'lucide-react'
 import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
 import { sf_telegramVerification } from '@/server/telegram/telegram.function'
 import ErrorWrapper from '@/components/errorWrapper'
@@ -151,7 +151,7 @@ function RouteComponent() {
                 // products display gid
                 <ScrollArea className="h-full">
                   <div className="flex flex-col h-full min-h-0">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
                       {products
                         .slice()
                         .sort((a, b) => a.id.localeCompare(b.id))
@@ -221,7 +221,18 @@ function RouteComponent() {
                   </div>
                 </ScrollArea>
               ) : (
-                <Empty></Empty>
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant={'icon'}>
+                      <ReceiptText />
+                    </EmptyMedia>
+                    <EmptyTitle>No orders for now</EmptyTitle>
+                    <EmptyDescription>
+                      Stay active and keep showcasing your products. Success
+                      often begins with small steps.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
               )}
             </div>
           </TabsContent>
