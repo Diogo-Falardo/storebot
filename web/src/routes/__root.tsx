@@ -48,7 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Toaster />
+        <Toaster position="top-right" />
         {/* <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme"> */}
         {children}
         {/* </ThemeProvider> */}

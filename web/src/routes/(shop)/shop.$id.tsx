@@ -1,6 +1,6 @@
 import { useServerFn } from '@tanstack/react-start'
 import { ClientOnly, createFileRoute } from '@tanstack/react-router'
-import { Package, ReceiptText } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Spinner } from '@/components/ui/spinner'
@@ -28,7 +28,6 @@ import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/pr
 import { ProductInfo } from '@/components/shop/products/productInfo'
 import ShopFilters from '@/components/shop/shopFilters'
 import { ModeToggle } from '@/components/mode-toggle'
-import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import Orders from '@/components/shop/orders/orders'
 
@@ -42,27 +41,26 @@ function ErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription="" />
 }
 
-export const Route = createFileRoute('/(shop)/$shopId')({
+export const Route = createFileRoute('/(shop)/shop/$id')({
   errorComponent: ErrorComponent,
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { shopId } = Route.useParams()
+  const { id: shopId } = Route.useParams()
+  // hooks
   const { data, isLoading } = usePublicShop({ shopId })
+  // server fn
+  const verifyUser = useServerFn(sf_PublicTelegramVerification)
+  const categoryName = useServerFn(sf_ConvertCategoryIdIntoName)
+  // states
   const [user, setUser] = useState<TelegramUser | null>()
   const [error, setError] = useState<Error | null>(null)
-  // categorys
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({})
-  // filters state
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [selectedCategories, setSelectedCategories] = useState<Array<string>>(
     [],
   )
-
-  // server fn
-  const verifyUser = useServerFn(sf_PublicTelegramVerification)
-  const categoryName = useServerFn(sf_ConvertCategoryIdIntoName)
 
   useEffect(() => {
     const authenticate = async () => {
@@ -108,8 +106,6 @@ function RouteComponent() {
 
   const availableCategories = Object.values(categoryNames).filter(Boolean)
 
-  // rendering filters
-
   const filteredProducts = visibleProducts.filter((product) => {
     // price filters
     const price = Number(product.productPrice)
@@ -126,6 +122,13 @@ function RouteComponent() {
   })
 
   if (error) return <ErrorComponent error={error} />
+  if (isLoading)
+    return (
+      <div className="flex h-screen items-center justify-center flex-col gap-3">
+        <Spinner />
+        <p className="text-sm text-muted-foreground">Loading store...</p>
+      </div>
+    )
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
@@ -144,7 +147,7 @@ function RouteComponent() {
       {/* container number 1 */}
       {/* part 2 of the container one renders: shop filters & cart */}
       <div className="w-full shrink-0">
-        {user?.telegramId && data?.products && data.products.length > 0 && (
+        {user?.telegramId && data && visibleProducts.length !== 0 && (
           <div className="flex justify-end p-3 gap-2">
             <ShopFilters
               categoryNames={availableCategories}
@@ -161,11 +164,10 @@ function RouteComponent() {
           </div>
         )}
       </div>
-
       {/* container number 2 */}
       {/* the following container displays the shop products inside a scroll area or an Empty "Object" */}
       <div className="flex-1 min-h-0 w-full">
-        {!isLoading && data?.products && data.products.length > 0 ? (
+        {data && visibleProducts.length !== 0 ? (
           // scroll area should ocupate the fr space (remaining space of the screen)
           <ScrollArea className="h-full">
             <div className="flex flex-col gap-4">
@@ -262,7 +264,6 @@ function RouteComponent() {
           </Empty>
         )}
       </div>
-
       {/* container number 3 */}
       {/* the following container is used to display actions in row */}
       {/* is showed on the end of the page */}

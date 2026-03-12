@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
+import { clearCartStorage } from '../cart'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -36,10 +37,7 @@ import {
   useGetShopShippingMethods,
 } from '@/lib/hooks/shop/shop.hooks'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  sf_GetProductFromId,
-  sf_ValidateIfProductExists,
-} from '@/server/shop/products/product.functions'
+import { sf_GetProductFromId } from '@/server/shop/products/product.functions'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
 import { sf_PlaceOrder } from '@/server/shop/orders/order.function'
@@ -57,34 +55,27 @@ const Checkout = ({
   shopId,
   productsId,
   isCartEmpty = false,
+  onCartCleared,
 }: {
   telegramUserId: number
   shopId: string
   productsId: Array<string>
   isCartEmpty?: boolean
+  onCartCleared?: () => void
 }) => {
-  const [displayProducts, setDisplayProducts] = useState<Array<ProductInfo>>([])
-  // load current methods
+  const queryClient = useQueryClient()
+  const closeDialogRef = useRef<HTMLButtonElement>(null)
+  // hooks
   const { data: paymentMethods, isLoading: loadingPaymentMethods } =
     useGetShopPaymentMethods({ shopId })
   const { data: shippingMethods, isLoading: loadingShippingMethods } =
     useGetShopShippingMethods({ shopId })
-
   // server fn
   const placeOrder = useServerFn(sf_PlaceOrder)
-
-  const queryClient = useQueryClient()
-  const closeDialogRef = useRef<HTMLButtonElement>(null)
-
-  console.log(`
-    
-    PRODUCTS: ${productsId}
-    DISPLAY: ${displayProducts}
-    
-    `)
-
-  // serverFn
   const productInfo = useServerFn(sf_GetProductFromId)
+
+  // states
+  const [displayProducts, setDisplayProducts] = useState<Array<ProductInfo>>([])
 
   // update products array
   async function updateDisplayProducts() {
@@ -122,14 +113,12 @@ const Checkout = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        console.log(`
-          
-          PRODUCTS ID: ${value.productsId}
-          
-          `)
         await placeOrder({ data: { telegramUserId, shopId, dto: value } })
-        closeDialogRef.current?.click()
         toast.success(`Your order has been placed!`)
+        clearCartStorage()
+        if (onCartCleared) onCartCleared()
+        queryClient.invalidateQueries({ queryKey: ['orders', shopId] })
+        closeDialogRef.current?.click()
       } catch (err: any) {
         toast.error(err.message ?? 'Order failed!')
       }

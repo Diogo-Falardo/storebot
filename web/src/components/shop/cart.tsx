@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
-import { ShoppingBag, ShoppingCart, Trash2, X } from 'lucide-react'
+import { ShoppingBag, ShoppingCart, X } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   Sheet,
@@ -47,6 +47,17 @@ function getItemFromStorage(): Array<StoredItem> {
   }
 
   return stored
+}
+
+export function clearCartStorage() {
+  const keysToRemove = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key?.startsWith(CART_PREFIX)) {
+      keysToRemove.push(key)
+    }
+  }
+  keysToRemove.forEach((key) => localStorage.removeItem(key))
 }
 
 const Cart = ({
@@ -227,6 +238,7 @@ const Cart = ({
             shopId={shopId}
             productsId={validatedProducts}
             isCartEmpty={cartProducts.length === 0}
+            onCartCleared={refreshCart}
           />
         </div>
       </SheetContent>

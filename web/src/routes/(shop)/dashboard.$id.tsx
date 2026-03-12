@@ -209,14 +209,20 @@ function RouteComponent() {
                 <ScrollArea className="h-full">
                   <div className="flex flex-col h-full min-h-0">
                     <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
-                      {orders.map((order) => (
-                        <OrderCardADM
-                          key={order.id}
-                          shopId={shopId}
-                          shopCurrency={shopInfo.shopCurrency}
-                          order={order}
-                        />
-                      ))}
+                      {orders
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime(),
+                        )
+                        .map((order) => (
+                          <OrderCardADM
+                            key={order.id}
+                            shopId={shopId}
+                            shopCurrency={shopInfo.shopCurrency}
+                            order={order}
+                          />
+                        ))}
                     </div>
                   </div>
                 </ScrollArea>
