@@ -121,7 +121,6 @@ function RouteComponent() {
     return inPriceRange && inCategory
   })
 
-  if (error) return <ErrorComponent error={error} />
   if (isLoading)
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-3">
@@ -129,6 +128,8 @@ function RouteComponent() {
         <p className="text-sm text-muted-foreground">Loading store...</p>
       </div>
     )
+  if (error) return <ErrorComponent error={error} />
+  if (!data) return <ErrorComponent error={new Error('Shop not found')} />
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
