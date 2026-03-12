@@ -1,6 +1,6 @@
 -- Current sql file was generated after introspecting the database
 -- If you want to run this migration please uncomment this code before executing migrations
-/*
+
 CREATE TABLE `category` (
 	`id` char(36) NOT NULL,
 	`shop_id` char(36) NOT NULL,
@@ -94,4 +94,3 @@ CREATE INDEX `idx_orders_id` ON `products_orders` (`order_id`);--> statement-bre
 CREATE INDEX `idx_orders_product_id` ON `products_orders` (`product_id`);--> statement-breakpoint
 CREATE INDEX `idx_shippingMethods_shop_id` ON `shipping_methods` (`shop_id`);--> statement-breakpoint
 CREATE INDEX `idx_shops_user_id` ON `shops` (`user_id`);
-*/

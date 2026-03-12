@@ -1,8 +1,7 @@
 const port = 2109;
 
-var cors = require("cors");
-// express
-const express = require("express");
+// import cors from "cors";
+import express from "express";
 import { Request, Response, NextFunction } from "express";
 import { HttpError } from "./system/utils/ErrorHandling";
 

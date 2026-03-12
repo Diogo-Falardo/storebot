@@ -137,7 +137,7 @@ function RouteComponent() {
       {/* header */}
       {/* following code should only render the shop name and theme switcher */}
       <header className="flex w-full justify-center items-center p-3 border-b">
-        <h1 className="font-mono font-bold text-3xl">{data?.shop.shopName}</h1>
+        <h1 className="font-mono font-bold text-3xl">{data.shop.shopName}</h1>
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
           {/* TODO: put theme swithcer working */}
           {/* <ClientOnly>
@@ -148,7 +148,7 @@ function RouteComponent() {
       {/* container number 1 */}
       {/* part 2 of the container one renders: shop filters & cart */}
       <div className="w-full shrink-0">
-        {user?.telegramId && data && visibleProducts.length !== 0 && (
+        {user?.telegramId && visibleProducts.length !== 0 && (
           <div className="flex justify-end p-3 gap-2">
             <ShopFilters
               categoryNames={availableCategories}
@@ -168,7 +168,7 @@ function RouteComponent() {
       {/* container number 2 */}
       {/* the following container displays the shop products inside a scroll area or an Empty "Object" */}
       <div className="flex-1 min-h-0 w-full">
-        {data && visibleProducts.length !== 0 ? (
+        {visibleProducts.length !== 0 ? (
           // scroll area should ocupate the fr space (remaining space of the screen)
           <ScrollArea className="h-full">
             <div className="flex flex-col gap-4">
@@ -273,7 +273,7 @@ function RouteComponent() {
           <Orders
             shopId={shopId}
             telegramUserId={Number(user.telegramId)}
-            shopCurrency={data?.shop.shopCurrency}
+            shopCurrency={data.shop.shopCurrency}
           />
         )}
       </div>
