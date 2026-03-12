@@ -30,6 +30,7 @@ import ShopFilters from '@/components/shop/shopFilters'
 import { ModeToggle } from '@/components/mode-toggle'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import Orders from '@/components/shop/orders/orders'
 
 type TelegramUser = {
   telegramId: string
@@ -266,10 +267,13 @@ function RouteComponent() {
       {/* the following container is used to display actions in row */}
       {/* is showed on the end of the page */}
       <div className="w-full p-5 flex justify-center items-center">
-        <Button>
-          <ReceiptText />
-          Orders
-        </Button>
+        {user?.telegramId && (
+          <Orders
+            shopId={shopId}
+            telegramUserId={Number(user.telegramId)}
+            shopCurrency={data?.shop.shopCurrency}
+          />
+        )}
       </div>
     </div>
   )

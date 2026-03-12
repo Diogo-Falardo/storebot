@@ -48,7 +48,7 @@ import {
   sf_UpdateOrderStatus,
 } from '@/server/shop/orders/order.function'
 
-function formatDate(dateString: string) {
+export function formatDate(dateString: string) {
   const date = new Date(dateString)
   return date.toLocaleString(undefined, {
     year: 'numeric',
@@ -261,10 +261,15 @@ const OrderCardSheet = ({
                 ORDER FROM: ${orderIdentifier}
                 `}
           </SheetTitle>
-          <SheetDescription>{`
-                ORDER ID: ${orderId}
-                ORDER DATE: ${formatDate(orderDate)}
-                `}</SheetDescription>
+          <SheetDescription className="flex flex-col">
+            <h1 className="font-bold">
+              Order Id: <span className="font-normal">{orderId}</span>
+            </h1>
+            <h1 className="font-bold">
+              Order Date:{' '}
+              <span className="font-normal">{formatDate(orderDate)}</span>
+            </h1>
+          </SheetDescription>
         </SheetHeader>
 
         {/* BODY OF THE ORDER
@@ -277,7 +282,7 @@ const OrderCardSheet = ({
           <h1 className="text-lg flex gap-2 font-normal">
             TOTAL:
             <span className="font-medium">
-              {total}
+              {total.toFixed(2)}
               <span className="ml-1">{shopCurrency}</span>
             </span>
           </h1>

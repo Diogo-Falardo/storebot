@@ -75,3 +75,12 @@ export const sf_UpdateOrderStatus = createServerFn({ method: 'POST' })
       data.status,
     )
   })
+
+export const sf_GetTelegramUserOrders = createServerFn({ method: 'GET' })
+  .inputValidator((data: { shopId: string; telegramUserId: number }) => data)
+  .handler(async ({ data }) => {
+    return await orderServer.getOrdersFromTelegramId(
+      data.shopId,
+      data.telegramUserId,
+    )
+  })

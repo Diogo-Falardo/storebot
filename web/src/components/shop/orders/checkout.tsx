@@ -103,6 +103,10 @@ const Checkout = ({
   // remove product
   const handleRemove = (id: string) => {
     setDisplayProducts((prev) => prev.filter((p) => p.id !== id))
+    form.setFieldValue(
+      'productsId',
+      displayProducts.filter((p) => p.id !== id).map((p) => p.id),
+    )
   }
 
   const form = useForm({
@@ -118,6 +122,11 @@ const Checkout = ({
     },
     onSubmit: async ({ value }) => {
       try {
+        console.log(`
+          
+          PRODUCTS ID: ${value.productsId}
+          
+          `)
         await placeOrder({ data: { telegramUserId, shopId, dto: value } })
         closeDialogRef.current?.click()
         toast.success(`Your order has been placed!`)

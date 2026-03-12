@@ -167,4 +167,33 @@ export class serverOrder {
       throw new Error(err.message ?? 'Error updating order status')
     }
   }
+
+  /**
+   * Return all the orders from an user
+   * @param telegramUserId
+   * @param shopId
+   * @returns
+   */
+  async getOrdersFromTelegramId(shopId: string, telegramUserId: number) {
+    try {
+      const userOrders = await db
+        .select()
+        .from(orders)
+        .where(
+          and(
+            eq(orders.shopId, shopId),
+            eq(orders.telegramUserId, telegramUserId),
+          ),
+        )
+
+      if (userOrders.length === 0) {
+        return 'no orders'
+      }
+
+      return userOrders
+    } catch (err: any) {
+      console.error(err)
+      throw new Error(err.message ?? 'Error while getting telegram orders')
+    }
+  }
 }
