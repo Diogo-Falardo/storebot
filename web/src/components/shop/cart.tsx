@@ -102,8 +102,9 @@ const Cart = ({
 
   // validate cart products
   async function validateCartProducts() {
+    const items = getItemFromStorage()
     const results = await Promise.all(
-      cartProducts.map(async (product) => {
+      items.map(async (product) => {
         const valid = await validProduct({
           data: { shopId, productId: product.productId },
         })
@@ -128,13 +129,13 @@ const Cart = ({
     }
 
     setValidatedProducts(validIds)
+    setStored(getItemFromStorage())
   }
 
   return (
     <Sheet
       onOpenChange={async (open) => {
         if (open) {
-          refreshCart()
           await validateCartProducts()
         }
       }}

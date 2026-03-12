@@ -96,56 +96,62 @@ function RouteComponent() {
   if (!userId || shopLoading || !shopInfo || !userId) return <Spinner />
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* header */}
-      <header className="p-4 max-h-20">
-        <nav className="w-full flex justify-center">
-          <div className="w-full lg:max-w-7xl flex items-center justify-between">
-            <Link
-              to="/"
-              className="select-none text-4xl font-bold tracking-wide"
-            >
-              {shopInfo.shopName}
-            </Link>
-            <div className="flex items-center gap-3">
-              {/* <ClientOnly>
+      {/* following code should render the shop name, shop Update dialog and a theme toogler */}
+      <header className="flex justify-center w-full p-3 border-b">
+        <div className="w-full lg:max-w-7xl flex items-center justify-between">
+          <Link to="/" className="select-none text-4xl font-bold tracking-wide">
+            {shopInfo.shopName}
+          </Link>
+          <div className="flex items-center gap-3">
+            {/* FIX: ---- */}
+            {/* <ClientOnly>
                 <ModeToggle />
               </ClientOnly> */}
-              <ShopUpdate userId={shopInfo.userId} shopId={shopInfo.id} />
-            </div>
+            <ShopUpdate userId={shopInfo.userId} shopId={shopInfo.id} />
           </div>
-        </nav>
+        </div>
       </header>
-      {/* body */}
-      <main className="p-6 w-full flex flex-1 overflow-auto justify-center">
-        <div className="w-full lg:max-w-7xl flex justify-between">
-          <Tabs defaultValue={'product'} className="w-full">
-            <TabsList className="w-full">
-              <TabsTrigger value="product" className="cursor-pointer">
-                Products
-              </TabsTrigger>
-              <TabsTrigger value="orders" className="cursor-pointer">
-                Orders
-              </TabsTrigger>
-            </TabsList>
-            {/* page products */}
-            <TabsContent value="product">
-              <div className="flex flex-col gap-5">
-                <div className="flex justify-end gap-2 mt-2 mb-4">
-                  <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
-                  <ProductCategoryAdd shopId={shopInfo.id} />
-                </div>
-                {/* while products are loading */}
-                {productsLoading && (
-                  <div>
-                    <Spinner />
-                    Loading your products
-                  </div>
-                )}
-                {!productsLoading && products && products.length > 0 ? (
-                  // products display grid
-                  <ScrollArea>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* container number 1 */}
+      {/* the dashboard... */}
+      <main className="w-full flex-1  min-h-0 p-3 flex justify-center">
+        <Tabs defaultValue={'product'} className="flex-1 flex flex-col min-h-0">
+          {/* tab swithcer to switch between products and orders */}
+          <TabsList className="w-full rounded-sm">
+            <TabsTrigger value="product" className="cursor-pointer ">
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="cursor-pointer">
+              Orders
+            </TabsTrigger>
+          </TabsList>
+          {/* page products */}
+          <TabsContent
+            value="product"
+            className="flex-1 flex flex-col min-h-0 gap-3"
+          >
+            {/* container 1 */}
+            {/* top actions */}
+            <div className="flex justify-end gap-2">
+              <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
+              <ProductCategoryAdd shopId={shopInfo.id} />
+            </div>
+            {/* while products are loading */}
+            {productsLoading && (
+              <div>
+                <Spinner />
+                Loading your products
+              </div>
+            )}
+            {/* container 2 */}
+            {/* products render or empty */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {!productsLoading && products && products.length > 0 ? (
+                // products display gid
+                <ScrollArea className="h-full">
+                  <div className="flex flex-col h-full min-h-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
                       {products
                         .slice()
                         .sort((a, b) => a.id.localeCompare(b.id))
@@ -157,62 +163,69 @@ function RouteComponent() {
                           />
                         ))}
                     </div>
-                  </ScrollArea>
-                ) : (
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant={'icon'}>
-                        <Package />
-                      </EmptyMedia>
-                      <EmptyTitle>No products yet</EmptyTitle>
-                      <EmptyDescription>
-                        You haven&apos;t inserted any product yet. Add your
-                        first product
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                      <ProductAdd
-                        userId={shopInfo.userId}
-                        shopId={shopInfo.id}
-                      />
-                    </EmptyContent>
-                  </Empty>
-                )}
-              </div>
-            </TabsContent>
-            {/* page orders */}
-            <TabsContent value="orders">
-              <div className="flex flex-col gap-5">
-                <div className="flex justify-end gap-2 mt-2 mb-4">
-                  <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
-                  <PaymentMethodAdd userId={userId} shopId={shopInfo.id} />
-                </div>
-                {/* while orders are loading */}
-                {ordersLoading && (
-                  <div>
-                    <Spinner />
-                    Loading your orders
                   </div>
-                )}
-
-                {!ordersLoading && orders && orders.length > 0 ? (
-                  <div className="flex flex-col">
-                    {orders.map((order) => (
-                      <OrderCardADM
-                        key={order.id}
-                        shopId={shopId}
-                        shopCurrency={shopInfo.shopCurrency}
-                        order={order}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Empty></Empty>
-                )}
+                </ScrollArea>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant={'icon'}>
+                      <Package />
+                    </EmptyMedia>
+                    <EmptyTitle>No products yet</EmptyTitle>
+                    <EmptyDescription>
+                      You haven&apos;t inserted any product yet. Add your first
+                      product
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
+                  </EmptyContent>
+                </Empty>
+              )}
+            </div>
+          </TabsContent>
+          {/* page orders */}
+          <TabsContent
+            value="orders"
+            className="flex-1 flex flex-col min-h-0 gap-3"
+          >
+            {/* container 1 */}
+            {/* top actions */}
+            <div className="flex justify-end gap-2">
+              <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
+              <PaymentMethodAdd userId={userId} shopId={shopInfo.id} />
+            </div>
+            {/* while orders are loading */}
+            {ordersLoading && (
+              <div>
+                <Spinner />
+                Loading your orders
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+            )}
+            {/* container 2 */}
+            {/* orders render or empty */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {!ordersLoading && orders && orders.length > 0 ? (
+                <ScrollArea className="h-full">
+                  <div className="flex flex-col h-full min-h-0">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
+                      {orders.map((order) => (
+                        <OrderCardADM
+                          key={order.id}
+                          shopId={shopId}
+                          shopCurrency={shopInfo.shopCurrency}
+                          order={order}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </ScrollArea>
+              ) : (
+                <Empty></Empty>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )

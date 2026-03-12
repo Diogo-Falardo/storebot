@@ -27,10 +27,11 @@ export const RECEIVE_ORDER = z.object({
     .string()
     .min(1, { message: 'Please provide identification' })
     .max(255, { message: 'Indentification limit of 255 characters' }),
-  orderPaymentMethod: z.uuid(),
-  orderShippingMethod: z.uuid(),
+  orderPaymentMethod: z.uuid({ message: 'Invalid payment method' }),
+  orderShippingMethod: z.uuid({ message: 'Invalid shipping method' }),
   orderDeliveryInstruction: z
     .string()
+    .min(1, { message: 'Please provide delivery instructions' })
     .max(1000, { message: 'Delivery instruction too long' }),
   productsId: z.array(z.uuid()),
 })

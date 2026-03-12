@@ -76,6 +76,13 @@ const Checkout = ({
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
+  console.log(`
+    
+    PRODUCTS: ${productsId}
+    DISPLAY: ${displayProducts}
+    
+    `)
+
   // serverFn
   const productInfo = useServerFn(sf_GetProductFromId)
 
@@ -276,7 +283,7 @@ const Checkout = ({
                   )
                 }}
               />
-              {/* order shipping instructions */}
+              {/* order delivery instructions */}
               <form.Field
                 name="orderDeliveryInstruction"
                 children={(field) => {

@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import {
@@ -46,6 +47,17 @@ import {
   sf_AddCustomOrderMessage,
   sf_UpdateOrderStatus,
 } from '@/server/shop/orders/order.function'
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
 const OrderCardADM = ({
   shopId,
@@ -95,54 +107,62 @@ const OrderCardADM = ({
   }
 
   return (
-    <>
-      <Card className="p-2" onClick={() => setSheetOpen(true)}>
-        {/* CARD HEADER
-        rendering:
+    <div className="w-full max-w-sm">
+      <Card className="p-2  w-full max-w-sm">
+        <CardContent className="flex flex-col w-full justify-between p-0 gap-4">
+          {/* header */}
+          <CardHeader className="w-full flex flex-row justify-between items-start gap-0 p-0">
+            <CardTitle className="text-xl w-full p-0">
+              Order for: {order.orderIdentifier}
+            </CardTitle>
+            {/* order status changer */}
+            <div
+              className="w-full flex flex-row gap-2 justify-end items-end"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Label className="text-xl mb-1">Status</Label>
+              <Select value={status} onValueChange={updateStatus}>
+                <SelectTrigger className="uppercase dark:bg-neutral-950 text-xs ">
+                  <SelectValue placeholder={status.replace('_', ' ')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ORDER_STATUS_ENUM.options.map((statusOption) => (
+                    <SelectItem key={statusOption} value={statusOption}>
+                      {statusOption.replace('_', ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
 
-        - orderIndentifier
-        - orderStatus */}
-        <div className="flex justify-between items-center">
-          <CardTitle>Order for: {order.orderIdentifier}</CardTitle>
-          <div className="flex justify-center items-center gap-1">
-            <h1>Status:</h1>
-            {/* SELECT to: change the order status  */}
-            <Select value={status} onValueChange={updateStatus}>
-              <SelectTrigger className={`uppercase dark:bg-black`}>
-                <SelectValue placeholder={status.replace('_', ' ')} />
-              </SelectTrigger>
-              <SelectContent>
-                {ORDER_STATUS_ENUM.options.map((statusOption) => (
-                  <SelectItem key={statusOption} value={statusOption}>
-                    {statusOption.replace('_', ' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="flex justify-between ">
-          {/* LEFT OF THE CARD 
-        rendering:
-
-        - orderId
-        - orderPaymentMethod
-        - orderShippingMethod */}
-          <div className="flex flex-col gap-2">
-            <h1 className="flex gap-2">
-              Order id:
-              <Badge className={`rounded-sm dark:bg-neutral-300`}>
-                {order.id}
+          {/* container 1 */}
+          {/* order info */}
+          <div className="w-full gap-4">
+            <h1 className="flex items-center gap-2 font-bold text-lg">
+              Order Date:
+              <span className="text-base font-normal">
+                {formatDate(order.createdAt)}
+              </span>
+            </h1>
+            <h1 className="flex items-center gap-2">
+              Payment Method
+              <Badge className="rounded bg-emerald-900 text-white">
+                {paymentMethodName}
               </Badge>
             </h1>
-            <h3 className="flex gap-2">
-              Payment method: <Badge>{shippingMethodName}</Badge>
-            </h3>
-            <h3 className="flex gap-2">
-              Shipping method: <Badge>{paymentMethodName}</Badge>
-            </h3>
+            <h1 className="flex items-center gap-2">
+              Shipping Method
+              <Badge className="rounded bg-cyan-900 text-white">
+                {shippingMethodName}
+              </Badge>
+            </h1>
           </div>
-        </div>
+
+          <Button className="mt-4 w-full" onClick={() => setSheetOpen(true)}>
+            View Details
+          </Button>
+        </CardContent>
       </Card>
       <OrderCardSheet
         orderId={order.id}
@@ -150,11 +170,12 @@ const OrderCardADM = ({
         shopCurrency={shopCurrency}
         orderCustomMessage={order.orderCustomMessage}
         orderIdentifier={order.orderIdentifier}
+        orderDate={order.createdAt}
         orderDeliveryInstruction={order.orderDeliveryInstruction}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />
-    </>
+    </div>
   )
 }
 
@@ -162,6 +183,7 @@ const OrderCardSheet = ({
   shopId,
   shopCurrency,
   orderId,
+  orderDate,
   orderIdentifier,
   orderDeliveryInstruction,
   orderCustomMessage,
@@ -171,6 +193,7 @@ const OrderCardSheet = ({
   shopId: string
   shopCurrency: string
   orderId: string
+  orderDate: string
   orderIdentifier: string
   orderDeliveryInstruction: string
   orderCustomMessage: string | null
@@ -230,11 +253,8 @@ const OrderCardSheet = ({
         <span />
       </SheetTrigger>
       <SheetContent>
-        {/* HEADER OF THE ORDER 
-        
-        - orderIndentifier
-        - orderId
-        */}
+        {/* header */}
+        {/* uses to render */}
         <SheetHeader>
           <SheetTitle>
             {`
@@ -243,6 +263,7 @@ const OrderCardSheet = ({
           </SheetTitle>
           <SheetDescription>{`
                 ORDER ID: ${orderId}
+                ORDER DATE: ${formatDate(orderDate)}
                 `}</SheetDescription>
         </SheetHeader>
 
