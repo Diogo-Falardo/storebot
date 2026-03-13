@@ -19,6 +19,10 @@ api.use("/user", userRouter);
 import storeRouter from "./system/route/store.route";
 api.use("/store", storeRouter);
 
+// payment route
+import paymentRouter from "./system/route/payment.route";
+api.use("/payment", paymentRouter);
+
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   // use http error
   if (err instanceof HttpError) {

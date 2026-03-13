@@ -37,27 +37,63 @@ export const storeService = {
   async updateStoreExpireDate(
     userId: string,
     storeId: string,
-    expireDate: string,
+    period: string, // pass period instead of expireDate
   ) {
     const ownership = await this.validateStoreOwner(userId, storeId);
     if (!ownership) return "Upsss.... restriceted area!";
 
+    // Fetch current expire date
+    const store = await db
+      .select()
+      .from(stores)
+      .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
+      .limit(1);
+
+    let currentExpire = store[0]?.storeExpireDate
+      ? new Date(store[0].storeExpireDate)
+      : new Date();
+
+    const now = new Date();
+    // If currentExpire is in the past, use now
+    if (currentExpire < now) currentExpire = now;
+
+    // Calculate new expire date
+    switch (period) {
+      case "1d":
+        currentExpire.setDate(currentExpire.getDate() + 1);
+        break;
+      case "1w":
+        currentExpire.setDate(currentExpire.getDate() + 7);
+        break;
+      case "1m":
+        currentExpire.setMonth(currentExpire.getMonth() + 1);
+        break;
+      case "3m":
+        currentExpire.setMonth(currentExpire.getMonth() + 3);
+        break;
+      case "1y":
+        currentExpire.setFullYear(currentExpire.getFullYear() + 1);
+        break;
+      default:
+        throw new HttpError(400, "Invalid period");
+    }
+
     try {
       await db
         .update(stores)
-        .set({ storeExpireDate: new Date(expireDate) })
+        .set({ storeExpireDate: currentExpire })
         .where(and(eq(stores.userId, userId), eq(stores.id, storeId)));
 
-      return `Store is expiring at: ${new Date(expireDate)}`;
+      return `Store is expiring at: ${currentExpire}`;
     } catch (err) {
       console.error(`
-        -------------------------------------
-        ERROR UPDATING STORE EXPIRE DATE:
+      -------------------------------------
+      ERROR UPDATING STORE EXPIRE DATE:
 
-        ${err}
+      ${err}
 
-        -------------------------------------
-        `);
+      -------------------------------------
+      `);
       throw new HttpError(500, "Error loading store...");
     }
   },
@@ -114,8 +150,8 @@ export const storeService = {
       await db.insert(stores).values({
         id: uuidv4(),
         userId: userId,
-        storeName: dto.shopName,
-        storeType: dto.shopType,
+        storeName: dto.storeName,
+        storeType: dto.storeType,
       });
 
       return "store created";

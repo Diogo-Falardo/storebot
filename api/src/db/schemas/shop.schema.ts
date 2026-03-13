@@ -3,9 +3,9 @@ import { z } from "zod";
 export const SHOP_TYPE_ENUM = z.enum(["public", "private"]);
 
 export const CREATE_SHOP_MODEL = z.object({
-  shopType: SHOP_TYPE_ENUM,
-  shopName: z.string(),
-  shopCurrency: z.string().optional().nullable(),
+  storeType: SHOP_TYPE_ENUM,
+  storeName: z.string(),
+  storeCurrency: z.string().optional().nullable(),
 });
 export type CREATE_SHOP_TYPE = z.infer<typeof CREATE_SHOP_MODEL>;
 

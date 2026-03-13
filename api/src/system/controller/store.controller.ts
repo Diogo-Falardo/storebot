@@ -7,8 +7,6 @@ import { CREATE_SHOP_MODEL } from "../../db/schemas/shop.schema";
 import { schema_add_STORE_EXPIRE_DATE } from "../../schemas/store.schema";
 import { valid_uuid } from "../../lib/field.valid";
 
-// schemas
-
 export const storeController = {
   /**
    * Create a shop and associate it with a telegram user
@@ -73,32 +71,32 @@ export const storeController = {
     }
   },
 
-  async updateExpireStoreDate(req: Request, res: Response, next: NextFunction) {
-    // validate headers
-    const header = tgHeadersSchema.parse(req.headers);
-    // validate bot secret
-    if (header["x-bot-secret"] !== process.env.BOT_SECRET) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    const userId = header["x-tg-user-id"];
-    const { id: storeId } = valid_uuid.parse({ id: req.params.id });
-    const { storeExpireDate } = schema_add_STORE_EXPIRE_DATE.parse(req.body);
+  // async updateExpireStoreDate(req: Request, res: Response, next: NextFunction) {
+  //   // validate headers
+  //   const header = tgHeadersSchema.parse(req.headers);
+  //   // validate bot secret
+  //   if (header["x-bot-secret"] !== process.env.BOT_SECRET) {
+  //     return res.status(401).json({ error: "Unauthorized" });
+  //   }
+  //   const userId = header["x-tg-user-id"];
+  //   const { id: storeId } = valid_uuid.parse({ id: req.params.id });
+  //   const { storeExpireDate } = schema_add_STORE_EXPIRE_DATE.parse(req.body);
 
-    const user = await userService.getUserId(userId);
-    if (typeof user === "string") {
-      valid_uuid.parse({ id: user });
-    } else return res.status(404).json({ error: "User not found" });
+  //   const user = await userService.getUserId(userId);
+  //   if (typeof user === "string") {
+  //     valid_uuid.parse({ id: user });
+  //   } else return res.status(404).json({ error: "User not found" });
 
-    try {
-      const result = await storeService.updateStoreExpireDate(
-        user,
-        storeId,
-        storeExpireDate,
-      );
+  //   try {
+  //     const result = await storeService.updateStoreExpireDate(
+  //       user,
+  //       storeId,
+  //       storeExpireDate,
+  //     );
 
-      return res.status(200).json(result);
-    } catch (err) {
-      next(err);
-    }
-  },
+  //     return res.status(200).json(result);
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // },
 };

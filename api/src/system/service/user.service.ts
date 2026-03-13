@@ -28,19 +28,19 @@ export const userService = {
         throw new HttpError(404, "user not found");
       }
 
-      const userShop = await storeService.getStoreByUserId(user[0].id);
+      const userStore = await storeService.getStoreByUserId(user[0].id);
 
       // remove this in the future
       // need to think on a better solution for this
-      if (!userShop) {
-        return "no shops";
+      if (!userStore) {
+        return "no stores";
       }
 
       return {
         userCreatedAt: user[0].createdAt,
         ...user[0],
-        ...userShop,
-        shopId: userShop.id, // this or will missmatch in "schemas"
+        ...userStore,
+        storeId: userStore.id, // this or will missmatch in "schemas"
       };
     } catch (err: any) {
       console.error(err);

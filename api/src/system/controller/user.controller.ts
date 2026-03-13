@@ -24,7 +24,7 @@ export const userController = {
     try {
       const user = await userService.getUserInfo(tgUserId);
 
-      if (user === "no shops") {
+      if (user === "no stores") {
         return res.status(200).json(user);
       }
 
