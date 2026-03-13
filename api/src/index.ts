@@ -9,15 +9,15 @@ const app = express();
 app.use(express.json());
 
 const api = express.Router();
-app.use("/kira", api);
+app.use("/api", api);
 
 // user route
 import userRouter from "./system/route/user.route";
 api.use("/user", userRouter);
 
 // shop route
-import shopRouter from "./system/route/shop.route";
-api.use("/shop", shopRouter);
+import storeRouter from "./system/route/store.route";
+api.use("/store", storeRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   // use http error

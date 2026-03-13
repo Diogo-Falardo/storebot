@@ -1,19 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpError } from "../utils/ErrorHandling";
 import { userService } from "../service/user.service";
-import { shopService } from "../service/shop.service";
+import { storeService } from "../service/store.service";
 import { tgHeadersSchema } from "../../db";
 import { CREATE_SHOP_MODEL } from "../../db/schemas/shop.schema";
 
 // schemas
 
-export const ShopController = {
+export const storeController = {
   /**
    * Create a shop and associate it with a telegram user
    * @param req HEADERS : tg-user-id , bot-secret ("used to validate request")
    * @returns
    */
-  async createShop_For_Telegram(
+  async createStore_For_Telegram(
     req: Request,
     res: Response,
     next: NextFunction,
@@ -31,17 +31,40 @@ export const ShopController = {
     // db user id
     const userId = await userService.tg_checkId(tg_userID);
 
-    console.log(userId);
-
-    const shop = await shopService.getShopByUserId(userId);
+    const shop = await storeService.getStoreByUserId(userId);
 
     if (shop) {
-      return res.status(401).json("You already have a shop: " + shop.shopName);
+      return res.status(401).json("You already have a shop: " + shop.storeName);
     }
 
     try {
-      const newShop = await shopService.createShop(userId, shopCreateDto);
+      const newShop = await storeService.createStore(userId, shopCreateDto);
       return res.status(201).json(newShop);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async storeInfo(req: Request, res: Response, next: NextFunction) {
+    // validate headers
+    const header = tgHeadersSchema.parse(req.headers);
+    // validate bot secret
+    if (header["x-bot-secret"] !== process.env.BOT_SECRET) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const storeId = req.params.id;
+
+    if (!storeId || Array.isArray(storeId))
+      return res.status(400).json({ error: "Store id is required" });
+
+    try {
+      const store = await storeService.getStoreByStoreId(storeId);
+
+      if (!store) {
+        return res.status(404).json({ error: "Store not found" });
+      }
+      return res.json(store);
     } catch (err) {
       next(err);
     }

@@ -3,7 +3,7 @@ import { users } from "../../db/schema";
 import { db } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
-import { shopService } from "./shop.service";
+import { storeService } from "./store.service";
 import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
 export const userService = {
@@ -28,7 +28,7 @@ export const userService = {
         throw new HttpError(404, "user not found");
       }
 
-      const userShop = await shopService.getShopByUserId(user[0].id);
+      const userShop = await storeService.getStoreByUserId(user[0].id);
 
       // remove this in the future
       // need to think on a better solution for this
