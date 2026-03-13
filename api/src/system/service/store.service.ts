@@ -33,7 +33,7 @@ export const storeService = {
     }
   },
 
-  // updates a store expireDate
+  // updates a store expire date
   async updateStoreExpireDate(
     userId: string,
     storeId: string,
@@ -54,10 +54,10 @@ export const storeService = {
       : new Date();
 
     const now = new Date();
-    // If currentExpire is in the past, use now
+    // if currentExpire is in the past, use now
     if (currentExpire < now) currentExpire = now;
 
-    // Calculate new expire date
+    // calculate new expire date
     switch (period) {
       case "1d":
         currentExpire.setDate(currentExpire.getDate() + 1);
@@ -89,6 +89,31 @@ export const storeService = {
       console.error(`
       -------------------------------------
       ERROR UPDATING STORE EXPIRE DATE:
+
+      ${err}
+
+      -------------------------------------
+      `);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
+  // get store expire date
+  async getStoreExpireDate(userId: string, storeId: string) {
+    try {
+      const active = await db
+        .select({ storeExpireDate: stores.storeExpireDate })
+        .from(stores)
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
+        .limit(1);
+
+      if (!active[0]) throw new HttpError(404, "Store was not found");
+
+      return active[0].storeExpireDate;
+    } catch (err) {
+      console.error(`
+      -------------------------------------
+      ERROR GETTING STORE EXPIRE DATE
 
       ${err}
 

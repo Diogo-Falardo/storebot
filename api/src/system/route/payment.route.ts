@@ -2,7 +2,9 @@ import express, { NextFunction, Router, Request, Response } from "express";
 import { userService } from "../service/user.service";
 import { valid_uuid } from "../../lib/field.valid";
 import { storeService } from "../service/store.service";
-const stripe = require("stripe")(process.env.STRIPE_PRIVATE!);
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_PRIVATE!);
 
 const router = Router();
 
@@ -17,35 +19,13 @@ function getPriceIdForPeriod(period: string): string | null {
   return PRICE_IDS[period] ?? null;
 }
 
-function getExpireDate(period: string): Date {
-  const now = new Date();
-  switch (period) {
-    case "1d":
-      now.setDate(now.getDate() + 1);
-      break;
-    case "1w":
-      now.setDate(now.getDate() + 7);
-      break;
-    case "1m":
-      now.setMonth(now.getMonth() + 1);
-      break;
-    case "3m":
-      now.setMonth(now.getMonth() + 3);
-      break;
-    case "1y":
-      now.setFullYear(now.getFullYear() + 1);
-      break;
-    default:
-      throw new Error("Invalid period");
-  }
-  return now;
-}
-
 // creates a payment link associated to a user
 router.post(
   "/create-link",
   async (req: Request, res: Response, next: NextFunction) => {
     const { period, telegramId } = req.body;
+
+    console.log(period, telegramId);
 
     const priceId = getPriceIdForPeriod(period);
     if (!priceId) {
@@ -53,18 +33,25 @@ router.post(
     }
 
     const info = await userService.getUserInfo(telegramId);
-    if (info === "no stores") {
-      return res
-        .status(400)
-        .json({ error: "You dont have a shop to activate" });
+
+    console.log("User info:", info);
+    try {
+      if (info === "no stores") {
+        return res
+          .status(400)
+          .json({ error: "You dont have a shop to activate, create one!" });
+      }
+
+      const paymentLink = await stripe.paymentLinks.create({
+        line_items: [{ price: priceId, quantity: 1 }],
+        metadata: { userId: info.userId, storeId: info.storeId, period },
+      });
+
+      res.json({ url: paymentLink.url });
+    } catch (err) {
+      console.log(err);
+      next(err);
     }
-
-    const paymentLink = await stripe.paymentLinks.create({
-      line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { userId: info.userId, shopId: info.id, period },
-    });
-
-    res.json({ url: paymentLink.url });
   },
 );
 
@@ -92,6 +79,11 @@ router.post(
       const userId = session.metadata?.userId;
       const shopId = session.metadata?.shopId;
       const period = session.metadata?.period;
+
+      if (!userId || !shopId || !period) {
+        console.error("Missing metadata in Stripe session:", session.metadata);
+        return res.status(400).json({ error: "Missing payment metadata" });
+      }
 
       await storeService.updateStoreExpireDate(userId, shopId, period);
 

@@ -71,6 +71,30 @@ export const storeController = {
     }
   },
 
+  async storeExpireDate(req: Request, res: Response, next: NextFunction) {
+    // validate headers
+    const header = tgHeadersSchema.parse(req.headers);
+    // validate bot secret
+    if (header["x-bot-secret"] !== process.env.BOT_SECRET) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const tg_userID = header["x-tg-user-id"];
+    const storeId = req.params.id;
+
+    if (!storeId || Array.isArray(storeId))
+      return res.status(400).json({ error: "Store id is required" });
+
+    const userId = await userService.tg_checkId(tg_userID);
+
+    try {
+      const expireDate = await storeService.getStoreExpireDate(userId, storeId);
+
+      return res.status(200).json(expireDate);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // async updateExpireStoreDate(req: Request, res: Response, next: NextFunction) {
   //   // validate headers
   //   const header = tgHeadersSchema.parse(req.headers);
