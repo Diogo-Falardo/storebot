@@ -4,8 +4,64 @@ import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling";
 import { stores } from "../../db/schema";
 import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema";
+import {
+  schema_public_STORE_INFO,
+  schema_public_type_STORE_INFO,
+} from "../../schemas/store.schema";
 
 export const storeService = {
+  // validates if a user is the real owner of that store
+  async validateStoreOwner(userId: string, storeId: string): Promise<boolean> {
+    try {
+      const owner = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)));
+
+      if (!owner[0]) return false;
+
+      return true;
+    } catch (err) {
+      console.error(`
+        -------------------------------------
+        ERROR WITH VALIDATION STORE OWNER:
+
+        ${err}
+        
+        -------------------------------------`);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
+  // updates a store expireDate
+  async updateStoreExpireDate(
+    userId: string,
+    storeId: string,
+    expireDate: string,
+  ) {
+    const ownership = await this.validateStoreOwner(userId, storeId);
+    if (!ownership) return "Upsss.... restriceted area!";
+
+    try {
+      await db
+        .update(stores)
+        .set({ storeExpireDate: new Date(expireDate) })
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)));
+
+      return `Store is expiring at: ${new Date(expireDate)}`;
+    } catch (err) {
+      console.error(`
+        -------------------------------------
+        ERROR UPDATING STORE EXPIRE DATE:
+
+        ${err}
+
+        -------------------------------------
+        `);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
   /**
    * Gets the corresponding shop from an user
    * @param userId [database]
@@ -28,8 +84,10 @@ export const storeService = {
     }
   },
 
-  // querys for a store id
-  async getStoreByStoreId(storeId: string) {
+  // querys for a store id and returns a public store info
+  async getStoreByStoreId(
+    storeId: string,
+  ): Promise<schema_public_type_STORE_INFO | null> {
     try {
       const store = await db
         .select()
@@ -39,7 +97,7 @@ export const storeService = {
 
       if (!store[0]) return null;
 
-      return store[0];
+      return schema_public_STORE_INFO.parse(store[0]);
     } catch (err) {
       console.error(err);
       throw new HttpError(500, "Error loading store...");
