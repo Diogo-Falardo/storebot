@@ -35,7 +35,7 @@ const StoreFilters = (filters: storeFiltersProps) => {
     const valueStr = e.target.value.replace(',', '.')
     const value =
       e.target.value === ''
-        ? Infinity
+        ? MAX
         : Math.max(Number(valueStr), filters.priceRange[0])
     filters.setPriceRange([filters.priceRange[0], value])
   }
