@@ -77,15 +77,15 @@ router.post(
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const userId = session.metadata?.userId;
-      const shopId = session.metadata?.shopId;
+      const storeId = session.metadata?.storeId;
       const period = session.metadata?.period;
 
-      if (!userId || !shopId || !period) {
+      if (!userId || !storeId || !period) {
         console.error("Missing metadata in Stripe session:", session.metadata);
         return res.status(400).json({ error: "Missing payment metadata" });
       }
 
-      await storeService.updateStoreExpireDate(userId, shopId, period);
+      await storeService.updateStoreExpireDate(userId, storeId, period);
 
       console.log(`Payment completed for user ${userId} for period ${period}`);
     }
