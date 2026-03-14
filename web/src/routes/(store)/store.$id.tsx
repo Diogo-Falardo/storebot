@@ -32,6 +32,11 @@ import Cart from '@/components/shop/cart'
 import { ProductInfo } from '@/components/shop/products/productInfo'
 import CartAdd from '@/components/shop/cartAdd'
 import Orders from '@/components/shop/orders/orders'
+import { sf_GetUserIdFromTelegramId } from '@/server/user/user.function'
+import {
+  sf_IsStoreValid,
+  sf_ValidateStore,
+} from '@/server/store/store.functions'
 
 type TelegramUser = {
   telegramId: string
@@ -54,6 +59,9 @@ function RouteComponent() {
   const { data, isLoading } = usePublicstore({ storeId })
   // server fn
   const verifyUser = useServerFn(sf_PublicTelegramVerification)
+  const tryToGetUserId = useServerFn(sf_GetUserIdFromTelegramId)
+  const validateStore = useServerFn(sf_ValidateStore)
+  const isStoreValid = useServerFn(sf_IsStoreValid)
   const categoryName = useServerFn(sf_ConvertCategoryIdIntoName)
   // states
   const [user, setUser] = useState<TelegramUser | null>()
@@ -67,16 +75,26 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
-        // const initData = WebApp.initData
-        // Example for mocking in your test
-        const initData =
-          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        const tgUser = await verifyUser({ data: { initData: WebApp.initData } })
 
-        const tgUser = await verifyUser({ data: { initData } })
+        const userId = await tryToGetUserId({
+          data: { telegramId: tgUser.telegramId },
+        })
 
+        if (userId) {
+          const isValid = await validateStore({ data: { userId, storeId } })
+          if (!isValid) {
+            throw new Error('This shop is not activated')
+          }
+        }
+
+        const isValid = await isStoreValid({ data: { storeId } })
+        if (!isValid) {
+          throw new Error('This shop is not activated')
+        }
         setUser(tgUser)
       } catch (err: any) {
         setError(err ?? 'Error loading store')

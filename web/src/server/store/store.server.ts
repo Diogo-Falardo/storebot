@@ -10,6 +10,60 @@ import {
 } from '@/schemas/store.schema'
 
 export class serverStore {
+  async ValidateStore(userId: string, storeId: string): Promise<boolean> {
+    try {
+      const isOwner = await this.validateUserStoreOwnership(userId, storeId)
+      if (isOwner) {
+        return true
+      }
+
+      const storeExperireDate = await this.getStoreExpireDate(storeId)
+
+      if (
+        storeExperireDate &&
+        new Date(storeExperireDate).getTime() < Date.now()
+      ) {
+        return false
+      }
+
+      return true
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR VALIDATING STORE
+
+        ${err}
+
+        -------------------------
+        `)
+      throw new (err.message ?? 'error validating store')()
+    }
+  }
+
+  async getStoreExpireDate(storeId: string) {
+    try {
+      const expireDate = await db
+        .select({ storeExpireDate: stores.storeExpireDate })
+        .from(stores)
+        .where(eq(stores.id, storeId))
+        .limit(1)
+
+      if (!expireDate[0]) throw new Error('shop not found')
+
+      return expireDate[0].storeExpireDate
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE EXIPRE DATE
+
+        ${err}
+
+        -------------------------
+      `)
+      throw new (err.message ?? 'error fetching store')()
+    }
+  }
+
   /**
    * Validates if a user is owner of the store
    *

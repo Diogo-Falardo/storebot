@@ -5,7 +5,7 @@ import { z } from 'zod'
  */
 export const VISUALIZE_PRODUCT_SCHEMA = z.object({
   id: z.uuid(),
-  shopId: z.uuid(),
+  storeId: z.uuid(),
   productName: z.string(),
   productPrice: z.string(),
   productDesc: z.string().optional().nullable(),

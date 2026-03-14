@@ -27,6 +27,7 @@ import ProductCardADM from '@/components/shop/products/productCard.admin'
 import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
 import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserstoreInfo } from '@/lib/hooks/shop/store.hooks'
+import { sf_ValidateStore } from '@/server/store/store.functions'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -45,23 +46,24 @@ function RouteComponent() {
   const [error, setError] = useState<Error | null>(null)
 
   const verifyTelegram = useServerFn(sf_telegramVerification)
+  const verifyStore = useServerFn(sf_ValidateStore)
 
   // auto renders
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
-
-        // const initData = WebApp.initData
-
-        // Example for mocking in your test
-        const initData =
-          'user=%7B%22id%22%3A7824653895%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1700000000&hash=FAKE_HASH'
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
         const user = await verifyTelegram({
-          data: { initData: initData },
+          data: { initData: WebApp.initData },
         })
+
+        const isValidStore = await verifyStore({
+          data: { userId: user.userId, storeId: storeId },
+        })
+
+        if (!isValidStore) throw new Error('Unauthorized...')
 
         setUserId(user.userId)
       } catch (err: any) {

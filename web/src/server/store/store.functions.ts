@@ -200,3 +200,26 @@ export const sf_GetPaymentMethodName = createServerFn({
   .handler(async ({ data }) => {
     return await storeServer.getstorePaymentMethodFromId(data.paymentMethodId)
   })
+
+export const sf_ValidateStore = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((data: { userId: string; storeId: string }) => data)
+  .handler(async ({ data }) => {
+    return await storeServer.ValidateStore(data.userId, data.storeId)
+  })
+
+export const sf_IsStoreValid = createServerFn({ method: 'GET' })
+  .inputValidator((data: { storeId: string }) => data)
+  .handler(async ({ data }) => {
+    const storeExperireDate = await storeServer.getStoreExpireDate(data.storeId)
+
+    if (
+      storeExperireDate &&
+      new Date(storeExperireDate).getTime() < Date.now()
+    ) {
+      return false
+    }
+
+    return true
+  })

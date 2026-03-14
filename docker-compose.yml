@@ -41,7 +41,7 @@ services:
   web:
     build:
       context: ./web
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: kira-web
     ports:
       - "3000:3000" # TanStack Start dev server
@@ -49,7 +49,7 @@ services:
       - ./web:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       # Very important: tell frontend where backend (api) lives inside network
       - VITE_API_URL=http://api:2109
       # or if using import.meta.env / process.env in TanStack Start:
