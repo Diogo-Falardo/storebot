@@ -6,13 +6,13 @@ import {
   conversations,
   createConversation,
 } from "@grammyjs/conversations";
-import { createStoreConversation } from "./shop/shop.conversations.js";
+import { createStoreConversation } from "./store/store.conversations.js";
 import {
   createPaymentLink,
   getStoreExpireDate,
   getStoreInfoByStoreId,
   getTelegramUserInfo,
-} from "./shop/requests.js";
+} from "./store/requests.js";
 
 const token = process.env.BOT_TOKEN;
 if (!token) throw new Error("BOT_TOKEN missing");
