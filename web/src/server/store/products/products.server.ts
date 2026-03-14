@@ -167,7 +167,7 @@ export class serverProduct {
       typeof dto.categoryId !== 'undefined' &&
       dto.categoryId !== product.categoryId
     ) {
-      if (dto.categoryId === 'none') {
+      if (dto.categoryId === 'null') {
         updateObj.categoryId = null
       } else {
         updateObj.categoryId = dto.categoryId
