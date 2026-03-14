@@ -28,8 +28,8 @@ test-results/
 playwright-report/
 
 # Drizzle / migrations temp files (if any)
-drizzle/
-migrations/             # ← usually committed, but if you generate temp files
+# drizzle/
+# migrations/             # ← usually committed, but if you generate temp files
 
 # Git & logs
 .git
