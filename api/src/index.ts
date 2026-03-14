@@ -6,10 +6,14 @@ import { Request, Response, NextFunction } from "express";
 import { HttpError } from "./system/utils/ErrorHandling.js";
 
 const app = express();
-app.use(express.json());
-
 const api = express.Router();
 app.use("/api", api);
+
+// payment route
+import paymentRouter from "./system/route/payment.route.js";
+api.use("/payment", paymentRouter);
+
+app.use(express.json());
 
 // user route
 import userRouter from "./system/route/user.route.js";
@@ -18,10 +22,6 @@ api.use("/user", userRouter);
 // shop route
 import storeRouter from "./system/route/store.route.js";
 api.use("/store", storeRouter);
-
-// payment route
-import paymentRouter from "./system/route/payment.route.js";
-api.use("/payment", paymentRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   // use http error
