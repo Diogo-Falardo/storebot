@@ -39,6 +39,7 @@ RUN npm ci --only=production --ignore-scripts --no-audit --prefer-offline
 
 # Copy the compiled output (this is what failed before)
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/drizzle ./drizzle
 
 # Optional final debug (can be removed later)
 RUN echo "=== DEBUG: Final runtime - dist/ contents ===" && \
