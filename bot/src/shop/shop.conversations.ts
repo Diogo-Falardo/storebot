@@ -1,40 +1,41 @@
 import type { Conversation } from "@grammyjs/conversations";
 import type { Context } from "grammy";
-import { getTelegramUserInfo, createShopTgOnly } from "./requests.js";
+import { createStoreTgOnly, getTelegramUserInfo } from "./requests.js";
 
-// Creates a conversation to create a new shop
-export async function createShopConversation(
+// create store conversation
+export async function createStoreConversation(
   conversation: Conversation,
   ctx: Context,
 ) {
-  // verify if user has already a shop created
   const tgUserId = ctx.from!.id;
   const username = ctx.from?.username;
 
   const user = await getTelegramUserInfo(tgUserId);
 
-  // if there is shops
-  if (user !== "no shops") {
+  // If user already has a store
+  if (user !== "no stores") {
     await ctx.reply(
-      `Hello${username ? ` ${username}` : ""}, you already have a shop: ${user?.shopName}.\n\n` +
-        "Currently, creating multiple shops is not supported. Stay tuned for future updates!",
+      `👋 Hello${username ? ` ${username}` : ""}, you already have a store: ${user?.storeName}.\n\n` +
+        "➤ Creating multiple stores is not supported yet.\n" +
+        "More features will be available soon.",
     );
     return;
   }
 
   await ctx.reply(
-    `Welcome${username ? ` ${username}` : ""}!\nThank you for choosing Kira to create your shop.\n\n` +
-      "Please reply with your desired shop name (1–50 characters).",
+    `👋 Welcome${username ? ` ${username}` : ""}!\n` +
+      "Let's set up your store.\n\n" +
+      "Please send the name you want for your store (1–50 characters).",
   );
 
   let shopName: string;
-  // while name is not correct
+
   while (true) {
     const { message } = await conversation.waitFor("message:text");
     shopName = String(message.text).trim();
 
     if (!shopName) {
-      await ctx.reply("No name received. Please send your shop name.");
+      await ctx.reply("⚠️ Please send a valid store name.");
       continue;
     }
     if (shopName.charAt(0) === "/") {
@@ -42,7 +43,7 @@ export async function createShopConversation(
     }
     if (shopName.length < 1 || shopName.length > 50) {
       await ctx.reply(
-        "Shop name must be between 1 and 50 characters. Please try again.",
+        "⚠️ Store name must be between 1 and 50 characters. Try again.",
       );
       continue;
     }
@@ -50,16 +51,20 @@ export async function createShopConversation(
   }
 
   try {
-    const result = await createShopTgOnly(tgUserId, shopName);
+    const result = await createStoreTgOnly(tgUserId, shopName);
 
-    return await ctx.reply(
-      `Shop created: ${result.shopName ?? shopName}\n` +
-        "Next step: activate it with /activate",
+    await ctx.reply(
+      `✅ Your store has been created: <b>${result.shopName ?? shopName}</b>\n\n` +
+        "Next steps:\n" +
+        "• 📂 <b>/dashboard</b> – Manage your store (add products, edit settings, delete store, etc.)\n" +
+        "• 🔓 <b>/activate</b> – Make your store visible to everyone\n\n" +
+        "⚠️ Your store remains hidden until activation is completed.",
+      { parse_mode: "HTML" },
     );
   } catch (err: any) {
     console.error(err);
-    return await ctx.reply(
-      "An error occurred while creating your shop. Please try again later.\n" +
+    await ctx.reply(
+      "❌ An error occurred while creating your store. Please try again later.\n" +
         (err.message ?? err),
     );
   }

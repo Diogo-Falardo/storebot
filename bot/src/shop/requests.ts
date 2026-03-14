@@ -13,12 +13,12 @@ const BOT_SECRET = process.env.BOT_SECRET!;
 type UserInfo =
   | {
       userId: string;
-      shopId: string;
-      shopName: string;
-      shopType: string;
-      shopCurrency?: string;
+      storeId: string;
+      storeName: string;
+      storeType: string;
+      storeCurrency?: string;
     }
-  | "no shops";
+  | "no stores";
 
 const urlUser = "/user";
 export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
@@ -36,7 +36,7 @@ export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
    * that is not a problem so we skip it
    */
   if (res.status === 404) {
-    return "no shops";
+    return "no stores";
   }
 
   if (!res.ok) {
@@ -46,14 +46,12 @@ export async function getTelegramUserInfo(tgUserId: number): Promise<UserInfo> {
   return res.json();
 }
 
-// ----------
-// RELATED TO SHOP ENDPOINTS
-// ----------
+// ------------ store
 
-const urlShops = "/shop";
+const urlStore = "/store";
 // create a shop to a user
-export async function createShopTgOnly(tgUserId: number, shopName: string) {
-  const res = await fetch(`${API_URL}${urlShops}/create`, {
+export async function createStoreTgOnly(tgUserId: number, storeName: string) {
+  const res = await fetch(`${API_URL}${urlStore}/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,8 +59,8 @@ export async function createShopTgOnly(tgUserId: number, shopName: string) {
       "x-TG-USER-ID": String(tgUserId),
     },
     body: JSON.stringify({
-      shopName,
-      shopType: "public",
+      storeName,
+      storeType: "public",
     }),
   });
 
@@ -71,4 +69,59 @@ export async function createShopTgOnly(tgUserId: number, shopName: string) {
   }
 
   return res.json();
+}
+
+export async function getStoreInfoByStoreId(tgUserId: number, storeId: string) {
+  const res = await fetch(`${API_URL}${urlStore}/public-info/${storeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-BOT-SECRET": BOT_SECRET,
+      "x-TG-USER-ID": String(tgUserId),
+    },
+  });
+
+  if (!res.ok) {
+    console.error(res);
+  }
+
+  return res.json();
+}
+
+export async function getStoreExpireDate(tgUserId: number, storeId: string) {
+  const res = await fetch(`${API_URL}${urlStore}/expire-date/${storeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-BOT-SECRET": BOT_SECRET,
+      "x-TG-USER-ID": String(tgUserId),
+    },
+  });
+
+  if (!res.ok) {
+    console.error(res);
+  }
+
+  return res.json();
+}
+
+const urlPayment = "/payment";
+export async function createPaymentLink(telegramId: number, period: string) {
+  const res = await fetch(`${API_URL}${urlPayment}/create-link`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ period, telegramId }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    console.error(res);
+    return `❌ ${data.error || "Failed to generate payment link. Please try again."}`;
+  }
+
+  if (!data.url) {
+    return "❌ Failed to generate payment link. Please try again.";
+  }
+
+  return data.url;
 }
