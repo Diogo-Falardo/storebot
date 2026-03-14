@@ -17,7 +17,7 @@ type ProductInfoProps = {
   productPrice: string
   productCategory: string | null
   productImage: string | null
-  shopCurrency: string | null
+  storeCurrency: string | null
 }
 
 export const ProductInfo = (product: ProductInfoProps) => {
@@ -60,7 +60,7 @@ export const ProductInfo = (product: ProductInfoProps) => {
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-primary">
                 {product.productPrice}
-                <span>{product.shopCurrency}</span>
+                <span>{product.storeCurrency}</span>
               </span>
             </div>
             <p className="mb-4 mt-2">

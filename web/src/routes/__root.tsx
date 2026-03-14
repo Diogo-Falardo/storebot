@@ -10,6 +10,7 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import TanStackQueryDevtools from '@/integrations/tanstack-query/devtools'
 import { ThemeProvider } from '@/components/theme-provider'
+import UnderConstruction from '@/components/underConstruction'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -26,7 +27,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Kira',
+        title: 'storebot',
       },
     ],
     links: [
@@ -34,10 +35,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         rel: 'stylesheet',
         href: appCss,
       },
+      { rel: 'icon', href: '/favicon.ico', type: 'image/x-icon' },
     ],
   }),
 
   shellComponent: RootDocument,
+  notFoundComponent: () => <UnderConstruction />,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
