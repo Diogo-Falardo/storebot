@@ -27,14 +27,16 @@ type storeFiltersProps = {
 const StoreFilters = (filters: storeFiltersProps) => {
   // Handlers for input changes
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.min(Number(e.target.value), filters.priceRange[1])
+    const valueStr = e.target.value.replace(',', '.')
+    const value = Math.min(Number(valueStr), filters.priceRange[1])
     filters.setPriceRange([value, filters.priceRange[1]])
   }
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueStr = e.target.value.replace(',', '.')
     const value =
       e.target.value === ''
         ? Infinity
-        : Math.max(Number(e.target.value), filters.priceRange[0])
+        : Math.max(Number(valueStr), filters.priceRange[0])
     filters.setPriceRange([filters.priceRange[0], value])
   }
 

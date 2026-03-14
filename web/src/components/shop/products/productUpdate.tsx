@@ -142,7 +142,10 @@ const ProductUpdate = (product: productProps) => {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(',', '.')
+                        field.handleChange(value)
+                      }}
                       aria-invalid={isInvalid}
                       placeholder={product.productPrice}
                       autoComplete="off"

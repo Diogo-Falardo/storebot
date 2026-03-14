@@ -202,7 +202,7 @@ bot.command("shop", async (ctx) => {
       );
     }
 
-    const url = `${webUrl}/${user.storeId}`;
+    const url = `${webUrl}/store/${user.storeId}`;
 
     await ctx.reply("🛒 Open your store:", {
       reply_markup: {
@@ -288,7 +288,7 @@ bot.command("openshop", async (ctx) => {
       return ctx.reply("❌ The store you are looking for was not found.");
     }
 
-    const storeUrl = `${webUrl}/${shopId}`;
+    const storeUrl = `${webUrl}/store/${shopId}`;
 
     await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
       parse_mode: "HTML",

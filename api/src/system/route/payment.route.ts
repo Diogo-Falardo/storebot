@@ -48,9 +48,11 @@ router.post(
       });
 
       res.json({ url: paymentLink.url });
-    } catch (err) {
-      console.log(err);
-      next(err);
+    } catch (err: any) {
+      console.error("Error creating payment link:", err);
+      return res
+        .status(500)
+        .json({ error: err.message || "Internal server error" });
     }
   },
 );
