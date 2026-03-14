@@ -16,7 +16,7 @@ import { Label } from '../ui/label'
 const MIN = 0
 const MAX = 100000
 
-type ShopFiltersProps = {
+type storeFiltersProps = {
   categoryNames: Array<string>
   priceRange: [number, number]
   setPriceRange: (range: [number, number]) => void
@@ -24,7 +24,7 @@ type ShopFiltersProps = {
   setSelectedCategories: (categories: Array<string>) => void
 }
 
-const ShopFilters = (filters: ShopFiltersProps) => {
+const StoreFilters = (filters: storeFiltersProps) => {
   // Handlers for input changes
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), filters.priceRange[1])
@@ -126,4 +126,4 @@ const ShopFilters = (filters: ShopFiltersProps) => {
   )
 }
 
-export default ShopFilters
+export default StoreFilters

@@ -43,13 +43,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
-import { sf_DeleteShop, sf_UpdateShop } from '@/server/shop/shop.functions'
 import {
-  CREATE_SHOP_SCHEMA,
-  SHOP_CURRENCY_ENUM,
-  SHOP_TYPE_ENUM,
-} from '@/schemas/shop.schema'
+  CREATE_store_SCHEMA,
+  store_CURRENCY_ENUM,
+  store_TYPE_ENUM,
+} from '@/schemas/store.schema'
+import { useGetUserstoreInfo } from '@/lib/hooks/shop/store.hooks'
+import { sf_Deletestore, sf_Updatestore } from '@/server/store/store.functions'
 
 /**
  *
@@ -58,9 +58,15 @@ import {
  * @param param0
  * @returns Component
  */
-const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
-  // load existing data from shop
-  const { data, isLoading } = useGetUserShopInfo({ userId, shopId })
+const StoreUpdate = ({
+  userId,
+  storeId,
+}: {
+  userId: string
+  storeId: string
+}) => {
+  // load existing data from store
+  const { data, isLoading } = useGetUserstoreInfo({ userId, storeId })
   if (data) {
     console.log(data)
   }
@@ -69,51 +75,51 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
   const router = useRouter()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const update = useServerFn(sf_UpdateShop)
-  const deleted = useServerFn(sf_DeleteShop)
+  const update = useServerFn(sf_Updatestore)
+  const deleted = useServerFn(sf_Deletestore)
 
   const form = useForm({
     defaultValues: {
-      shopName: data?.shopName ?? '',
-      shopType: data?.shopType ?? 'public',
-      shopCurrency: data?.shopCurrency ?? 'EUR',
+      storeName: data?.storeName ?? '',
+      storeType: data?.storeType ?? 'public',
+      storeCurrency: data?.storeCurrency ?? 'EUR',
     },
     validators: {
-      onSubmit: CREATE_SHOP_SCHEMA,
+      onSubmit: CREATE_store_SCHEMA,
     },
     onSubmit: async ({ value }) => {
       try {
         const updatedInfo = await update({
-          data: { userId, shopId, dto: value },
+          data: { userId, storeId, dto: value },
         })
         toast.success(updatedInfo)
         // invalidate querys and router
-        queryClient.invalidateQueries({ queryKey: ['shop', shopId] })
+        queryClient.invalidateQueries({ queryKey: ['store', storeId] })
         closeDialogRef.current?.click()
       } catch (err: any) {
-        toast.error(err.message ?? 'Error while updating shop!')
+        toast.error(err.message ?? 'Error while updating store!')
       }
     },
   })
 
-  // function to delete the user shop for completely
-  const deleteUserShop = async () => {
+  // function to delete the user store for completely
+  const deleteUserstore = async () => {
     try {
       const result = await deleted({
         data: {
           userId: userId,
-          shopId: shopId,
+          storeId: storeId,
         },
       })
       if (result) {
-        toast.success('Shop and all its related data got deleted!')
-        // invalidate all querys related to the shop
-        queryClient.invalidateQueries({ queryKey: ['shop'] })
+        toast.success('store and all its related data got deleted!')
+        // invalidate all querys related to the store
+        queryClient.invalidateQueries({ queryKey: ['store'] })
         router.invalidate()
         router.navigate({ to: '/' })
       }
     } catch (err: any) {
-      toast.error(err.message ?? 'Error while deleting shop')
+      toast.error(err.message ?? 'Error while deleting store')
     }
   }
 
@@ -133,29 +139,29 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
           <Settings />
         </Button>
       </DialogTrigger>
-      {/* update shop content */}
+      {/* update store content */}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Shop</DialogTitle>
+          <DialogTitle>Update store</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <form
-          id="update-shop-form"
+          id="update-store-form"
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
           }}
         >
           <FieldGroup>
-            {/* shop name */}
+            {/* store name */}
             <form.Field
-              name="shopName"
+              name="storeName"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Shop Name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>store Name</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -163,7 +169,7 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder="Kira Shop"
+                      placeholder="Kira store"
                       autoComplete="off"
                     />
                     {isInvalid && (
@@ -173,15 +179,15 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                 )
               }}
             />
-            {/* shop currency */}
+            {/* store currency */}
             <form.Field
-              name="shopCurrency"
+              name="storeCurrency"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Shop Currency</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>store Currency</FieldLabel>
                     <Select
                       value={field.state.value}
                       onValueChange={(value) =>
@@ -189,10 +195,10 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select your shop currency" />
+                        <SelectValue placeholder="Select your store currency" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SHOP_CURRENCY_ENUM.options.map((type) => (
+                        {store_CURRENCY_ENUM.options.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
                           </SelectItem>
@@ -206,15 +212,15 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                 )
               }}
             />
-            {/* shop type */}
+            {/* store type */}
             <form.Field
-              name="shopType"
+              name="storeType"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Shop Type</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>store Type</FieldLabel>
                     <Select
                       value={field.state.value}
                       onValueChange={(value) =>
@@ -222,10 +228,10 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                       }
                     >
                       <SelectTrigger disabled>
-                        <SelectValue placeholder="Select a shop type" />
+                        <SelectValue placeholder="Select a store type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SHOP_TYPE_ENUM.options.map((type) => (
+                        {store_TYPE_ENUM.options.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type.charAt(0).toUpperCase() + type.slice(1)}
                           </SelectItem>
@@ -250,7 +256,7 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
             <AlertDialogTrigger asChild>
               <Button variant={'destructive'}>
                 <Trash2 />
-                Delete Shop
+                Delete store
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent size="sm">
@@ -259,9 +265,9 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                   <Trash2 />
                 </AlertDialogMedia>
                 <AlertDialogTitle>
-                  Delete shop?
+                  Delete store?
                   <AlertDialogDescription>
-                    This will delete this shop and all respective data!
+                    This will delete this store and all respective data!
                   </AlertDialogDescription>
                 </AlertDialogTitle>
               </AlertDialogHeader>
@@ -269,16 +275,16 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
                 <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
-                  onClick={() => deleteUserShop()}
+                  onClick={() => deleteUserstore()}
                 >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Button form="update-shop-form" type="submit">
+          <Button form="update-store-form" type="submit">
             <Store />
-            Update Shop
+            Update store
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -286,4 +292,4 @@ const ShopUpdate = ({ userId, shopId }: { userId: string; shopId: string }) => {
   )
 }
 
-export default ShopUpdate
+export default StoreUpdate

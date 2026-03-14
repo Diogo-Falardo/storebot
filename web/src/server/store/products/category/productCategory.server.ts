@@ -10,12 +10,12 @@ export class serverCategory {
    *
    * true: means available
    * false: means already inserted
-   * @param shopId uuid
+   * @param storeId uuid
    * @param categoryName string
    * @returns bool
    */
   async verifyCategoryName(
-    shopId: string,
+    storeId: string,
     categoryName: string,
   ): Promise<boolean> {
     try {
@@ -23,7 +23,10 @@ export class serverCategory {
         .select()
         .from(category)
         .where(
-          and(eq(category.shopId, shopId), eq(category.category, categoryName)),
+          and(
+            eq(category.storeId, storeId),
+            eq(category.category, categoryName),
+          ),
         )
 
       if (!row[0]) {
@@ -40,15 +43,15 @@ export class serverCategory {
   /**
    * Obtains an array of categorys
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns array
    */
-  async getCategorysFromShopId(shopId: string) {
+  async getCategorysFromstoreId(storeId: string) {
     try {
       const categorys = await db
         .select()
         .from(category)
-        .where(eq(category.shopId, shopId))
+        .where(eq(category.storeId, storeId))
 
       return VISUALIZE_CATEGORY_SCHEMA.array().parse(categorys)
     } catch (err: any) {
@@ -60,13 +63,13 @@ export class serverCategory {
   /**
    * Creates a category
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param categoryName string
    * @returns "msg" string
    */
-  async createCategory(shopId: string, categoryName: string) {
+  async createCategory(storeId: string, categoryName: string) {
     const categoryVerification = await this.verifyCategoryName(
-      shopId,
+      storeId,
       categoryName,
     )
 
@@ -77,7 +80,7 @@ export class serverCategory {
     try {
       await db.insert(category).values({
         id: uuidv4(),
-        shopId: shopId,
+        storeId: storeId,
         category: categoryName,
       })
 
@@ -91,15 +94,15 @@ export class serverCategory {
   /**
    * Deletes a category
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param categoryId uuid
    * @returns "msg" string
    */
-  async deleteCategory(shopId: string, categoryId: string) {
+  async deleteCategory(storeId: string, categoryId: string) {
     try {
       await db
         .delete(category)
-        .where(and(eq(category.shopId, shopId), eq(category.id, categoryId)))
+        .where(and(eq(category.storeId, storeId), eq(category.id, categoryId)))
 
       return 'category deleted'
     } catch (err: any) {
@@ -111,15 +114,15 @@ export class serverCategory {
   /**
    * Converts category id into name
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param categoryId uuid
    */
-  async getCategoryName(shopId: string, categoryId: string) {
+  async getCategoryName(storeId: string, categoryId: string) {
     try {
       const categoryName = await db
         .select()
         .from(category)
-        .where(and(eq(category.shopId, shopId), eq(category.id, categoryId)))
+        .where(and(eq(category.storeId, storeId), eq(category.id, categoryId)))
 
       return categoryName[0].category
     } catch (err: any) {

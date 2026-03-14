@@ -1,55 +1,56 @@
 import { createServerFn } from '@tanstack/react-start'
 import { serverProduct } from './products.server'
-import {
-  DTO_CREATE_PRODUCT,
-  PRODUCT_SCHEMA,
-  VISUALIZE_PRODUCT_SCHEMA,
-} from '@/schemas/product.schema'
+import { DTO_CREATE_PRODUCT, PRODUCT_SCHEMA } from '@/schemas/product.schema'
 
 const productServer = new serverProduct()
 
 /**
  * "GET"
- * products from a shop
+ * products from a store
  *
- * required: userId & shopId
+ * required: userId & storeId
  */
-export const sf_ProductsFromShop = createServerFn({ method: 'GET' })
-  .inputValidator((data: { userId: string; shopId: string }) => data)
+export const sf_ProductsFromstore = createServerFn({ method: 'GET' })
+  .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await productServer.getProductsFromShopId(data.userId, data.shopId)
+    return await productServer.getProductsFromstoreId(data.userId, data.storeId)
   })
 
 /**
  * "POST"
  * create a product
  *
- * required: userId, shopId, product objects
+ * required: userId, storeId, product objects
  */
-export const sf_AddProductToShop = createServerFn({ method: 'POST' })
+export const sf_AddProductTostore = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: { userId: string; shopId: string; dto: DTO_CREATE_PRODUCT }) => data,
+    (data: { userId: string; storeId: string; dto: DTO_CREATE_PRODUCT }) =>
+      data,
   )
   .handler(async ({ data }) => {
-    return await productServer.createProduct(data.userId, data.shopId, data.dto)
+    return await productServer.createProduct(
+      data.userId,
+      data.storeId,
+      data.dto,
+    )
   })
 
 /**
  * "POST"
- * update a product from a shop
+ * update a product from a store
  *
- * required: shopId, productId, product object
+ * required: storeId, productId, product object
  */
-export const sf_UpdateProductFromShop = createServerFn({
+export const sf_UpdateProductFromstore = createServerFn({
   method: 'POST',
 })
   .inputValidator(
-    (data: { shopId: string; productId: string; dto: DTO_CREATE_PRODUCT }) =>
+    (data: { storeId: string; productId: string; dto: DTO_CREATE_PRODUCT }) =>
       data,
   )
   .handler(async ({ data }) => {
     return await productServer.updateProduct(
-      data.shopId,
+      data.storeId,
       data.productId,
       data.dto,
     )
@@ -59,29 +60,29 @@ export const sf_UpdateProductFromShop = createServerFn({
  * "POST"
  * delete a product
  *
- * required: shopId & productId
+ * required: storeId & productId
  */
-export const sf_DeleteProductFromShop = createServerFn({
+export const sf_DeleteProductFromstore = createServerFn({
   method: 'POST',
 })
-  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }) => {
-    return await productServer.deleteProduct(data.shopId, data.productId)
+    return await productServer.deleteProduct(data.storeId, data.productId)
   })
 
 /**
  * "POST"
  * switch product visibility
  *
- * required: shopId & productId
+ * required: storeId & productId
  */
 export const sf_ToogleProductVisibilty = createServerFn({
   method: 'POST',
 })
-  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }) => {
     const product = await productServer.getProductById(
-      data.shopId,
+      data.storeId,
       data.productId,
     )
 
@@ -106,15 +107,15 @@ export const sf_AddProductImage = createServerFn({
 
 /**
  * "GET"
- * validate if a product still exists in shop
+ * validate if a product still exists in store
  *
- * required: shopId & productId
+ * required: storeId & productId
  */
 export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
-  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }): Promise<'invalid' | 'valid'> => {
     const res = await productServer.validateIfProductExists(
-      data.shopId,
+      data.storeId,
       data.productId,
     )
 
@@ -127,10 +128,10 @@ export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
  * "GET"
  * return a product from its id
  *
- * required shopId & productId
+ * required storeId & productId
  */
 export const sf_GetProductFromId = createServerFn({ method: 'GET' })
-  .inputValidator((data: { shopId: string; productId: string }) => data)
+  .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }): Promise<PRODUCT_SCHEMA> => {
-    return await productServer.getProductById(data.shopId, data.productId)
+    return await productServer.getProductById(data.storeId, data.productId)
   })

@@ -1,21 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
-import { sf_ProductsFromShop } from '@/server/shop/products/product.functions'
+import { sf_ProductsFromstore } from '@/server/store/products/product.functions'
 
 /**
- * Hook to fetch the products from a shop
+ * Hook to fetch the products from a store
  *
- * @param param0 userId and shopId
- * @returns server function: sf_ProductsFromShop
+ * @param param0 userId and storeId
+ * @returns server function: sf_ProductsFromstore
  */
-export function useGetShopProducts({
+export function useGetstoreProducts({
   userId,
-  shopId,
+  storeId,
 }: {
   userId: string
-  shopId: string
+  storeId: string
 }) {
   return useQuery({
-    queryKey: ['products', shopId],
-    queryFn: () => sf_ProductsFromShop({ data: { userId, shopId } }),
+    queryKey: ['products', storeId],
+    queryFn: () => sf_ProductsFromstore({ data: { userId, storeId } }),
   })
 }

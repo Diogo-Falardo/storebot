@@ -14,18 +14,18 @@ const productServer = new serverProduct()
 
 export class serverOrder {
   /**
-   * Place an order [shop]
+   * Place an order [store]
    *
    * Indentifies who placed the order by its telegramUserId and order Indentifier
    *
    * @param telegramUserId number
-   * @param shopId uuid
+   * @param storeId uuid
    * @param dto receive order
    * @returns "msg"
    */
   async placeOrder(
     telegramUserId: number,
-    shopId: string,
+    storeId: string,
     dto: DTO_RECEIVE_ORDER,
   ) {
     // generate an order id
@@ -42,7 +42,7 @@ export class serverOrder {
 
     const orderPayload = {
       id: orderId,
-      shopId: shopId,
+      storeId: storeId,
       orderStatus: 'pending',
       telegramUserId: telegramUserId,
       orderIdentifier: dto.orderIdentifier,
@@ -67,21 +67,21 @@ export class serverOrder {
   }
 
   /**
-   * Returns all the orders corresponding to a shop
-   * @param shopId uuid
-   * @returns ShopOrders.Parsed(ORDER_VISUALIZATION)
+   * Returns all the orders corresponding to a store
+   * @param storeId uuid
+   * @returns storeOrders.Parsed(ORDER_VISUALIZATION)
    */
-  async getOrdersFromShopId(shopId: string): Promise<Array<ORDER_SCHEMA>> {
+  async getOrdersFromstoreId(storeId: string): Promise<Array<ORDER_SCHEMA>> {
     try {
-      const shopOrders = await db
+      const storeOrders = await db
         .select()
         .from(orders)
-        .where(eq(orders.shopId, shopId))
+        .where(eq(orders.storeId, storeId))
 
-      return ORDER_VISUALIZATION.array().parse(shopOrders)
+      return ORDER_VISUALIZATION.array().parse(storeOrders)
     } catch (err: any) {
       console.error(err)
-      throw new Error(err.message ?? `Error getting the shop orders`)
+      throw new Error(err.message ?? `Error getting the store orders`)
     }
   }
 
@@ -91,7 +91,7 @@ export class serverOrder {
    * @param orderId uuid
    * @returns "msg" or products
    */
-  async getProductsFromOrderId(shopId: string, orderId: string) {
+  async getProductsFromOrderId(storeId: string, orderId: string) {
     try {
       const products = await db
         .select()
@@ -105,7 +105,7 @@ export class serverOrder {
       // Fetch all product info in parallel and collect results
       const productInfos = await Promise.all(
         products.map(async (product) => {
-          return await productServer.getProductById(shopId, product.productId)
+          return await productServer.getProductById(storeId, product.productId)
         }),
       )
 
@@ -120,12 +120,12 @@ export class serverOrder {
    * Add a Order Custom Message to an order
    *
    * @param orderId uuid
-   * @param shopId uuid
+   * @param storeId uuid
    * @param message string
    * @returns "msg"
    */
   async addOrderCustomMessage(
-    shopId: string,
+    storeId: string,
     orderId: string,
     message: string,
   ) {
@@ -133,7 +133,7 @@ export class serverOrder {
       await db
         .update(orders)
         .set({ orderCustomMessage: message })
-        .where(and(eq(orders.id, orderId), eq(orders.shopId, shopId)))
+        .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)))
 
       return 'Added Order Custom Message'
     } catch (err: any) {
@@ -145,13 +145,13 @@ export class serverOrder {
   /**
    * Update the order status of an order
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param orderId uuid
    * @param orderStatus enum
    * @returns "msg"
    */
   async changeOrderStatus(
-    shopId: string,
+    storeId: string,
     orderId: string,
     orderStatus: OrderStatus,
   ) {
@@ -159,7 +159,7 @@ export class serverOrder {
       await db
         .update(orders)
         .set({ orderStatus: orderStatus })
-        .where(and(eq(orders.shopId, shopId), eq(orders.id, orderId)))
+        .where(and(eq(orders.storeId, storeId), eq(orders.id, orderId)))
 
       return 'Updated Order Status'
     } catch (err: any) {
@@ -171,17 +171,17 @@ export class serverOrder {
   /**
    * Return all the orders from an user
    * @param telegramUserId
-   * @param shopId
+   * @param storeId
    * @returns
    */
-  async getOrdersFromTelegramId(shopId: string, telegramUserId: number) {
+  async getOrdersFromTelegramId(storeId: string, telegramUserId: number) {
     try {
       const userOrders = await db
         .select()
         .from(orders)
         .where(
           and(
-            eq(orders.shopId, shopId),
+            eq(orders.storeId, storeId),
             eq(orders.telegramUserId, telegramUserId),
           ),
         )

@@ -6,16 +6,16 @@ import { Image } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { sf_AddProductImage } from '@/server/shop/products/product.functions'
+import { sf_AddProductImage } from '@/server/store/products/product.functions'
 
 const CLOUD_NAME = 'ddpkwh9th'
 const UPLOAD_PRESET = 'KiraBot'
 
 const ImgUploader = ({
-  shopId,
+  storeId,
   productId,
 }: {
-  shopId: string
+  storeId: string
   productId: string
 }) => {
   const [uploading, setUploading] = useState(false)
@@ -51,7 +51,7 @@ const ImgUploader = ({
       })
       if (ok) {
         toast.success('Image updated!')
-        queryClient.invalidateQueries({ queryKey: ['products', shopId] })
+        queryClient.invalidateQueries({ queryKey: ['products', storeId] })
         router.invalidate()
       }
     }

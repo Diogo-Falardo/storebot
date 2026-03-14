@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
-import { serverShop } from '../shop.server'
+import { serverStore } from '../store.server'
 import { db } from '@/db'
 import { products } from '@/db/schema'
 import {
@@ -9,25 +9,25 @@ import {
   VISUALIZE_PRODUCT_SCHEMA,
 } from '@/schemas/product.schema'
 
-const shopServer = new serverShop()
+const storeServer = new serverStore()
 
 export class serverProduct {
   /**
    * Obtain product by id
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param productId uuid
    * @returns parsed product
    */
   async getProductById(
-    shopId: string,
+    storeId: string,
     productId: string,
   ): Promise<PRODUCT_SCHEMA> {
     try {
       const product = await db
         .select()
         .from(products)
-        .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+        .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
 
       if (!product[0]) {
         throw new Error('Product not found!')
@@ -41,12 +41,12 @@ export class serverProduct {
 
   /**
    * Obtain a produt by name
-   * @param shopId uuid
+   * @param storeId uuid
    * @param productName string
    * @returns parsed product or "product not found"
    */
   async getProductByName(
-    shopId: string,
+    storeId: string,
     productName: string,
   ): Promise<PRODUCT_SCHEMA | string> {
     try {
@@ -55,7 +55,7 @@ export class serverProduct {
         .from(products)
         .where(
           and(
-            eq(products.shopId, shopId),
+            eq(products.storeId, storeId),
             eq(products.productName, productName),
           ),
         )
@@ -75,20 +75,27 @@ export class serverProduct {
    * Create a new product
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @param dto create product object
    * @returns "product created" if success
    */
-  async createProduct(userId: string, shopId: string, dto: DTO_CREATE_PRODUCT) {
+  async createProduct(
+    userId: string,
+    storeId: string,
+    dto: DTO_CREATE_PRODUCT,
+  ) {
     // validate user ownership
-    const ownership = await shopServer.validateUserShopOwnership(userId, shopId)
+    const ownership = await storeServer.validateUserStoreOwnership(
+      userId,
+      storeId,
+    )
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
     // gets the product by name adn verify if there is already a product with that names
-    const product = await this.getProductByName(shopId, dto.productName)
+    const product = await this.getProductByName(storeId, dto.productName)
     console.log(product)
     if (product !== 'product not found')
       throw new Error('Product already inserted!')
@@ -106,7 +113,7 @@ export class serverProduct {
     try {
       await db.insert(products).values({
         id: uuidv4(),
-        shopId: shopId,
+        storeId: storeId,
         productName: dto.productName,
         productPrice: dto.productPrice,
         productDesc: productDesc,
@@ -123,17 +130,17 @@ export class serverProduct {
   /**
    * Update product
    *
-   * @param shopId uuid internal user id
+   * @param storeId uuid internal user id
    * @param productId uuid
    * @param dto create product object
    * @returns "msg" string
    */
   async updateProduct(
-    shopId: string,
+    storeId: string,
     productId: string,
     dto: DTO_CREATE_PRODUCT,
   ) {
-    const product = await this.getProductById(shopId, productId)
+    const product = await this.getProductById(storeId, productId)
 
     // object for the updated product fields
     const updateObj: Record<string, any> = {}
@@ -176,7 +183,7 @@ export class serverProduct {
       await db
         .update(products)
         .set(updateObj)
-        .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+        .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
 
       return 'Product updated!'
     } catch (err: any) {
@@ -187,17 +194,17 @@ export class serverProduct {
 
   /**
    * Delete product
-   * @param shopId uuid
+   * @param storeId uuid
    * @param productId uuid
    * @returns "msg" string
    */
-  async deleteProduct(shopId: string, productId: string) {
-    await this.getProductById(shopId, productId)
+  async deleteProduct(storeId: string, productId: string) {
+    await this.getProductById(storeId, productId)
 
     try {
       await db
         .delete(products)
-        .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+        .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
 
       return 'product deleted!'
     } catch (err: any) {
@@ -207,18 +214,21 @@ export class serverProduct {
   }
 
   /**
-   * Obtain a list of products from a shop
+   * Obtain a list of products from a store
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns parsed list of products
    */
-  async getProductsFromShopId(
+  async getProductsFromstoreId(
     userId: string,
-    shopId: string,
+    storeId: string,
   ): Promise<Array<PRODUCT_SCHEMA>> {
     // validate user ownership
-    const ownership = await shopServer.validateUserShopOwnership(userId, shopId)
+    const ownership = await storeServer.validateUserStoreOwnership(
+      userId,
+      storeId,
+    )
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
@@ -228,7 +238,7 @@ export class serverProduct {
       const productsList = await db
         .select()
         .from(products)
-        .where(eq(products.shopId, shopId))
+        .where(eq(products.storeId, storeId))
 
       return VISUALIZE_PRODUCT_SCHEMA.array().parse(productsList)
     } catch (err: any) {
@@ -273,21 +283,21 @@ export class serverProduct {
   }
 
   /**
-   * Validates if a product id is still in shop
+   * Validates if a product id is still in store
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param productId uuid
    * @returns boolean
    */
   async validateIfProductExists(
-    shopId: string,
+    storeId: string,
     productId: string,
   ): Promise<boolean> {
     try {
       const product = await db
         .select()
         .from(products)
-        .where(and(eq(products.shopId, shopId), eq(products.id, productId)))
+        .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
 
       if (!product[0]) {
         return false
@@ -302,18 +312,18 @@ export class serverProduct {
 }
 
 /**
- * Obtains all the products related to a shop
- * @param shopId uuid
+ * Obtains all the products related to a store
+ * @param storeId uuid
  * @returns list of products
  */
-export async function getProductsFromPublicShop(
-  shopId: string,
+export async function getProductsFromPublicstore(
+  storeId: string,
 ): Promise<Array<PRODUCT_SCHEMA>> {
   try {
     const productsList = await db
       .select()
       .from(products)
-      .where(eq(products.shopId, shopId))
+      .where(eq(products.storeId, storeId))
 
     return VISUALIZE_PRODUCT_SCHEMA.array().parse(productsList)
   } catch (err: any) {

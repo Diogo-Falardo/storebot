@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
-import { ShoppingBag, ShoppingCart, X } from 'lucide-react'
+import { ShoppingCart, X } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   Sheet,
@@ -20,7 +20,7 @@ import {
 } from '../ui/empty'
 import { ScrollArea } from '../ui/scroll-area'
 import Checkout from './orders/checkout'
-import { sf_ValidateIfProductExists } from '@/server/shop/products/product.functions'
+import { sf_ValidateIfProductExists } from '@/server/store/products/product.functions'
 
 type StoredItem = {
   productId: string
@@ -61,12 +61,12 @@ export function clearCartStorage() {
 }
 
 const Cart = ({
-  shopId,
-  shopCurrency,
+  storeId,
+  storeCurrency,
   telegramUserId,
 }: {
-  shopId: string
-  shopCurrency: string | null
+  storeId: string
+  storeCurrency: string | null
   telegramUserId: number | null
 }) => {
   if (typeof telegramUserId !== 'number') {
@@ -117,7 +117,7 @@ const Cart = ({
     const results = await Promise.all(
       items.map(async (product) => {
         const valid = await validProduct({
-          data: { shopId, productId: product.productId },
+          data: { storeId, productId: product.productId },
         })
         return { productId: product.productId, valid }
       }),
@@ -153,7 +153,7 @@ const Cart = ({
     >
       <SheetTrigger asChild>
         <Button>
-          <ShoppingBag /> My Cart
+          <ShoppingCart /> My Cart
         </Button>
       </SheetTrigger>
       <SheetContent className="flex flex-col h-full p-3">
@@ -188,7 +188,7 @@ const Cart = ({
                               <h1 className="text-base">{item.productName}</h1>
                               <h1 className="flex gap-1">
                                 {item.productPrice}
-                                <span>{shopCurrency}</span>
+                                <span>{storeCurrency}</span>
                               </h1>
                             </div>
                           </div>
@@ -230,12 +230,12 @@ const Cart = ({
         <div>
           <div className="flex justify-between">
             <h1 className="text-lg">Total:</h1>
-            <p>{total ? `${total.toFixed(2)} ${shopCurrency}` : ''}</p>
+            <p>{total ? `${total.toFixed(2)} ${storeCurrency}` : ''}</p>
           </div>
 
           <Checkout
             telegramUserId={telegramUserId}
-            shopId={shopId}
+            storeId={storeId}
             productsId={validatedProducts}
             isCartEmpty={cartProducts.length === 0}
             onCartCleared={refreshCart}

@@ -12,16 +12,16 @@ import { Spinner } from '../../ui/spinner'
 import { ScrollArea } from '../../ui/scroll-area'
 import { Empty, EmptyDescription, EmptyTitle } from '../../ui/empty'
 import { Card, CardTitle } from '../../ui/card'
-import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
+import { CREATE_CATEGORY_SCHEMA } from '@/schemas/category.schema'
+import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
 import {
   sf_CreateCategory,
   sf_DeleteCategory,
-} from '@/server/shop/products/category/productCategory.functions'
-import { CREATE_CATEGORY_SCHEMA } from '@/schemas/category.schema'
+} from '@/server/store/products/category/productCategory.functions'
 
-const ProductCategoryAdd = ({ shopId }: { shopId: string }) => {
+const ProductCategoryAdd = ({ storeId }: { storeId: string }) => {
   // load current payment methods
-  const { data, isLoading } = useGetShopCategorys({ shopId })
+  const { data, isLoading } = useGetstoreCategorys({ storeId })
 
   const queryClient = useQueryClient()
 
@@ -40,10 +40,10 @@ const ProductCategoryAdd = ({ shopId }: { shopId: string }) => {
     onSubmit: async ({ value }) => {
       try {
         await addCategory({
-          data: { shopId, category: value.category },
+          data: { storeId, category: value.category },
         })
         toast.success(`NEW Category: ${value.category}`)
-        queryClient.invalidateQueries({ queryKey: ['categorys', shopId] })
+        queryClient.invalidateQueries({ queryKey: ['categorys', storeId] })
       } catch (err: any) {
         toast.error(err.message ?? 'Error adding category.')
       }
@@ -54,9 +54,9 @@ const ProductCategoryAdd = ({ shopId }: { shopId: string }) => {
     setDeletingId(categoryId)
     try {
       await deleteCategory({
-        data: { shopId, categoryId },
+        data: { storeId, categoryId },
       })
-      queryClient.invalidateQueries({ queryKey: ['categorys', shopId] })
+      queryClient.invalidateQueries({ queryKey: ['categorys', storeId] })
       toast.success('Category deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {
@@ -151,7 +151,7 @@ const ProductCategoryAdd = ({ shopId }: { shopId: string }) => {
               <EmptyDescription className="">
                 Please add at least one product category so your customers can
                 easily browse and discover your products. Well-organized
-                categories improve navigation and enhance the overall shopping
+                categories improve navigation and enhance the overall storeping
                 experience.
               </EmptyDescription>
             </Empty>

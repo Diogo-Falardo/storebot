@@ -32,24 +32,24 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import {
   sf_GetPaymentMethodName,
   sf_GetShippingMethodName,
-} from '@/server/shop/shop.functions'
-import { Label } from '@/components/ui/label'
+} from '@/server/store/store.functions'
 
 const Orders = ({
-  shopId,
+  storeId,
   telegramUserId,
-  shopCurrency,
+  storeCurrency,
 }: {
-  shopId: string
+  storeId: string
   telegramUserId: number
-  shopCurrency?: string | null
+  storeCurrency?: string | null
 }) => {
   // hook
   const { data: userOrders, isLoading: loadingUserOrders } =
-    useGetOrdersFromTelegramUser({ shopId, telegramUserId })
+    useGetOrdersFromTelegramUser({ storeId, telegramUserId })
   // server fn
   const shippingMethod = useServerFn(sf_GetShippingMethodName)
   const paymentMethod = useServerFn(sf_GetPaymentMethodName)
@@ -152,8 +152,8 @@ const Orders = ({
                       </Card>
                       {/* InfoOrders for this order */}
                       <InfoOrders
-                        shopId={shopId}
-                        shopCurrency={shopCurrency}
+                        storeId={storeId}
+                        storeCurrency={storeCurrency}
                         orderId={order.id}
                         orderDate={order.createdAt}
                         orderIdentifier={order.orderIdentifier}
@@ -191,8 +191,8 @@ const Orders = ({
 }
 
 const InfoOrders = ({
-  shopId,
-  shopCurrency,
+  storeId,
+  storeCurrency,
   orderId,
   orderDate,
   orderIdentifier,
@@ -201,8 +201,8 @@ const InfoOrders = ({
   open,
   onOpenChange,
 }: {
-  shopId: string
-  shopCurrency?: string | null
+  storeId: string
+  storeCurrency?: string | null
   orderId: string
   orderDate: string
   orderIdentifier: string
@@ -215,7 +215,7 @@ const InfoOrders = ({
 
   // load the products from each order
   const { data: products, isLoading: productsIsLoading } =
-    useGetProductsFromOrders({ shopId, orderId })
+    useGetProductsFromOrders({ storeId, orderId })
 
   useEffect(() => {
     if (
@@ -259,7 +259,7 @@ const InfoOrders = ({
             TOTAL :
             <span className="font-medium">
               {total.toFixed(2)}
-              <span className="ml-1">{shopCurrency}</span>
+              <span className="ml-1">{storeCurrency}</span>
             </span>
           </Label>
 
@@ -301,7 +301,7 @@ const InfoOrders = ({
                         <div className="flex flex-col">
                           <CardTitle>{product.productName}</CardTitle>
                           <CardDescription>
-                            {product.productPrice} {shopCurrency}
+                            {product.productPrice} {storeCurrency}
                           </CardDescription>
                         </div>
                       </div>

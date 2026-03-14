@@ -18,10 +18,6 @@ import {
   OrderStatus,
 } from '@/schemas/order.schema'
 import {
-  sf_GetPaymentMethodName,
-  sf_GetShippingMethodName,
-} from '@/server/shop/shop.functions'
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -44,9 +40,13 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import {
+  sf_GetPaymentMethodName,
+  sf_GetShippingMethodName,
+} from '@/server/store/store.functions'
+import {
   sf_AddCustomOrderMessage,
   sf_UpdateOrderStatus,
-} from '@/server/shop/orders/order.function'
+} from '@/server/store/orders/order.function'
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -60,12 +60,12 @@ export function formatDate(dateString: string) {
 }
 
 const OrderCardADM = ({
-  shopId,
-  shopCurrency,
+  storeId,
+  storeCurrency,
   order,
 }: {
-  shopId: string
-  shopCurrency: string
+  storeId: string
+  storeCurrency: string
   order: ORDER_SCHEMA
 }) => {
   // serverFn
@@ -97,10 +97,10 @@ const OrderCardADM = ({
     setStatus(newStatus)
     try {
       await updateOrderStatus({
-        data: { shopId, orderId: order.id, status: newStatus },
+        data: { storeId, orderId: order.id, status: newStatus },
       })
       toast.success(`Status changed to: ${newStatus}!`)
-      queryClient.invalidateQueries({ queryKey: ['orders', shopId, order.id] })
+      queryClient.invalidateQueries({ queryKey: ['orders', storeId, order.id] })
     } catch (err: any) {
       toast.error(err.message ?? 'Error updating order status')
     }
@@ -166,8 +166,8 @@ const OrderCardADM = ({
       </Card>
       <OrderCardSheet
         orderId={order.id}
-        shopId={shopId}
-        shopCurrency={shopCurrency}
+        storeId={storeId}
+        storeCurrency={storeCurrency}
         orderCustomMessage={order.orderCustomMessage}
         orderIdentifier={order.orderIdentifier}
         orderDate={order.createdAt}
@@ -180,8 +180,8 @@ const OrderCardADM = ({
 }
 
 const OrderCardSheet = ({
-  shopId,
-  shopCurrency,
+  storeId,
+  storeCurrency,
   orderId,
   orderDate,
   orderIdentifier,
@@ -190,8 +190,8 @@ const OrderCardSheet = ({
   open,
   onOpenChange,
 }: {
-  shopId: string
-  shopCurrency: string
+  storeId: string
+  storeCurrency: string
   orderId: string
   orderDate: string
   orderIdentifier: string
@@ -205,7 +205,7 @@ const OrderCardSheet = ({
 
   // load the products from each order
   const { data: products, isLoading: productsIsLoading } =
-    useGetProductsFromOrders({ shopId, orderId })
+    useGetProductsFromOrders({ storeId, orderId })
 
   // serverfn
   const add = useServerFn(sf_AddCustomOrderMessage)
@@ -237,10 +237,12 @@ const OrderCardSheet = ({
     onSubmit: async ({ value }) => {
       try {
         await add({
-          data: { shopId, orderId, message: value.orderCustomMessage },
+          data: { storeId, orderId, message: value.orderCustomMessage },
         })
         toast.success(`Order Custom Message was updated!`)
-        queryClient.invalidateQueries({ queryKey: ['orders', shopId, orderId] })
+        queryClient.invalidateQueries({
+          queryKey: ['orders', storeId, orderId],
+        })
       } catch (err: any) {
         toast.error(err.message ?? 'Error adding custom order message')
       }
@@ -283,7 +285,7 @@ const OrderCardSheet = ({
             TOTAL:
             <span className="font-medium">
               {total.toFixed(2)}
-              <span className="ml-1">{shopCurrency}</span>
+              <span className="ml-1">{storeCurrency}</span>
             </span>
           </h1>
 
@@ -330,7 +332,7 @@ const OrderCardSheet = ({
                         <div className="flex flex-col">
                           <CardTitle>{product.productName}</CardTitle>
                           <CardDescription>
-                            {product.productPrice} {shopCurrency}
+                            {product.productPrice} {storeCurrency}
                           </CardDescription>
                         </div>
                       </div>
@@ -360,7 +362,7 @@ const OrderCardSheet = ({
                         Order Custome Message
                       </FieldLabel>
                       <FieldDescription>
-                        Order Custom Message allows shop administrators to
+                        Order Custom Message allows store administrators to
                         communicate important updates or personalized notes
                         regarding an order. Use this field to inform customers
                         about delays, special instructions, or any issues

@@ -32,19 +32,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { sf_AddProductToShop } from '@/server/shop/products/product.functions'
-import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
 
-const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
+import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
+import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
+import { sf_AddProductTostore } from '@/server/store/products/product.functions'
+
+const ProductAdd = ({
+  userId,
+  storeId,
+}: {
+  userId: string
+  storeId: string
+}) => {
   const router = useRouter()
   // load current categories
-  const { data: categories, isLoading } = useGetShopCategorys({ shopId })
+  const { data: categories, isLoading } = useGetstoreCategorys({ storeId })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const add = useServerFn(sf_AddProductToShop)
+  const add = useServerFn(sf_AddProductTostore)
 
   const form = useForm({
     defaultValues: {
@@ -59,7 +66,7 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
     },
     onSubmit: async ({ value }) => {
       try {
-        await add({ data: { userId, shopId, dto: value } })
+        await add({ data: { userId, storeId, dto: value } })
         toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
         router.invalidate()
@@ -82,7 +89,7 @@ const ProductAdd = ({ userId, shopId }: { userId: string; shopId: string }) => {
         <DialogHeader>
           <DialogTitle>Add Product</DialogTitle>
           <DialogDescription>
-            Add what ever you want to sell on your shop!
+            Add what ever you want to sell on your store!
           </DialogDescription>
         </DialogHeader>
         <form

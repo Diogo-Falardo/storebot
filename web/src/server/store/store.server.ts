@@ -1,122 +1,124 @@
 import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { paymentMethods, shippingMethods, shops } from '@/db/schema'
+import { paymentMethods, shippingMethods, stores } from '@/db/schema'
 import {
-  DTO_CREATE_SHOP,
-  SHOP_SCHEMA,
+  DTO_CREATE_store,
   VISUALIZE_METHOD_SCHEMA,
-  VISUALIZE_SHOP_SCHEMA,
-} from '@/schemas/shop.schema'
-import { th } from 'zod/v4/locales'
+  VISUALIZE_store_SCHEMA,
+  store_SCHEMA,
+} from '@/schemas/store.schema'
 
-export class serverShop {
+export class serverStore {
   /**
-   * Validates if a user is owner of the shop
+   * Validates if a user is owner of the store
    *
    * true: means its the owner
-   * false: means its not the user or simply the shop was not found...
+   * false: means its not the user or simply the store was not found...
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns boolean
    */
-  async validateUserShopOwnership(
+  async validateUserStoreOwnership(
     userId: string,
-    shopId: string,
+    storeId: string,
   ): Promise<boolean> {
     try {
-      await this.getShopById(userId, shopId)
+      await this.getStoreById(userId, storeId)
       return true
     } catch (err: any) {
-      // if server.getShopById
-      // returned the error Shop not found, means user is trying to access something that its not his..
-      if (err.message === 'Shop not found') {
+      // if server.getstoreById
+      // returned the error store not found, means user is trying to access something that its not his..
+      if (err.message === 'store not found') {
         return false
       }
       console.error(err.message)
-      throw new Error(err.message ?? 'Error validating shop ownership')
+      throw new Error(err.message ?? 'Error validating store ownership')
     }
   }
 
   /**
-   * Obtain a shop by its shopId
+   * Obtain a store by its storeId
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
-   * @returns parsed shop schema
+   * @param storeId uuid
+   * @returns parsed store schema
    */
-  async getShopById(userId: string, shopId: string): Promise<SHOP_SCHEMA> {
+  async getStoreById(userId: string, storeId: string): Promise<store_SCHEMA> {
     try {
-      const shop = await db
+      const store = await db
         .select()
-        .from(shops)
-        .where(and(eq(shops.userId, userId), eq(shops.id, shopId)))
+        .from(stores)
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
         .limit(1)
 
-      if (!shop[0]) throw new Error('Shop was not found!')
+      if (!store[0]) throw new Error('store was not found!')
 
-      return VISUALIZE_SHOP_SCHEMA.parse(shop[0])
+      return VISUALIZE_store_SCHEMA.parse(store[0])
     } catch (err: any) {
       console.error(err)
-      throw new Error(err.message ?? 'Error getting shop')
+      throw new Error(err.message ?? 'Error getting store')
     }
   }
 
   /**
-   * Create a shop to a user
+   * Create a store to a user
    *
    * @param userId uuid internal user id
-   * @param dto create shop object
+   * @param dto create store object
    */
-  async createShop(userId: string, dto: DTO_CREATE_SHOP) {
+  async createstore(userId: string, dto: DTO_CREATE_store) {
     try {
-      await db.insert(shops).values({
+      await db.insert(stores).values({
         id: uuidv4(),
         userId: userId,
-        shopName: dto.shopName,
-        shopType: dto.shopType,
+        storeName: dto.storeName,
+        storeType: dto.storeType,
       })
 
-      return 'shop created'
+      return 'store created'
     } catch (err: any) {
       console.error(err)
-      throw new Error('Error creating shop')
+      throw new Error('Error creating store')
     }
   }
 
   /**
-   * Update a shop related to an user
+   * Update a store related to an user
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
-   * @param dto create shop object
+   * @param storeId uuid
+   * @param dto create store object
    * @returns
    */
-  async updateShop(userId: string, shopId: string, dto: DTO_CREATE_SHOP) {
+  async updatestore(userId: string, storeId: string, dto: DTO_CREATE_store) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
-    // obtains the current shop info
-    const shop = await this.getShopById(userId, shopId)
+    // obtains the current store info
+    const store = await this.getStoreById(userId, storeId)
 
     // object to compare what data have changed
     const updateObj: Record<string, any> = {}
 
-    // shopName
-    if (typeof dto.shopName !== 'undefined' && dto.shopName !== shop.shopName) {
-      updateObj.shopName = dto.shopName
+    // storeName
+    if (
+      typeof dto.storeName !== 'undefined' &&
+      dto.storeName !== store.storeName
+    ) {
+      updateObj.storeName = dto.storeName
     }
 
-    // shopCurrency
+    // storeCurrency
     if (
-      typeof dto.shopCurrency !== 'undefined' &&
-      dto.shopCurrency !== shop.shopCurrency
+      typeof dto.storeCurrency !== 'undefined' &&
+      dto.storeCurrency !== store.storeCurrency
     ) {
-      updateObj.shopCurrency = dto.shopCurrency
+      updateObj.storeCurrency = dto.storeCurrency
     }
 
     // if no changes, return
@@ -126,56 +128,56 @@ export class serverShop {
 
     try {
       await db
-        .update(shops)
+        .update(stores)
         .set(updateObj)
-        .where(and(eq(shops.id, shopId), eq(shops.userId, userId)))
+        .where(and(eq(stores.id, storeId), eq(stores.userId, userId)))
 
-      return 'Shop has been updated'
+      return 'store has been updated'
     } catch (err: any) {
       console.error(err.message)
-      throw new Error(err.message ?? 'Error updating shop')
+      throw new Error(err.message ?? 'Error updating store')
     }
   }
 
   /**
-   * ANNIQUILATION OF A SHOP......
-   * GOODBYESHOP NEVER SEEN AGAIN
+   * ANNIQUILATION OF A store......
+   * GOODBYEstore NEVER SEEN AGAIN
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns bool
    */
-  async deleteShop(userId: string, shopId: string) {
+  async deletestore(userId: string, storeId: string) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
     try {
       await db
-        .delete(shops)
-        .where(and(eq(shops.userId, userId), eq(shops.id, shopId)))
+        .delete(stores)
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
 
       return true
     } catch (err: any) {
       console.error(err)
-      throw new Error(err.message ?? 'Error deleting shop')
+      throw new Error(err.message ?? 'Error deleting store')
     }
   }
 
   /**
-   * Obtain the list of shipping methods from a shop
+   * Obtain the list of shipping methods from a store
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns "0" methods string || array of methods
    */
-  async getShopShippingMethods(shopId: string) {
+  async getStoreShippingMethods(storeId: string) {
     try {
       const methods = await db
         .select()
         .from(shippingMethods)
-        .where(eq(shippingMethods.shopId, shopId))
+        .where(eq(shippingMethods.storeId, storeId))
 
       if (methods.length === 0) {
         return `There are a total of 0 Shipping Methods...`
@@ -194,12 +196,12 @@ export class serverShop {
    * valid means its availables
    * invalid means its already in use
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param shippingMethodName string
    * @returns valid | invalid
    */
   async ValidateShippingMethodName(
-    shopId: string,
+    storeId: string,
     shippingMethodName: string,
   ): Promise<'valid' | 'invalid'> {
     try {
@@ -208,7 +210,7 @@ export class serverShop {
         .from(shippingMethods)
         .where(
           and(
-            eq(shippingMethods.shopId, shopId),
+            eq(shippingMethods.storeId, storeId),
             eq(shippingMethods.method, shippingMethodName),
           ),
         )
@@ -223,27 +225,27 @@ export class serverShop {
   }
 
   /**
-   * Add a shipping method to a shop
+   * Add a shipping method to a store
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @param shippingMethod string
    * @returns "msg"
    */
   async addShippingMethod(
     userId: string,
-    shopId: string,
+    storeId: string,
     shippingMethod: string,
   ) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
     const validMethod = await this.ValidateShippingMethodName(
-      shopId,
+      storeId,
       shippingMethod,
     )
 
@@ -254,7 +256,7 @@ export class serverShop {
     try {
       await db.insert(shippingMethods).values({
         id: uuidv4(),
-        shopId: shopId,
+        storeId: storeId,
         method: shippingMethod,
       })
 
@@ -269,13 +271,17 @@ export class serverShop {
    * Delete a shipping method
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @param methodId uuid
    * @returns "msg"
    */
-  async deleteShippingMethod(userId: string, shopId: string, methodId: string) {
+  async deleteShippingMethod(
+    userId: string,
+    storeId: string,
+    methodId: string,
+  ) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
@@ -285,7 +291,7 @@ export class serverShop {
         .delete(shippingMethods)
         .where(
           and(
-            eq(shippingMethods.shopId, shopId),
+            eq(shippingMethods.storeId, storeId),
             eq(shippingMethods.id, methodId),
           ),
         )
@@ -303,7 +309,7 @@ export class serverShop {
    * @param shippingMethodId
    * @returns method name
    */
-  async getShopShippingMethodFromId(shippingMethodId: string) {
+  async getStoreShippingMethodFromId(shippingMethodId: string) {
     try {
       const method = await db
         .select()
@@ -321,17 +327,17 @@ export class serverShop {
   }
 
   /**
-   * Obtain the list of  payment methods from a shop
+   * Obtain the list of  payment methods from a store
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @returns "0" methods string || array of methods
    */
-  async getShopPaymentMethods(shopId: string) {
+  async getStorePaymentMethods(storeId: string) {
     try {
       const methods = await db
         .select()
         .from(paymentMethods)
-        .where(eq(paymentMethods.shopId, shopId))
+        .where(eq(paymentMethods.storeId, storeId))
 
       if (methods.length === 0) {
         return `There are a total of 0 Payment Methods...`
@@ -350,12 +356,12 @@ export class serverShop {
    * valid means its availables
    * invalid means its already in use
    *
-   * @param shopId uuid
+   * @param storeId uuid
    * @param shippingMethodName string
    * @returns valid | invalid
    */
   async ValidatePaymentMethodName(
-    shopId: string,
+    storeId: string,
     shippingMethodName: string,
   ): Promise<'valid' | 'invalid'> {
     try {
@@ -364,7 +370,7 @@ export class serverShop {
         .from(paymentMethods)
         .where(
           and(
-            eq(paymentMethods.shopId, shopId),
+            eq(paymentMethods.storeId, storeId),
             eq(paymentMethods.method, shippingMethodName),
           ),
         )
@@ -379,27 +385,27 @@ export class serverShop {
   }
 
   /**
-   * add a payment method to a shop
+   * add a payment method to a store
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
-   * @param paymentMethod shopid
+   * @param storeId uuid
+   * @param paymentMethod storeid
    * @returns "msg"
    */
   async addPaymentMethod(
     userId: string,
-    shopId: string,
+    storeId: string,
     paymentMethod: string,
   ) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
     const validMethod = await this.ValidatePaymentMethodName(
-      shopId,
+      storeId,
       paymentMethod,
     )
 
@@ -410,7 +416,7 @@ export class serverShop {
     try {
       await db.insert(paymentMethods).values({
         id: uuidv4(),
-        shopId: shopId,
+        storeId: storeId,
         method: paymentMethod,
       })
 
@@ -425,13 +431,13 @@ export class serverShop {
    * Delete a Payment method
    *
    * @param userId uuid internal user id
-   * @param shopId uuid
+   * @param storeId uuid
    * @param methodId uuid
    * @returns "msg"
    */
-  async deletePaymentMethod(userId: string, shopId: string, methodId: string) {
+  async deletePaymentMethod(userId: string, storeId: string, methodId: string) {
     // validate user ownership
-    const ownership = await this.validateUserShopOwnership(userId, shopId)
+    const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
@@ -441,7 +447,7 @@ export class serverShop {
         .delete(paymentMethods)
         .where(
           and(
-            eq(paymentMethods.shopId, shopId),
+            eq(paymentMethods.storeId, storeId),
             eq(paymentMethods.id, methodId),
           ),
         )
@@ -459,7 +465,7 @@ export class serverShop {
    * @param paymentMethodId
    * @returns method name
    */
-  async getShopPaymentMethodFromId(paymentMethodId: string) {
+  async getstorePaymentMethodFromId(paymentMethodId: string) {
     try {
       const method = await db
         .select()
@@ -478,64 +484,67 @@ export class serverShop {
 }
 
 /**
- * Obtains the shop and product information about a shop
+ * Obtains the store and product information about a store
  *
- * SHOULD ONLY BE RENDERER on **SHOP VIEW ROUTE**,
+ * SHOULD ONLY BE RENDERER on **store VIEW ROUTE**,
  * THIS FUNCTION SHOULD ONLY BE USED TO RENDER WHEN ACTUALY NEEDED
  *
- * @param shopId uuid
+ * @param storeId uuid
  */
-export async function publicShop(shopId: string) {
+export async function publicStore(storeId: string) {
   try {
-    const shop = await db
-      .select({ shopName: shops.shopName, shopCurrency: shops.shopCurrency })
-      .from(shops)
-      .where(eq(shops.id, shopId))
+    const store = await db
+      .select({
+        storeName: stores.storeName,
+        storeCurrency: stores.storeCurrency,
+      })
+      .from(stores)
+      .where(eq(stores.id, storeId))
       .limit(1)
 
-    if (!shop[0]) throw new Error('Shop was not found')
+    if (!store[0]) throw new Error('store was not found')
 
-    return shop[0]
+    return store[0]
   } catch (err: any) {
     console.error(err)
-    throw new Error(err.message ?? 'Error finding shop')
+    throw new Error(err.message ?? 'Error finding store')
   }
 }
 
-// get all the user shops from its id
-// export async function getUserShopsByUserId(
+// get all the user stores from its id
+// export async function getUserstoresByUserId(
 //   userId: string,
-// ): Promise<Array<shopExtendedSchemaType> | null> {
+// ): Promise<Array<storeExtendedSchemaType> | null> {
 //   try {
-//     const userShops = await db
+//     const userstores = await db
 //       .select()
-//       .from(shops)
-//       .where(eq(shops.userId, userId))
+//       .from(stores)
+//       .where(eq(stores.userId, userId))
 
-//     if (userShops.length === 0) return null
-//     return shopExtendedSchema.array().parse(userShops)
+//     if (userstores.length === 0) return null
+//     return storeExtendedSchema.array().parse(userstores)
 //   } catch (err: any) {
 //     console.error(err)
-//     throw new Error('Error getting user shops')
+//     throw new Error('Error getting user stores')
 //   }
 // }
 
-// get shop by id
-// export async function getNameByShopId(shopId: string) {
+// get store by id
+// export async function getNameBystoreId(storeId: string) {
 //   try {
-//     const shop = await db
+//     const store = await db
 //       .select({
-//         shopName: shops.shopName,
+//         storeName: stores.storeName,
 //       })
-//       .from(shops)
-//       .where(eq(shops.id, shopId))
+//       .from(stores)
+//       .where(eq(stores.id, storeId))
 //       .limit(1)
 
-//     console.log(shop.length)
-//     if (shop.length === 0) throw new Error('Shop not found')
-//     return shop[0].shopName
+//     console.log(store.length)
+//     if (store.length === 0) throw new Error('store not found')
+//     return store[0].storeName
 //   } catch (err: any) {
 //     console.error(err)
-//     throw new Error(err.message ?? 'Error getting shop')
+//     throw new Error(err.message ?? 'Error getting store')
 //   }
 // }

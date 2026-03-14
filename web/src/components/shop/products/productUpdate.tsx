@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { sf_UpdateProductFromShop } from '@/server/shop/products/product.functions'
+
 import {
   Select,
   SelectContent,
@@ -33,11 +33,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { useGetShopCategorys } from '@/lib/hooks/shop/category.hook'
+import { sf_UpdateProductFromstore } from '@/server/store/products/product.functions'
+import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
 
 type productProps = {
   id: string
-  shopId: string
+  storeId: string
   productName?: string
   productPrice?: string
   productDesc?: string | null
@@ -45,14 +46,14 @@ type productProps = {
 }
 
 const ProductUpdate = (product: productProps) => {
-  // get current shop categorys
-  const { data, isLoading } = useGetShopCategorys({ shopId: product.shopId })
+  // get current store categorys
+  const { data, isLoading } = useGetstoreCategorys({ storeId: product.storeId })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
   // server fn
-  const update = useServerFn(sf_UpdateProductFromShop)
+  const update = useServerFn(sf_UpdateProductFromstore)
 
   const form = useForm({
     defaultValues: {
@@ -68,7 +69,7 @@ const ProductUpdate = (product: productProps) => {
     onSubmit: async ({ value }) => {
       try {
         const service = await update({
-          data: { shopId: product.shopId, productId: product.id, dto: value },
+          data: { storeId: product.storeId, productId: product.id, dto: value },
         })
         toast.success(service)
         queryClient.invalidateQueries({ queryKey: ['products'] })

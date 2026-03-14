@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { sf_GetCategorysFromShop } from '@/server/shop/products/category/productCategory.functions'
+import { sf_GetCategorysFromstore } from '@/server/store/products/category/productCategory.functions'
 
 /**
- * Hook to fetch all the categorys from a shop
+ * Hook to fetch all the categorys from a store
  *
- * @param param0 shopId
- * @returns server function: sf_GetCategorysFromShop
+ * @param param0 storeId
+ * @returns server function: sf_GetCategorysFromstore
  */
-export function useGetShopCategorys({ shopId }: { shopId: string }) {
+export function useGetstoreCategorys({ storeId }: { storeId: string }) {
   return useQuery({
-    queryKey: ['categorys', shopId],
-    queryFn: () => sf_GetCategorysFromShop({ data: { shopId } }),
+    queryKey: ['categorys', storeId],
+    queryFn: () => sf_GetCategorysFromstore({ data: { storeId } }),
   })
 }

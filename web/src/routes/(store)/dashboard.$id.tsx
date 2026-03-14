@@ -2,7 +2,6 @@ import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
 import { Package, ReceiptText } from 'lucide-react'
-import { useGetUserShopInfo } from '@/lib/hooks/shop/shop.hooks'
 import { sf_telegramVerification } from '@/server/telegram/telegram.function'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -15,31 +14,33 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+
+import { useGetstoreOrders } from '@/lib/hooks/order.hooks'
+
+import { ScrollArea } from '@/components/ui/scroll-area'
+import StoreUpdate from '@/components/shop/storeUpdate'
+import OrderCardADM from '@/components/shop/orders/orderCard.admin'
+import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
+import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
 import ProductAdd from '@/components/shop/products/productAdd'
 import ProductCardADM from '@/components/shop/products/productCard.admin'
-import ShopUpdate from '@/components/shop/shopUpdate'
-import { useGetShopProducts } from '@/lib/hooks/shop/product.hook'
-import { ModeToggle } from '@/components/mode-toggle'
-import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
-import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
 import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
-import { useGetShopOrders } from '@/lib/hooks/order.hooks'
-import OrderCardADM from '@/components/shop/orders/orderCard.admin'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
+import { useGetUserstoreInfo } from '@/lib/hooks/shop/store.hooks'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
 }
 
-export const Route = createFileRoute('/(shop)/dashboard/$id')({
+export const Route = createFileRoute('/(store)/dashboard/$id')({
   errorComponent: DashboardErrorComponent,
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  // shopId
-  const { id: shopId } = Route.useParams()
-  // shop data
+  // storeId
+  const { id: storeId } = Route.useParams()
+  // store data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
 
@@ -73,43 +74,43 @@ function RouteComponent() {
   }, [])
 
   const {
-    data: shopInfo,
-    isLoading: shopLoading,
-    error: shopError,
-  } = useGetUserShopInfo({
+    data: storeInfo,
+    isLoading: storeLoading,
+    error: storeError,
+  } = useGetUserstoreInfo({
     userId: userId ?? '',
-    shopId,
+    storeId,
   })
 
-  const { data: products, isLoading: productsLoading } = useGetShopProducts(
-    shopInfo
-      ? { userId: shopInfo.userId, shopId: shopInfo.id }
-      : { userId: '', shopId: '' },
+  const { data: products, isLoading: productsLoading } = useGetstoreProducts(
+    storeInfo
+      ? { userId: storeInfo.userId, storeId: storeInfo.id }
+      : { userId: '', storeId: '' },
   )
 
-  const { data: orders, isLoading: ordersLoading } = useGetShopOrders({
-    shopId,
+  const { data: orders, isLoading: ordersLoading } = useGetstoreOrders({
+    storeId,
   })
 
   if (error) return <DashboardErrorComponent error={error} />
-  if (shopError) return <DashboardErrorComponent error={shopError} />
-  if (!userId || shopLoading || !shopInfo || !userId) return <Spinner />
+  if (storeError) return <DashboardErrorComponent error={storeError} />
+  if (!userId || storeLoading || !storeInfo || !userId) return <Spinner />
 
   return (
     <div className="h-screen flex flex-col">
       {/* header */}
-      {/* following code should render the shop name, shop Update dialog and a theme toogler */}
+      {/* following code should render the store name, store Update dialog and a theme toogler */}
       <header className="flex justify-center w-full p-3 border-b">
         <div className="w-full lg:max-w-7xl flex items-center justify-between">
           <Link to="/" className="select-none text-4xl font-bold tracking-wide">
-            {shopInfo.shopName}
+            {storeInfo.storeName}
           </Link>
           <div className="flex items-center gap-3">
             {/* FIX: ---- */}
             {/* <ClientOnly>
                 <ModeToggle />
               </ClientOnly> */}
-            <ShopUpdate userId={shopInfo.userId} shopId={shopInfo.id} />
+            <StoreUpdate userId={storeInfo.userId} storeId={storeInfo.id} />
           </div>
         </div>
       </header>
@@ -134,8 +135,8 @@ function RouteComponent() {
             {/* container 1 */}
             {/* top actions */}
             <div className="flex justify-end gap-2">
-              <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
-              <ProductCategoryAdd shopId={shopInfo.id} />
+              <ProductAdd userId={storeInfo.userId} storeId={storeInfo.id} />
+              <ProductCategoryAdd storeId={storeInfo.id} />
             </div>
             {/* while products are loading */}
             {productsLoading && (
@@ -159,7 +160,7 @@ function RouteComponent() {
                           <ProductCardADM
                             key={product.id}
                             {...product}
-                            shopCurrency={shopInfo.shopCurrency}
+                            storeCurrency={storeInfo.storeCurrency}
                           />
                         ))}
                     </div>
@@ -178,7 +179,10 @@ function RouteComponent() {
                     </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
-                    <ProductAdd userId={shopInfo.userId} shopId={shopInfo.id} />
+                    <ProductAdd
+                      userId={storeInfo.userId}
+                      storeId={storeInfo.id}
+                    />
                   </EmptyContent>
                 </Empty>
               )}
@@ -192,8 +196,8 @@ function RouteComponent() {
             {/* container 1 */}
             {/* top actions */}
             <div className="flex justify-end gap-2">
-              <ShippingMethodAdd userId={userId} shopId={shopInfo.id} />
-              <PaymentMethodAdd userId={userId} shopId={shopInfo.id} />
+              <ShippingMethodAdd userId={userId} storeId={storeInfo.id} />
+              <PaymentMethodAdd userId={userId} storeId={storeInfo.id} />
             </div>
             {/* while orders are loading */}
             {ordersLoading && (
@@ -218,8 +222,8 @@ function RouteComponent() {
                         .map((order) => (
                           <OrderCardADM
                             key={order.id}
-                            shopId={shopId}
-                            shopCurrency={shopInfo.shopCurrency}
+                            storeId={storeId}
+                            storeCurrency={storeInfo.storeCurrency}
                             order={order}
                           />
                         ))}

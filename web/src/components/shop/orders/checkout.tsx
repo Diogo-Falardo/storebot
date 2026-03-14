@@ -32,15 +32,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  useGetShopPaymentMethods,
-  useGetShopShippingMethods,
-} from '@/lib/hooks/shop/shop.hooks'
+
 import { Textarea } from '@/components/ui/textarea'
-import { sf_GetProductFromId } from '@/server/shop/products/product.functions'
+
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
-import { sf_PlaceOrder } from '@/server/shop/orders/order.function'
+import {
+  useGetstorePaymentMethods,
+  useGetstoreShippingMethods,
+} from '@/lib/hooks/shop/store.hooks'
+import { sf_PlaceOrder } from '@/server/store/orders/order.function'
+import { sf_GetProductFromId } from '@/server/store/products/product.functions'
 
 type ProductInfo = {
   id: string
@@ -52,13 +54,13 @@ type ProductInfo = {
 
 const Checkout = ({
   telegramUserId,
-  shopId,
+  storeId,
   productsId,
   isCartEmpty = false,
   onCartCleared,
 }: {
   telegramUserId: number
-  shopId: string
+  storeId: string
   productsId: Array<string>
   isCartEmpty?: boolean
   onCartCleared?: () => void
@@ -67,9 +69,9 @@ const Checkout = ({
   const closeDialogRef = useRef<HTMLButtonElement>(null)
   // hooks
   const { data: paymentMethods, isLoading: loadingPaymentMethods } =
-    useGetShopPaymentMethods({ shopId })
+    useGetstorePaymentMethods({ storeId })
   const { data: shippingMethods, isLoading: loadingShippingMethods } =
-    useGetShopShippingMethods({ shopId })
+    useGetstoreShippingMethods({ storeId })
   // server fn
   const placeOrder = useServerFn(sf_PlaceOrder)
   const productInfo = useServerFn(sf_GetProductFromId)
@@ -85,7 +87,7 @@ const Checkout = ({
     }
     const products = await Promise.all(
       productsId.map(async (id) => {
-        return await productInfo({ data: { shopId, productId: id } })
+        return await productInfo({ data: { storeId, productId: id } })
       }),
     )
     setDisplayProducts(products)
@@ -113,11 +115,11 @@ const Checkout = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        await placeOrder({ data: { telegramUserId, shopId, dto: value } })
+        await placeOrder({ data: { telegramUserId, storeId, dto: value } })
         toast.success(`Your order has been placed!`)
         clearCartStorage()
         if (onCartCleared) onCartCleared()
-        queryClient.invalidateQueries({ queryKey: ['orders', shopId] })
+        queryClient.invalidateQueries({ queryKey: ['orders', storeId] })
         closeDialogRef.current?.click()
       } catch (err: any) {
         toast.error(err.message ?? 'Order failed!')
@@ -137,10 +139,10 @@ const Checkout = ({
 
   const getCheckoutDisableReason = () => {
     if (paymentMethods === 'There are a total of 0 Payment Methods...') {
-      return 'This shop has no payment methods configured. Please contact the shop owner.'
+      return 'This store has no payment methods configured. Please contact the store owner.'
     }
     if (shippingMethods === 'There are a total of 0 Shipping Methods...') {
-      return 'This shop has no shipping methods configured. Please contact the shop owner.'
+      return 'This store has no shipping methods configured. Please contact the store owner.'
     }
     return 'Checkout is currently unavailable.'
   }
@@ -186,7 +188,7 @@ const Checkout = ({
                       <FieldLabel>Telegram Contact</FieldLabel>
                       <FieldDescription>
                         Enter your Telegram username or contact information so
-                        the shop owner can reach you if needed.
+                        the store owner can reach you if needed.
                       </FieldDescription>
                       <Input
                         id={field.name}

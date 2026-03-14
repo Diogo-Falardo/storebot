@@ -19,16 +19,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import CartAdd from '@/components/shop/cartAdd'
-import Cart from '@/components/shop/cart'
-import { usePublicShop } from '@/lib/hooks/shop/shop.hooks'
+
 import { sf_PublicTelegramVerification } from '@/server/telegram/telegram.function'
 import { Badge } from '@/components/ui/badge'
-import { sf_ConvertCategoryIdIntoName } from '@/server/shop/products/category/productCategory.functions'
-import { ProductInfo } from '@/components/shop/products/productInfo'
-import ShopFilters from '@/components/shop/shopFilters'
+import { sf_ConvertCategoryIdIntoName } from '@/server/store/products/category/productCategory.functions'
+
 import { ModeToggle } from '@/components/mode-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { usePublicstore } from '@/lib/hooks/shop/store.hooks'
+import StoreFilters from '@/components/shop/storeFilters'
+import Cart from '@/components/shop/cart'
+import { ProductInfo } from '@/components/shop/products/productInfo'
+import CartAdd from '@/components/shop/cartAdd'
 import Orders from '@/components/shop/orders/orders'
 
 type TelegramUser = {
@@ -41,15 +43,15 @@ function ErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription="" />
 }
 
-export const Route = createFileRoute('/(shop)/shop/$id')({
+export const Route = createFileRoute('/(store)/store/$id')({
   errorComponent: ErrorComponent,
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { id: shopId } = Route.useParams()
+  const { id: storeId } = Route.useParams()
   // hooks
-  const { data, isLoading } = usePublicShop({ shopId })
+  const { data, isLoading } = usePublicstore({ storeId })
   // server fn
   const verifyUser = useServerFn(sf_PublicTelegramVerification)
   const categoryName = useServerFn(sf_ConvertCategoryIdIntoName)
@@ -77,7 +79,7 @@ function RouteComponent() {
 
         setUser(tgUser)
       } catch (err: any) {
-        setError(err ?? 'Error loading shop')
+        setError(err ?? 'Error loading store')
       }
     }
     authenticate()
@@ -92,7 +94,7 @@ function RouteComponent() {
       for (const product of visibleProducts) {
         if (product.categoryId && !names[product.categoryId]) {
           names[product.categoryId] = await categoryName({
-            data: { shopId, categoryId: product.categoryId },
+            data: { storeId, categoryId: product.categoryId },
           })
         }
       }
@@ -129,15 +131,15 @@ function RouteComponent() {
       </div>
     )
   if (error) return <ErrorComponent error={error} />
-  if (!data) return <ErrorComponent error={new Error('Shop not found')} />
+  if (!data) return <ErrorComponent error={new Error('store not found')} />
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
     <div className="h-screen flex flex-col">
       {/* header */}
-      {/* following code should only render the shop name and theme switcher */}
+      {/* following code should only render the store name and theme switcher */}
       <header className="flex w-full justify-center items-center p-3 border-b">
-        <h1 className="font-mono font-bold text-3xl">{data.shop.shopName}</h1>
+        <h1 className="font-mono font-bold text-3xl">{data.store.storeName}</h1>
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
           {/* TODO: put theme swithcer working */}
           {/* <ClientOnly>
@@ -146,11 +148,11 @@ function RouteComponent() {
         </div>
       </header>
       {/* container number 1 */}
-      {/* part 2 of the container one renders: shop filters & cart */}
+      {/* part 2 of the container one renders: store filters & cart */}
       <div className="w-full shrink-0">
         {user?.telegramId && visibleProducts.length !== 0 && (
           <div className="flex justify-end p-3 gap-2">
-            <ShopFilters
+            <StoreFilters
               categoryNames={availableCategories}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -159,14 +161,14 @@ function RouteComponent() {
             />
             <Cart
               telegramUserId={user.telegramId ? Number(user.telegramId) : null}
-              shopId={shopId}
-              shopCurrency={data.shop.shopCurrency}
+              storeId={storeId}
+              storeCurrency={data.store.storeCurrency}
             />
           </div>
         )}
       </div>
       {/* container number 2 */}
-      {/* the following container displays the shop products inside a scroll area or an Empty "Object" */}
+      {/* the following container displays the store products inside a scroll area or an Empty "Object" */}
       <div className="flex-1 min-h-0 w-full">
         {visibleProducts.length !== 0 ? (
           // scroll area should ocupate the fr space (remaining space of the screen)
@@ -219,7 +221,7 @@ function RouteComponent() {
                         </CardTitle>
                         <h1 className="flex gap-1">
                           {product.productPrice}
-                          <span>{data.shop.shopCurrency}</span>
+                          <span>{data.store.storeCurrency}</span>
                         </h1>
                         <CardDescription className="flex items-center gap-2"></CardDescription>
                       </CardHeader>
@@ -236,7 +238,7 @@ function RouteComponent() {
                               categoryNames[product.categoryId]
                             }
                             productImage={product.imageUrl}
-                            shopCurrency={data.shop.shopCurrency}
+                            storeCurrency={data.store.storeCurrency}
                           />
                           {/* add product to cart */}
                           <CartAdd
@@ -260,7 +262,7 @@ function RouteComponent() {
                 <Package />
               </EmptyMedia>
               <EmptyTitle>No products</EmptyTitle>
-              <EmptyDescription>This shop has no products</EmptyDescription>
+              <EmptyDescription>This store has no products</EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
@@ -271,9 +273,9 @@ function RouteComponent() {
       <div className="w-full p-5 flex justify-center items-center">
         {user?.telegramId && (
           <Orders
-            shopId={shopId}
+            storeId={storeId}
             telegramUserId={Number(user.telegramId)}
-            shopCurrency={data.shop.shopCurrency}
+            storeCurrency={data.store.storeCurrency}
           />
         )}
       </div>

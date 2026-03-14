@@ -12,29 +12,29 @@ import { Spinner } from '../ui/spinner'
 import { ScrollArea } from '../ui/scroll-area'
 import { Empty, EmptyDescription, EmptyTitle } from '../ui/empty'
 import { Card, CardTitle } from '../ui/card'
-import { CREATE_PAYMENT_METHOD_SCHEMA } from '@/schemas/shop.schema'
-import { useGetShopPaymentMethods } from '@/lib/hooks/shop/shop.hooks'
+import { CREATE_PAYMENT_METHOD_SCHEMA } from '@/schemas/store.schema'
+import { useGetstorePaymentMethods } from '@/lib/hooks/shop/store.hooks'
 import {
-  sf_CreateShopPaymentMethod,
-  sf_DeleteShopPaymentMethod,
-} from '@/server/shop/shop.functions'
+  sf_CreatestorePaymentMethod,
+  sf_DeletestorePaymentMethod,
+} from '@/server/store/store.functions'
 
 const PaymentMethodAdd = ({
   userId,
-  shopId,
+  storeId,
 }: {
   userId: string
-  shopId: string
+  storeId: string
 }) => {
   // load current payment methods
-  const { data, isLoading } = useGetShopPaymentMethods({ shopId })
+  const { data, isLoading } = useGetstorePaymentMethods({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateShopPaymentMethod)
-  const deleteMethod = useServerFn(sf_DeleteShopPaymentMethod)
+  const addMethod = useServerFn(sf_CreatestorePaymentMethod)
+  const deleteMethod = useServerFn(sf_DeletestorePaymentMethod)
 
   const form = useForm({
     defaultValues: {
@@ -46,10 +46,10 @@ const PaymentMethodAdd = ({
     onSubmit: async ({ value }) => {
       try {
         await addMethod({
-          data: { userId, shopId, paymentMethod: value.method },
+          data: { userId, storeId, paymentMethod: value.method },
         })
         toast.success(`NEW Payment Method: ${value.method}`)
-        queryClient.invalidateQueries({ queryKey: ['paymentMethods', shopId] })
+        queryClient.invalidateQueries({ queryKey: ['paymentMethods', storeId] })
       } catch (err: any) {
         toast.error(err.message ?? 'Error adding payment method.')
       }
@@ -60,9 +60,9 @@ const PaymentMethodAdd = ({
     setDeletingId(methodId)
     try {
       await deleteMethod({
-        data: { userId, shopId, methodId },
+        data: { userId, storeId, methodId },
       })
-      queryClient.invalidateQueries({ queryKey: ['paymentMethods', shopId] })
+      queryClient.invalidateQueries({ queryKey: ['paymentMethods', storeId] })
       toast.success('Method deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {

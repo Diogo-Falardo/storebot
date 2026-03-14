@@ -3,38 +3,38 @@ import {
   sf_GetOrders,
   sf_GetProductsFromOrder,
   sf_GetTelegramUserOrders,
-} from '@/server/shop/orders/order.function'
+} from '@/server/store/orders/order.function'
 
-export function useGetShopOrders({ shopId }: { shopId: string }) {
+export function useGetstoreOrders({ storeId }: { storeId: string }) {
   return useQuery({
-    queryKey: ['orders', shopId],
-    queryFn: () => sf_GetOrders({ data: { shopId } }),
+    queryKey: ['orders', storeId],
+    queryFn: () => sf_GetOrders({ data: { storeId } }),
   })
 }
 
 export function useGetProductsFromOrders({
-  shopId,
+  storeId,
   orderId,
 }: {
-  shopId: string
+  storeId: string
   orderId: string
 }) {
   return useQuery({
     queryKey: ['orders', orderId],
-    queryFn: () => sf_GetProductsFromOrder({ data: { shopId, orderId } }),
+    queryFn: () => sf_GetProductsFromOrder({ data: { storeId, orderId } }),
   })
 }
 
 export function useGetOrdersFromTelegramUser({
-  shopId,
+  storeId,
   telegramUserId,
 }: {
-  shopId: string
+  storeId: string
   telegramUserId: number
 }) {
   return useQuery({
-    queryKey: ['orders', shopId],
+    queryKey: ['orders', storeId],
     queryFn: () =>
-      sf_GetTelegramUserOrders({ data: { shopId, telegramUserId } }),
+      sf_GetTelegramUserOrders({ data: { storeId, telegramUserId } }),
   })
 }

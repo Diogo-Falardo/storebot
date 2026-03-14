@@ -4,10 +4,7 @@ import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
 import { Eye, EyeOff, Trash2 } from 'lucide-react'
 import ProductUpdate from './productUpdate'
-import {
-  sf_DeleteProductFromShop,
-  sf_ToogleProductVisibilty,
-} from '@/server/shop/products/product.functions'
+
 import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,22 +15,26 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import ImgUploader from '@/components/imgUploader'
+import {
+  sf_DeleteProductFromstore,
+  sf_ToogleProductVisibilty,
+} from '@/server/store/products/product.functions'
 
 type productProps = {
   id: string
-  shopId: string
+  storeId: string
   productName: string
   productPrice: string
   productDesc?: string | null
   categoryId?: string | null
   visible: number
   imageUrl: string | null
-  shopCurrency: string | null
+  storeCurrency: string | null
 }
 
 const ProductCardADM = (product: productProps) => {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
-  const deleted = useServerFn(sf_DeleteProductFromShop)
+  const deleted = useServerFn(sf_DeleteProductFromstore)
   const visibility = useServerFn(sf_ToogleProductVisibilty)
 
   const queryClient = useQueryClient()
@@ -41,13 +42,13 @@ const ProductCardADM = (product: productProps) => {
   const deleteProduct = async () => {
     try {
       const result = await deleted({
-        data: { shopId: product.shopId, productId: product.id },
+        data: { storeId: product.storeId, productId: product.id },
       })
 
       if (result) {
         toast.success('Product got deleted!')
         queryClient.invalidateQueries({
-          queryKey: ['products', product.shopId],
+          queryKey: ['products', product.storeId],
         })
       }
     } catch (err: any) {
@@ -58,7 +59,7 @@ const ProductCardADM = (product: productProps) => {
   const visibilityToogler = async () => {
     try {
       const result = await visibility({
-        data: { shopId: product.shopId, productId: product.id },
+        data: { storeId: product.storeId, productId: product.id },
       })
 
       if (result) {
@@ -66,7 +67,7 @@ const ProductCardADM = (product: productProps) => {
           product.visible === 1 ? 'Product hidden!' : 'Product shown!',
         )
         queryClient.invalidateQueries({
-          queryKey: ['products', product.shopId],
+          queryKey: ['products', product.storeId],
         })
       }
     } catch (err: any) {
@@ -84,13 +85,13 @@ const ProductCardADM = (product: productProps) => {
           {/* PRODUCT HEADER
         
         - productName
-        - productPrice and shopCurrency
+        - productPrice and storeCurrency
         */}
 
           <CardHeader className="w-full flex flex-col gap-0 p-0">
             <CardTitle className="text-xl">{product.productName}</CardTitle>
             <CardDescription>
-              {product.productPrice} {product.shopCurrency}
+              {product.productPrice} {product.storeCurrency}
             </CardDescription>
           </CardHeader>
         </div>
@@ -131,7 +132,7 @@ const ProductCardADM = (product: productProps) => {
                 </>
               )}
             </Button>
-            <ImgUploader shopId={product.shopId} productId={product.id} />
+            <ImgUploader storeId={product.storeId} productId={product.id} />
             {/* update */}
             <ProductUpdate {...product} />
             {/* delete */}
@@ -148,7 +149,7 @@ const ProductCardADM = (product: productProps) => {
               open={openConfirmDelete}
               onOpenChange={setOpenConfirmDelete}
               title={`Delete ${product.productName}? `}
-              description={`This will delete the ${product.productName} product from your shop!`}
+              description={`This will delete the ${product.productName} product from your store!`}
               confirmText="Delete"
               cancelText="Cancel"
               onConfirm={() => deleteProduct()}

@@ -12,29 +12,29 @@ import { Spinner } from '../ui/spinner'
 import { ScrollArea } from '../ui/scroll-area'
 import { Empty, EmptyDescription, EmptyTitle } from '../ui/empty'
 import { Card, CardTitle } from '../ui/card'
-import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/shop.schema'
-import { useGetShopShippingMethods } from '@/lib/hooks/shop/shop.hooks'
+import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/store.schema'
+import { useGetstoreShippingMethods } from '@/lib/hooks/shop/store.hooks'
 import {
-  sf_CreateShopShippingMethod,
-  sf_DeleteShopShippingMethod,
-} from '@/server/shop/shop.functions'
+  sf_CreateStoreShippingMethod,
+  sf_DeletestoreShippingMethod,
+} from '@/server/store/store.functions'
 
 const ShippingMethodAdd = ({
   userId,
-  shopId,
+  storeId,
 }: {
   userId: string
-  shopId: string
+  storeId: string
 }) => {
   // load current shipping methods
-  const { data, isLoading } = useGetShopShippingMethods({ shopId })
+  const { data, isLoading } = useGetstoreShippingMethods({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateShopShippingMethod)
-  const deleteMethod = useServerFn(sf_DeleteShopShippingMethod)
+  const addMethod = useServerFn(sf_CreateStoreShippingMethod)
+  const deleteMethod = useServerFn(sf_DeletestoreShippingMethod)
 
   const form = useForm({
     defaultValues: {
@@ -46,10 +46,12 @@ const ShippingMethodAdd = ({
     onSubmit: async ({ value }) => {
       try {
         await addMethod({
-          data: { userId, shopId, shippingMethod: value.method },
+          data: { userId, storeId, shippingMethod: value.method },
         })
         toast.success(`NEW Shipping Method: ${value.method}`)
-        queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
+        queryClient.invalidateQueries({
+          queryKey: ['shippingMethods', storeId],
+        })
       } catch (err: any) {
         toast.error(err.message ?? 'Error adding shipping method.')
       }
@@ -60,9 +62,9 @@ const ShippingMethodAdd = ({
     setDeletingId(methodId)
     try {
       await deleteMethod({
-        data: { userId, shopId, methodId },
+        data: { userId, storeId, methodId },
       })
-      queryClient.invalidateQueries({ queryKey: ['shippingMethods', shopId] })
+      queryClient.invalidateQueries({ queryKey: ['shippingMethods', storeId] })
       toast.success('Method deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {
@@ -157,7 +159,7 @@ const ShippingMethodAdd = ({
               <EmptyDescription className="">
                 Please add at least one shipping method so your customers can
                 understand how their orders will be delivered. Clear shipping
-                options help set expectations and improve the overall shopping
+                options help set expectations and improve the overall storeping
                 experience.
               </EmptyDescription>
             </Empty>

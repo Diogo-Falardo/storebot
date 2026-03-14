@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
-import { Route as shopShopIdRouteImport } from './routes/(shop)/shop.$id'
-import { Route as shopDashboardIdRouteImport } from './routes/(shop)/dashboard.$id'
+import { Route as storeStoreIdRouteImport } from './routes/(store)/store.$id'
+import { Route as storeDashboardIdRouteImport } from './routes/(store)/dashboard.$id'
 
 const publicRouteRoute = publicRouteRouteImport.update({
   id: '/(public)',
@@ -23,51 +23,51 @@ const publicIndexRoute = publicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => publicRouteRoute,
 } as any)
-const shopShopIdRoute = shopShopIdRouteImport.update({
-  id: '/(shop)/shop/$id',
-  path: '/shop/$id',
+const storeStoreIdRoute = storeStoreIdRouteImport.update({
+  id: '/(store)/store/$id',
+  path: '/store/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const shopDashboardIdRoute = shopDashboardIdRouteImport.update({
-  id: '/(shop)/dashboard/$id',
+const storeDashboardIdRoute = storeDashboardIdRouteImport.update({
+  id: '/(store)/dashboard/$id',
   path: '/dashboard/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof publicIndexRoute
-  '/dashboard/$id': typeof shopDashboardIdRoute
-  '/shop/$id': typeof shopShopIdRoute
+  '/dashboard/$id': typeof storeDashboardIdRoute
+  '/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof publicIndexRoute
-  '/dashboard/$id': typeof shopDashboardIdRoute
-  '/shop/$id': typeof shopShopIdRoute
+  '/dashboard/$id': typeof storeDashboardIdRoute
+  '/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(public)': typeof publicRouteRouteWithChildren
   '/(public)/': typeof publicIndexRoute
-  '/(shop)/dashboard/$id': typeof shopDashboardIdRoute
-  '/(shop)/shop/$id': typeof shopShopIdRoute
+  '/(store)/dashboard/$id': typeof storeDashboardIdRoute
+  '/(store)/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard/$id' | '/shop/$id'
+  fullPaths: '/' | '/dashboard/$id' | '/store/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard/$id' | '/shop/$id'
+  to: '/' | '/dashboard/$id' | '/store/$id'
   id:
     | '__root__'
     | '/(public)'
     | '/(public)/'
-    | '/(shop)/dashboard/$id'
-    | '/(shop)/shop/$id'
+    | '/(store)/dashboard/$id'
+    | '/(store)/store/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   publicRouteRoute: typeof publicRouteRouteWithChildren
-  shopDashboardIdRoute: typeof shopDashboardIdRoute
-  shopShopIdRoute: typeof shopShopIdRoute
+  storeDashboardIdRoute: typeof storeDashboardIdRoute
+  storeStoreIdRoute: typeof storeStoreIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -86,18 +86,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicIndexRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(shop)/shop/$id': {
-      id: '/(shop)/shop/$id'
-      path: '/shop/$id'
-      fullPath: '/shop/$id'
-      preLoaderRoute: typeof shopShopIdRouteImport
+    '/(store)/store/$id': {
+      id: '/(store)/store/$id'
+      path: '/store/$id'
+      fullPath: '/store/$id'
+      preLoaderRoute: typeof storeStoreIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(shop)/dashboard/$id': {
-      id: '/(shop)/dashboard/$id'
+    '/(store)/dashboard/$id': {
+      id: '/(store)/dashboard/$id'
       path: '/dashboard/$id'
       fullPath: '/dashboard/$id'
-      preLoaderRoute: typeof shopDashboardIdRouteImport
+      preLoaderRoute: typeof storeDashboardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -117,8 +117,8 @@ const publicRouteRouteWithChildren = publicRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   publicRouteRoute: publicRouteRouteWithChildren,
-  shopDashboardIdRoute: shopDashboardIdRoute,
-  shopShopIdRoute: shopShopIdRoute,
+  storeDashboardIdRoute: storeDashboardIdRoute,
+  storeStoreIdRoute: storeStoreIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
