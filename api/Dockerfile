@@ -57,4 +57,3 @@ CMD ["sh", "-c", "node dist/index.js --port ${PORT:-2109}"]
 # Assumes your API responds to /health or root path – adjust if needed
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=5 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/ || exit 1
-CMD ["node", "dist/index.js"]

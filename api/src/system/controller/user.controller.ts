@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../utils/ErrorHandling";
-import { tgHeadersSchema } from "../../db";
-import { userService } from "../service/user.service";
-import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
+import { HttpError } from "../utils/ErrorHandling.js";
+import { tgHeadersSchema } from "../../db/index.js";
+import { userService } from "../service/user.service.js";
+import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema.js";
 
 export const userController = {
   /**

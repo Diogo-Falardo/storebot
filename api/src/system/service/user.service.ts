@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import { users } from "../../db/schema";
-import { db } from "../../db";
+import { users } from "../../db/schema.js";
+import { db } from "../../db/index.js";
 import { eq, and } from "drizzle-orm";
-import { HttpError } from "../utils/ErrorHandling";
-import { storeService } from "./store.service";
+import { HttpError } from "../utils/ErrorHandling.js";
+import { storeService } from "./store.service.js";
 import { ENTIRE_USER_MODEL } from "../../db/schemas/user.schema";
 
 export const userService = {

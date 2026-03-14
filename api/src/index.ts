@@ -3,7 +3,7 @@ const port = 2109;
 // import cors from "cors";
 import express from "express";
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "./system/utils/ErrorHandling";
+import { HttpError } from "./system/utils/ErrorHandling.js";
 
 const app = express();
 app.use(express.json());
@@ -12,15 +12,15 @@ const api = express.Router();
 app.use("/api", api);
 
 // user route
-import userRouter from "./system/route/user.route";
+import userRouter from "./system/route/user.route.js";
 api.use("/user", userRouter);
 
 // shop route
-import storeRouter from "./system/route/store.route";
+import storeRouter from "./system/route/store.route.js";
 api.use("/store", storeRouter);
 
 // payment route
-import paymentRouter from "./system/route/payment.route";
+import paymentRouter from "./system/route/payment.route.js";
 api.use("/payment", paymentRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {

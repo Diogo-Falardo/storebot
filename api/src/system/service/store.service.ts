@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
-import { db } from "../../db";
+import { db } from "../../db/index.js";
 import { eq, and } from "drizzle-orm";
-import { HttpError } from "../utils/ErrorHandling";
-import { stores } from "../../db/schema";
-import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema";
+import { HttpError } from "../utils/ErrorHandling.js";
+import { stores } from "../../db/schema.js";
+import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema.js";
 import {
   schema_public_STORE_INFO,
   schema_public_type_STORE_INFO,
-} from "../../schemas/store.schema";
+} from "../../schemas/store.schema.js";
 
 export const storeService = {
   // validates if a user is the real owner of that store

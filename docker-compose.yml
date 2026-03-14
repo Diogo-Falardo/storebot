@@ -4,13 +4,15 @@ services:
   api:
     build:
       context: ./api
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: kira-api
     ports:
       - "2109:2109"
     volumes:
       - ./api:/app
       - /app/node_modules # preserve installed modules
+    env_file:
+      - ./api/.env
     environment:
       - NODE_ENV=development
       - PORT=2109 # most express apps respect this

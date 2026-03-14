@@ -1,7 +1,7 @@
 import express, { NextFunction, Router, Request, Response } from "express";
-import { userService } from "../service/user.service";
+import { userService } from "../service/user.service.js";
 import { valid_uuid } from "../../lib/field.valid";
-import { storeService } from "../service/store.service";
+import { storeService } from "../service/store.service.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE!);
