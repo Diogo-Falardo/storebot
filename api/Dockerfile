@@ -46,6 +46,7 @@ RUN echo "=== DEBUG: Final runtime - dist/ contents ===" && \
 
 # Railway dynamically assigns PORT via environment variable
 ENV PORT=2109
+ENV NODE_ENV=production
 EXPOSE ${PORT}
 
 # Start the compiled server
