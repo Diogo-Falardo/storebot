@@ -5,7 +5,6 @@ import { storeService } from "../service/store.service.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE!);
-console.log("Stripe key:", process.env.STRIPE_PRIVATE);
 
 const router = Router();
 
@@ -49,11 +48,9 @@ router.post(
       });
 
       res.json({ url: paymentLink.url });
-    } catch (err: any) {
-      console.error("Error creating payment link:", err);
-      return res
-        .status(500)
-        .json({ error: err.message || "Internal server error" });
+    } catch (err) {
+      console.log(err);
+      next(err);
     }
   },
 );

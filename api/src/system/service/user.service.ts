@@ -43,7 +43,7 @@ export const userService = {
         storeId: userStore.id, // this or will missmatch in "schemas"
       };
     } catch (err: any) {
-      console.error(err);
+      console.log(err);
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "error getting user");
     }
