@@ -5,6 +5,7 @@ import { storeService } from "../service/store.service.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE!);
+console.log("Stripe key:", process.env.STRIPE_PRIVATE);
 
 const router = Router();
 
