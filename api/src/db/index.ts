@@ -18,10 +18,3 @@ if (process.env.NODE_ENV === "production") {
     }
   })();
 }
-
-// telegram required verification
-import { z } from "zod";
-export const tgHeadersSchema = z.object({
-  "x-tg-user-id": z.coerce.number().int().positive(),
-  "x-bot-secret": z.string().min(1),
-});

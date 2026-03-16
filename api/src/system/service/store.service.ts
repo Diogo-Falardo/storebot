@@ -2,15 +2,33 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "../../db/index.js";
 import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling.js";
-import { stores } from "../../db/schema.js";
-import { CREATE_SHOP_TYPE } from "../../db/schemas/shop.schema.js";
 import {
-  schema_public_STORE_INFO,
-  schema_public_type_STORE_INFO,
-} from "../../schemas/store.schema.js";
+  category,
+  paymentMethods,
+  shippingMethods,
+  stores,
+} from "../../db/schema.js";
+import {
+  INSERT_STORE_type,
+  SELECT_PUBLIC_STORE,
+  SELECT_PUBLIC_STORE_type,
+  SELECT_STORE,
+  SELECT_STORE_CATEGORY,
+  SELECT_STORE_CATEGORY_type,
+  SELECT_STORE_METHODS,
+  SELECT_STORE_METHODS_type,
+  SELECT_STORE_type,
+} from "../../db/schemas/store.schema.js";
 
 export const storeService = {
-  // validates if a user is the real owner of that store
+  /**
+   * validates if a user is the real owner of that store
+   *
+   *
+   * @param userId
+   * @param storeId
+   * @returns true if user is the owner of the shop
+   */
   async validateStoreOwner(userId: string, storeId: string): Promise<boolean> {
     try {
       const owner = await db
@@ -23,17 +41,25 @@ export const storeService = {
       return true;
     } catch (err) {
       console.error(`
-        -------------------------------------
-        ERROR WITH VALIDATION STORE OWNER:
+-------------------------------------
+ERROR WITH VALIDATION STORE OWNER:
 
-        ${err}
+${err}
         
-        -------------------------------------`);
+-------------------------------------`);
       throw new HttpError(500, "Error loading store...");
     }
   },
 
-  // updates a store expire date
+  /**
+   * updates a store expire date based on the select period time
+   *
+   * period = `nday`, `nweek` , `nmonth`, ...
+   * @param userId
+   * @param storeId
+   * @param period "1d", "1w", "1m", "3m", "1y"
+   * @returns
+   */
   async updateStoreExpireDate(
     userId: string,
     storeId: string,
@@ -42,15 +68,10 @@ export const storeService = {
     const ownership = await this.validateStoreOwner(userId, storeId);
     if (!ownership) return "Upsss.... restriceted area!";
 
-    // Fetch current expire date
-    const store = await db
-      .select()
-      .from(stores)
-      .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
-      .limit(1);
+    const storeExpireDate = await this.getStoreExpireDate(storeId);
 
-    let currentExpire = store[0]?.storeExpireDate
-      ? new Date(store[0].storeExpireDate)
+    let currentExpire = storeExpireDate
+      ? new Date(storeExpireDate)
       : new Date();
 
     const now = new Date();
@@ -87,24 +108,29 @@ export const storeService = {
       return `Store is expiring at: ${currentExpire}`;
     } catch (err) {
       console.error(`
-      -------------------------------------
-      ERROR UPDATING STORE EXPIRE DATE:
+-------------------------------------
+ERROR UPDATING STORE EXPIRE DATE:
 
-      ${err}
+${err}
 
-      -------------------------------------
-      `);
+-------------------------------------
+`);
       throw new HttpError(500, "Error loading store...");
     }
   },
 
-  // get store expire date
-  async getStoreExpireDate(userId: string, storeId: string) {
+  /**
+   * selects the store exipire date
+   *
+   * @param storeId
+   * @returns
+   */
+  async getStoreExpireDate(storeId: string) {
     try {
       const active = await db
         .select({ storeExpireDate: stores.storeExpireDate })
         .from(stores)
-        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
+        .where(eq(stores.id, storeId))
         .limit(1);
 
       if (!active[0]) throw new HttpError(404, "Store was not found");
@@ -112,23 +138,26 @@ export const storeService = {
       return active[0].storeExpireDate;
     } catch (err) {
       console.error(`
-      -------------------------------------
-      ERROR GETTING STORE EXPIRE DATE
+-------------------------------------
+ERROR GETTING STORE EXPIRE DATE
 
-      ${err}
+${err}
 
-      -------------------------------------
+-------------------------------------
       `);
       throw new HttpError(500, "Error loading store...");
     }
   },
 
   /**
-   * Gets the corresponding shop from an user
-   * @param userId [database]
-   * @returns The corresponding shop or null
+   * select store info from internal user id
+   *
+   * @param userId
+   * @returns
    */
-  async getStoreByUserId(userId: string) {
+  async getStoreByInternalUserId(
+    userId: string,
+  ): Promise<SELECT_STORE_type | null> {
     try {
       const store = await db
         .select()
@@ -136,19 +165,40 @@ export const storeService = {
         .where(eq(stores.userId, userId))
         .limit(1);
 
-      if (!store[0]) return null; // this means there is no shop from that user
+      if (!store[0]) return null;
 
-      return store[0];
+      const _store = {
+        storeId: store[0].id,
+        storeCreatedAt: new Date(store[0].createdAt),
+        ...store[0],
+      };
+      return SELECT_STORE.parse(_store);
     } catch (err) {
-      console.error(err);
+      console.error(`
+-------------------------------------
+ERROR GETTING STORE BY INTERNAL USER ID
+
+${err}
+
+-------------------------------------
+      `);
       throw new HttpError(500, "Error loading store...");
     }
   },
 
-  // querys for a store id and returns a public store info
-  async getStoreByStoreId(
+  /**
+   * select "public store info"
+   *
+   * "selects cool to share store info"
+   *
+   * - info that is not sensitive
+   *
+   * @param storeId
+   * @returns
+   */
+  async publicStoreInfo(
     storeId: string,
-  ): Promise<schema_public_type_STORE_INFO | null> {
+  ): Promise<SELECT_PUBLIC_STORE_type | null> {
     try {
       const store = await db
         .select()
@@ -158,19 +208,27 @@ export const storeService = {
 
       if (!store[0]) return null;
 
-      return schema_public_STORE_INFO.parse(store[0]);
+      return SELECT_PUBLIC_STORE.parse(store[0]);
     } catch (err) {
-      console.error(err);
+      console.error(`
+-------------------------------------
+ERROR GETTING PUBLIC STORE INFO
+
+${err}
+
+ -------------------------------------
+      `);
       throw new HttpError(500, "Error loading store...");
     }
   },
 
   /**
-   * Creates a shop
+   * create a store
+   *
    * @param userId
    * @param dto
    */
-  async createStore(userId: string, dto: CREATE_SHOP_TYPE) {
+  async createStore(userId: string, dto: INSERT_STORE_type) {
     try {
       await db.insert(stores).values({
         id: uuidv4(),
@@ -181,8 +239,134 @@ export const storeService = {
 
       return "store created";
     } catch (err) {
-      console.error(err);
+      console.error(`
+-------------------------------------
+ERROR CREATING STORE
+
+${err}
+
+-------------------------------------
+`);
       throw new HttpError(500, "Error creating store...");
+    }
+  },
+
+  /**
+   * finds a store by its id
+   * @param storeId
+   * @returns store model
+   */
+  async getStoreByStoreId(storeId: string): Promise<SELECT_STORE_type | null> {
+    try {
+      const store = await db
+        .select()
+        .from(stores)
+        .where(eq(stores.id, storeId))
+        .limit(1);
+
+      if (!store[0]) return null;
+
+      return SELECT_STORE.parse(store[0]);
+    } catch (err: any) {
+      console.error(`
+-------------------------------------
+ERROR GETTING STORE BY STORE ID
+
+${err}
+
+-------------------------------------
+      `);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
+  /**
+   * finds the categorys of a store
+   * @param storeId
+   * @returns array of categorys
+   */
+  async getStoreCategorysByStoreId(
+    storeId: string,
+  ): Promise<Array<SELECT_STORE_CATEGORY_type> | null> {
+    try {
+      const categorys = await db
+        .select()
+        .from(category)
+        .where(eq(category.storeId, storeId));
+
+      if (categorys.length === 0) return null;
+
+      return SELECT_STORE_CATEGORY.array().parse(categorys);
+    } catch (err) {
+      console.error(`
+-------------------------------------
+ERROR GETTING STORE CATEGORYS BY STORE ID
+
+${err}
+
+-------------------------------------
+      `);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
+  /**
+   * finds the shipping methods of a store
+   * @param storeId
+   * @returns array of shipping methods
+   */
+  async getStoreShippingMethodsByStoreId(
+    storeId: string,
+  ): Promise<Array<SELECT_STORE_METHODS_type> | null> {
+    try {
+      const methods = await db
+        .select()
+        .from(shippingMethods)
+        .where(eq(shippingMethods.storeId, storeId));
+
+      if (methods.length === 0) return null;
+
+      return SELECT_STORE_METHODS.array().parse(methods);
+    } catch (err: any) {
+      console.error(`
+-------------------------------------
+ERROR GETTING STORE SHIPPING METHODS
+
+${err}
+
+-------------------------------------
+      `);
+      throw new HttpError(500, "Error loading store...");
+    }
+  },
+
+  /**
+   * finds the payment methods of a store
+   * @param storeId
+   * @returns array of payment methods
+   */
+  async getStorePaymentMethodsByStoreId(
+    storeId: string,
+  ): Promise<Array<SELECT_STORE_METHODS_type> | null> {
+    try {
+      const methods = await db
+        .select()
+        .from(paymentMethods)
+        .where(eq(paymentMethods.storeId, storeId));
+
+      if (methods.length === 0) return null;
+
+      return SELECT_STORE_METHODS.array().parse(methods);
+    } catch (err: any) {
+      console.error(`
+-------------------------------------
+ERROR GETTING STORE PAYMENT METHODS
+
+${err}
+
+-------------------------------------
+      `);
+      throw new HttpError(500, "Error loading store...");
     }
   },
 };
