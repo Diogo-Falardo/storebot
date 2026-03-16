@@ -1,0 +1,21 @@
+meta {
+  name: allowed to create?
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base-url}}{{url}}/validate-me
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-TG-USER-ID: 7824653895
+  X-BOT-SECRET: 7f9c8a2e0e3f4a6b9d4e1b8c7a5f2d0e6c4b1a9f8e7d5c3b2a1f0e9d8c7
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

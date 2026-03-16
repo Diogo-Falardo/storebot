@@ -99,7 +99,7 @@ export const userService = {
       console.log(`
         --------------------------------
 
-        ERROR GETTING TELEGRAM USER INFO
+        ERROR GETTING ENTIRE TELEGRAM USER INFO
 
         ${err}
 

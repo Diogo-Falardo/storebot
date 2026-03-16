@@ -1,6 +1,8 @@
 import type { Conversation } from "@grammyjs/conversations";
+import { InlineKeyboard } from "grammy";
 import type { Context } from "grammy";
-import { createStoreTgOnly, getTelegramUserInfo } from "./requests.js";
+import { me, userHasStore } from "../user/user.request.js";
+import { createStore } from "./store.request.js";
 
 // create store conversation
 export async function createStoreConversation(
@@ -10,12 +12,14 @@ export async function createStoreConversation(
   const tgUserId = ctx.from!.id;
   const username = ctx.from?.username;
 
-  const user = await getTelegramUserInfo(tgUserId);
+  const hasStore = await userHasStore(tgUserId);
 
   // If user already has a store
-  if (user !== "no stores") {
+  if (hasStore === "has a shop") {
+    // returns the entire user info
+    const EntireUser = await me(tgUserId);
     await ctx.reply(
-      `👋 Hello${username ? ` ${username}` : ""}, you already have a store: ${user?.storeName}.\n\n` +
+      `👋 Hello${username ? ` ${username}` : ""}, you already have a store: ${EntireUser?.storeName}.\n\n` +
         "➤ Creating multiple stores is not supported yet.\n" +
         "More features will be available soon.",
     );
@@ -28,20 +32,20 @@ export async function createStoreConversation(
       "Please send the name you want for your store (1–50 characters).",
   );
 
-  let shopName: string;
-
+  // validate store name
+  let storeName: string;
   while (true) {
     const { message } = await conversation.waitFor("message:text");
-    shopName = String(message.text).trim();
+    storeName = String(message.text).trim();
 
-    if (!shopName) {
+    if (!storeName) {
       await ctx.reply("⚠️ Please send a valid store name.");
       continue;
     }
-    if (shopName.charAt(0) === "/") {
+    if (storeName.charAt(0) === "/") {
       return;
     }
-    if (shopName.length < 1 || shopName.length > 50) {
+    if (storeName.length < 1 || storeName.length > 50) {
       await ctx.reply(
         "⚠️ Store name must be between 1 and 50 characters. Try again.",
       );
@@ -50,11 +54,34 @@ export async function createStoreConversation(
     break;
   }
 
+  // user to choose store type
+  const keyboard = new InlineKeyboard()
+    .text("🌐 Public", "store_type_public")
+    .text("🔒 Private", "store_type_private");
+
+  await ctx.reply("Choose your store type:", { reply_markup: keyboard });
+
+  // Wait for the user's button press
+  let storeType: "public" | "private" | undefined;
+  while (!storeType) {
+    const { callbackQuery } = await conversation.waitFor("callback_query:data");
+    if (callbackQuery.data === "store_type_public") {
+      storeType = "public";
+    } else if (callbackQuery.data === "store_type_private") {
+      storeType = "private";
+    } else {
+      await ctx.reply("Please choose one of the options.");
+      continue;
+    }
+    // Acknowledge the button press
+    await ctx.answerCallbackQuery();
+  }
+
   try {
-    const result = await createStoreTgOnly(tgUserId, shopName);
+    const result = await createStore(tgUserId, storeName, storeType);
 
     await ctx.reply(
-      `✅ Your store has been created: <b>${result.shopName ?? shopName}</b>\n\n` +
+      `✅ Your store has been created: <b>${storeName}</b>\n\n` +
         "Next steps:\n" +
         "• 📂 <b>/dashboard</b> – Manage your store (add products, edit settings, delete store, etc.)\n" +
         "• 🔓 <b>/activate</b> – Make your store visible to everyone\n\n" +

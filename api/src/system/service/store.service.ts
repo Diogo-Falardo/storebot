@@ -23,8 +23,6 @@ import {
 export const storeService = {
   /**
    * validates if a user is the real owner of that store
-   *
-   *
    * @param userId
    * @param storeId
    * @returns true if user is the owner of the shop

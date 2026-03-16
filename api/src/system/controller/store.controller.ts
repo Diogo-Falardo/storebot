@@ -65,7 +65,7 @@ export const storeController = {
       if (!store) {
         return res.status(404).json({ error: "Store not found" });
       }
-      return res.json(SELECT_PUBLIC_STORE.parse(store));
+      return res.status(200).json(SELECT_PUBLIC_STORE.parse(store));
     } catch (err) {
       next(err);
     }

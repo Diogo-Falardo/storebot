@@ -7,12 +7,9 @@ import {
   createConversation,
 } from "@grammyjs/conversations";
 import { createStoreConversation } from "./store/store.conversations.js";
-import {
-  createPaymentLink,
-  getStoreExpireDate,
-  getStoreInfoByStoreId,
-  getTelegramUserInfo,
-} from "./store/requests.js";
+import { userHasStore, me } from "./user/user.request.js";
+import { getStoreExpireDate } from "./store/store.request.js";
+import { createPaymentLink } from "./payments/payments.request.js";
 
 const token = process.env.BOT_TOKEN;
 if (!token) throw new Error("BOT_TOKEN missing");
@@ -90,9 +87,10 @@ bot.command("activate", async (ctx) => {
     return ctx.reply("⚠️ Unable to identify your account.");
   }
 
-  const user = await getTelegramUserInfo(tgUserId);
+  const user = await me(tgUserId);
+  const hasStore = await userHasStore(tgUserId);
 
-  if (user === "no stores" || !user.storeId) {
+  if (hasStore === "has no shop") {
     return ctx.reply(
       "ℹ️ You don't have a store yet. Use /create to set up your store.",
     );
@@ -121,6 +119,7 @@ bot.command("activate", async (ctx) => {
     },
   });
 });
+// call back to execute the generation of a payment link
 bot.callbackQuery(/activate_(.*)/, async (ctx) => {
   const period = ctx.match?.[1];
   const telegramId = ctx.from.id.toString();
@@ -149,11 +148,12 @@ bot.command("dashboard", async (ctx) => {
   if (!tgUserId) {
     return ctx.reply("⚠️ Unable to identify your account. Please try again.");
   }
+  const user = await me(tgUserId);
 
   try {
-    const user = await getTelegramUserInfo(tgUserId);
+    const hasStore = await userHasStore(tgUserId);
 
-    if (user === "no stores" || !user.storeId) {
+    if (hasStore || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
@@ -194,9 +194,10 @@ bot.command("shop", async (ctx) => {
   }
 
   try {
-    const user = await getTelegramUserInfo(tgUserId);
+    const user = await me(tgUserId);
+    const hasStore = await userHasStore(tgUserId);
 
-    if (user === "no stores" || !user.storeId) {
+    if (hasStore === "has a shop" || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
@@ -239,15 +240,16 @@ bot.command("setshop", async (ctx) => {
   }
 
   try {
-    const user = await getTelegramUserInfo(tgUserId);
+    const user = await me(tgUserId);
+    const hasStore = await userHasStore(tgUserId);
 
-    if (user === "no stores" || !user.storeId) {
+    if (hasStore === "has a shop" || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
     }
 
-    const deepLink = `https://t.me/usestorebot?start=shop_${user.storeId}`;
+    const deepLink = `https://t.me/usestorebot?openshop=shop_${user.storeId}`;
 
     await ctx.reply(
       `🛒 <b>${user.storeName}</b>\n\n` + `Tap below to open my store`,
@@ -266,41 +268,42 @@ bot.command("setshop", async (ctx) => {
 
 // ---------------------
 // open a shop by id button
-bot.command("openshop", async (ctx) => {
-  const tgUserId = ctx.from?.id;
-  if (!tgUserId) {
-    return ctx.reply("⚠️ Unable to identify your account. Please try again.");
-  }
+// bot.command("openshop", async (ctx) => {
+//   const tgUserId = ctx.from?.id;
+//   if (!tgUserId) {
+//     return ctx.reply("⚠️ Unable to identify your account. Please try again.");
+//   }
 
-  const args = ctx.match?.toString().trim();
-  if (!args || !args.startsWith("store_")) {
-    return ctx.reply(
-      "ℹ️ Please provide a valid store ID. Example: /openstore store_1234",
-    );
-  }
+//   const args = ctx.match?.toString().trim();
+//   if (!args || !args.startsWith("store_")) {
+//     return ctx.reply(
+//       "ℹ️ Please provide a valid store ID. Example: /openstore store_1234",
+//     );
+//   }
 
-  const shopId = args.replace("store_", "");
+//   const shopId = args.replace("store_", "");
 
-  try {
-    const store = await getStoreInfoByStoreId(tgUserId, shopId);
+//   try {
+//         const user = await me(tgUserId);
+//     const hasStore = await userHasStore(tgUserId);
 
-    if (!store) {
-      return ctx.reply("❌ The store you are looking for was not found.");
-    }
+//     if (!store) {
+//       return ctx.reply("❌ The store you are looking for was not found.");
+//     }
 
-    const storeUrl = `${webUrl}/store/${shopId}`;
+//     const storeUrl = `${webUrl}/store/${shopId}`;
 
-    await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [[{ text: "Open Store", web_app: { url: storeUrl } }]],
-      },
-    });
-  } catch (err) {
-    console.log(err);
-    return ctx.reply("❌ Something went wrong. Please try again later.");
-  }
-});
+//     await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
+//       parse_mode: "HTML",
+//       reply_markup: {
+//         inline_keyboard: [[{ text: "Open Store", web_app: { url: storeUrl } }]],
+//       },
+//     });
+//   } catch (err) {
+//     console.log(err);
+//     return ctx.reply("❌ Something went wrong. Please try again later.");
+//   }
+// });
 
 // ---------------------
 // about
