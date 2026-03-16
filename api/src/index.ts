@@ -18,7 +18,7 @@ app.use("/api", api);
 import paymentRouter from "./system/route/payment.route.js";
 api.use("/payment", paymentRouter);
 
-app.use(express.json());
+api.use(express.json());
 
 // user route
 import userRouter from "./system/route/user.route.js";

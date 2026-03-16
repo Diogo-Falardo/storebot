@@ -17,7 +17,7 @@ export type SELECT_STORE_type = z.infer<typeof SELECT_STORE>;
 
 // public store info
 export const SELECT_PUBLIC_STORE = z.object({
-  id: z.uuid(),
+  storeId: z.uuid(),
   storeName: z.string(),
   storeCurrency: z.string(),
 });

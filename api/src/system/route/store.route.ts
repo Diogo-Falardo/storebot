@@ -9,9 +9,6 @@ router.post("/create", storeController.createTelegramStore);
 // returns the public store info, doesnt need verification.
 router.get("/public-info/:id", storeController.storeInfo);
 
-// update the
-// router.post("/update-expire-date/:id", storeController.updateExpireStoreDate);
-
 // returns store expire date
 router.get("/expire-date/:id", storeController.storeExpireDate);
 

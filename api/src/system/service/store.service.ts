@@ -266,7 +266,13 @@ ${err}
 
       if (!store[0]) return null;
 
-      return SELECT_STORE.parse(store[0]);
+      const _store = {
+        storeId: store[0].id,
+        ...store[0],
+        storeCreatedAt: new Date(store[0].createdAt),
+      };
+
+      return SELECT_STORE.parse(_store);
     } catch (err: any) {
       console.error(`
 -------------------------------------
