@@ -1,8 +1,16 @@
 import { z } from "zod";
 import { category, paymentMethods } from "../schema";
 
+export const SELECT_SIMPLE_USER = z.object({
+  userTelegramId: z.string(),
+  userId: z.string(),
+  userCreatedAt: z.string(),
+});
+export type SELECT_SIMPLE_USER_type = z.infer<typeof SELECT_SIMPLE_USER>;
+4;
+
 // user info + shop info
-export const SELECT_ENTIRE_USER_OBJECT = z.object({
+export const SELECT_ENTIRE_USER = z.object({
   userId: z.uuid(),
   storeId: z.uuid(),
   storeName: z.string(),
@@ -14,6 +22,4 @@ export const SELECT_ENTIRE_USER_OBJECT = z.object({
   paymentMethods: z.array(z.string()),
   storeCreatedAt: z.string(),
 });
-export type SELECT_ENTIRE_USER_OBJECT_type = z.infer<
-  typeof SELECT_ENTIRE_USER_OBJECT
->;
+export type SELECT_ENTIRE_USER_type = z.infer<typeof SELECT_ENTIRE_USER>;

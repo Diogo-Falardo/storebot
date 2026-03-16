@@ -5,12 +5,44 @@ import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling.js";
 import { storeService } from "./store.service.js";
 import {
-  SELECT_ENTIRE_USER_OBJECT,
-  SELECT_ENTIRE_USER_OBJECT_type,
+  SELECT_ENTIRE_USER,
+  SELECT_ENTIRE_USER_type,
+  SELECT_SIMPLE_USER,
+  SELECT_SIMPLE_USER_type,
 } from "../../db/schemas/user.schema.js";
 
 export const userService = {
-  async createUser(telegramId: number) {},
+  /**
+   * finds if we have a user with that telegram_user_id
+   * @param telegramId
+   * @returns user object
+   */
+  async getTelegramUser(
+    telegramId: number,
+  ): Promise<SELECT_SIMPLE_USER_type | null> {
+    try {
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.telegramUserId, telegramId))
+        .limit(1);
+
+      if (!user[0]) return null;
+
+      return SELECT_SIMPLE_USER.parse(user[0]);
+    } catch (err: any) {
+      console.log(`
+        --------------------------------
+        ERROR GETTING TELEGRAM USER INFO
+
+        ${err}
+
+        --------------------------------
+        
+     `);
+      throw new HttpError(500, "Error loading user...");
+    }
+  },
 
   /**
    * from telegramId, selects all the available user info
@@ -20,7 +52,7 @@ export const userService = {
    */
   async getTelegramUserInfo(
     telegramId: number,
-  ): Promise<SELECT_ENTIRE_USER_OBJECT_type | string | undefined> {
+  ): Promise<SELECT_ENTIRE_USER_type | string | undefined> {
     try {
       const user = await db
         .select()
@@ -34,11 +66,10 @@ export const userService = {
 
       const userStore = await storeService.getStoreByInternalUserId(user[0].id);
 
-      // remove this in the future
-      // need to think on a better solution for this
       if (!userStore) {
-        return "No store";
+        return "No store yet, its free to create one!";
       }
+
       const categorys = await storeService.getStoreCategorysByStoreId(
         userStore.storeId,
       );
@@ -63,7 +94,7 @@ export const userService = {
         storeCreatedAt: userStore.storeCreatedAt.toISOString(),
       };
 
-      return SELECT_ENTIRE_USER_OBJECT.parse(info);
+      return SELECT_ENTIRE_USER.parse(info);
     } catch (err: any) {
       console.log(`
         --------------------------------

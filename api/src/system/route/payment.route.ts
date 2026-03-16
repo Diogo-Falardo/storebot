@@ -1,6 +1,5 @@
 import express, { NextFunction, Router, Request, Response } from "express";
 import { userService } from "../service/user.service.js";
-import { valid_uuid } from "../../lib/field.valid";
 import { storeService } from "../service/store.service.js";
 import Stripe from "stripe";
 
@@ -25,26 +24,30 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     const { period, telegramId } = req.body;
 
-    console.log(period, telegramId);
-
     const priceId = getPriceIdForPeriod(period);
     if (!priceId) {
       return res.status(400).json({ error: "Invalid period" });
     }
 
-    const info = await userService.getUserInfo(telegramId);
+    const user = await userService.getTelegramUser(telegramId);
+    // validate if user exist
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-    console.log("User info:", info);
     try {
-      if (info === "no stores") {
+      const store = await storeService.getStoreByInternalUserId(user.userId);
+      // validate if user has stores
+      if (!store) {
         return res
           .status(400)
           .json({ error: "You dont have a shop to activate, create one!" });
       }
 
+      // generate a payment link
       const paymentLink = await stripe.paymentLinks.create({
         line_items: [{ price: priceId, quantity: 1 }],
-        metadata: { userId: info.userId, storeId: info.storeId, period },
+        metadata: { userId: user.userId, storeId: store.storeId, period },
       });
 
       res.json({ url: paymentLink.url });
@@ -70,7 +73,9 @@ router.post(
         process.env.STRIPE_WEBHOOK_SECRET!,
       );
     } catch (err: any) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      return res
+        .status(400)
+        .send(`Stripe payment Webhook Error: ${err.message}`);
     }
 
     // Check for successful payment
@@ -81,13 +86,14 @@ router.post(
       const period = session.metadata?.period;
 
       if (!userId || !storeId || !period) {
-        console.error("Missing metadata in Stripe session:", session.metadata);
+        console.error(
+          "Missing metadata in Stripe payment session:",
+          session.metadata,
+        );
         return res.status(400).json({ error: "Missing payment metadata" });
       }
 
       await storeService.updateStoreExpireDate(userId, storeId, period);
-
-      console.log(`Payment completed for user ${userId} for period ${period}`);
     }
 
     res.json({ received: true });
