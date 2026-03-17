@@ -36,7 +36,7 @@ export class serverStore {
 
         -------------------------
         `)
-      throw new (err.message ?? 'error validating store')()
+      throw new (err.message ?? 'Error validating store')()
     }
   }
 
@@ -48,7 +48,7 @@ export class serverStore {
         .where(eq(stores.id, storeId))
         .limit(1)
 
-      if (!expireDate[0]) throw new Error('shop not found')
+      if (!expireDate[0]) throw new Error('Store not found')
 
       return expireDate[0].storeExpireDate
     } catch (err: any) {
@@ -60,7 +60,7 @@ export class serverStore {
 
         -------------------------
       `)
-      throw new (err.message ?? 'error fetching store')()
+      throw new (err.message ?? 'Error fetching store')()
     }
   }
 
@@ -86,7 +86,14 @@ export class serverStore {
       if (err.message === 'store not found') {
         return false
       }
-      console.error(err.message)
+      console.log(`
+        -------------------------
+        ERROR VALIDATING USER STORE OWNERSHIP
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error validating store ownership')
     }
   }
@@ -106,11 +113,18 @@ export class serverStore {
         .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
         .limit(1)
 
-      if (!store[0]) throw new Error('store was not found!')
+      if (!store[0]) throw new Error('Store was not found!')
 
       return VISUALIZE_store_SCHEMA.parse(store[0])
     } catch (err: any) {
-      console.error(err)
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE BY STORE ID
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error getting store')
     }
   }
@@ -130,9 +144,16 @@ export class serverStore {
         storeType: dto.storeType,
       })
 
-      return 'store created'
+      return 'Store created'
     } catch (err: any) {
-      console.error(err)
+      console.log(`
+        -------------------------
+        ERROR CREATING STORE
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error('Error creating store')
     }
   }
@@ -186,9 +207,16 @@ export class serverStore {
         .set(updateObj)
         .where(and(eq(stores.id, storeId), eq(stores.userId, userId)))
 
-      return 'store has been updated'
+      return 'Store has been updated'
     } catch (err: any) {
-      console.error(err.message)
+      console.log(`
+        -------------------------
+        ERROR UPDATING STORE
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error updating store')
     }
   }

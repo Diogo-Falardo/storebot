@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
+import { Route as publicTermsRouteImport } from './routes/(public)/Terms'
+import { Route as publicPricingRouteImport } from './routes/(public)/Pricing'
+import { Route as publicHowToUseRouteImport } from './routes/(public)/HowToUse'
+import { Route as publicAboutRouteImport } from './routes/(public)/About'
 import { Route as storeStoreIdRouteImport } from './routes/(store)/store.$id'
 import { Route as storeDashboardIdRouteImport } from './routes/(store)/dashboard.$id'
 
@@ -21,6 +25,26 @@ const publicRouteRoute = publicRouteRouteImport.update({
 const publicIndexRoute = publicIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicTermsRoute = publicTermsRouteImport.update({
+  id: '/Terms',
+  path: '/Terms',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicPricingRoute = publicPricingRouteImport.update({
+  id: '/Pricing',
+  path: '/Pricing',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicHowToUseRoute = publicHowToUseRouteImport.update({
+  id: '/HowToUse',
+  path: '/HowToUse',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicAboutRoute = publicAboutRouteImport.update({
+  id: '/About',
+  path: '/About',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const storeStoreIdRoute = storeStoreIdRouteImport.update({
@@ -35,11 +59,19 @@ const storeDashboardIdRoute = storeDashboardIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/About': typeof publicAboutRoute
+  '/HowToUse': typeof publicHowToUseRoute
+  '/Pricing': typeof publicPricingRoute
+  '/Terms': typeof publicTermsRoute
   '/': typeof publicIndexRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRoutesByTo {
+  '/About': typeof publicAboutRoute
+  '/HowToUse': typeof publicHowToUseRoute
+  '/Pricing': typeof publicPricingRoute
+  '/Terms': typeof publicTermsRoute
   '/': typeof publicIndexRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
@@ -47,18 +79,40 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(public)': typeof publicRouteRouteWithChildren
+  '/(public)/About': typeof publicAboutRoute
+  '/(public)/HowToUse': typeof publicHowToUseRoute
+  '/(public)/Pricing': typeof publicPricingRoute
+  '/(public)/Terms': typeof publicTermsRoute
   '/(public)/': typeof publicIndexRoute
   '/(store)/dashboard/$id': typeof storeDashboardIdRoute
   '/(store)/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard/$id' | '/store/$id'
+  fullPaths:
+    | '/About'
+    | '/HowToUse'
+    | '/Pricing'
+    | '/Terms'
+    | '/'
+    | '/dashboard/$id'
+    | '/store/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard/$id' | '/store/$id'
+  to:
+    | '/About'
+    | '/HowToUse'
+    | '/Pricing'
+    | '/Terms'
+    | '/'
+    | '/dashboard/$id'
+    | '/store/$id'
   id:
     | '__root__'
     | '/(public)'
+    | '/(public)/About'
+    | '/(public)/HowToUse'
+    | '/(public)/Pricing'
+    | '/(public)/Terms'
     | '/(public)/'
     | '/(store)/dashboard/$id'
     | '/(store)/store/$id'
@@ -86,6 +140,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicIndexRouteImport
       parentRoute: typeof publicRouteRoute
     }
+    '/(public)/Terms': {
+      id: '/(public)/Terms'
+      path: '/Terms'
+      fullPath: '/Terms'
+      preLoaderRoute: typeof publicTermsRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/Pricing': {
+      id: '/(public)/Pricing'
+      path: '/Pricing'
+      fullPath: '/Pricing'
+      preLoaderRoute: typeof publicPricingRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/HowToUse': {
+      id: '/(public)/HowToUse'
+      path: '/HowToUse'
+      fullPath: '/HowToUse'
+      preLoaderRoute: typeof publicHowToUseRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/About': {
+      id: '/(public)/About'
+      path: '/About'
+      fullPath: '/About'
+      preLoaderRoute: typeof publicAboutRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
     '/(store)/store/$id': {
       id: '/(store)/store/$id'
       path: '/store/$id'
@@ -104,10 +186,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface publicRouteRouteChildren {
+  publicAboutRoute: typeof publicAboutRoute
+  publicHowToUseRoute: typeof publicHowToUseRoute
+  publicPricingRoute: typeof publicPricingRoute
+  publicTermsRoute: typeof publicTermsRoute
   publicIndexRoute: typeof publicIndexRoute
 }
 
 const publicRouteRouteChildren: publicRouteRouteChildren = {
+  publicAboutRoute: publicAboutRoute,
+  publicHowToUseRoute: publicHowToUseRoute,
+  publicPricingRoute: publicPricingRoute,
+  publicTermsRoute: publicTermsRoute,
   publicIndexRoute: publicIndexRoute,
 }
 
