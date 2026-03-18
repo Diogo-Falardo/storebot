@@ -7,8 +7,7 @@ import {
   createFileRoute,
   useNavigate,
 } from '@tanstack/react-router'
-// import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { useLayoutPublic } from '@/lib/data'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -19,9 +18,12 @@ export const Route = createFileRoute('/(public)')({
 function RouteComponent() {
   const navbarRef = useRef<HTMLDivElement>(null)
   const footerRef = useRef<HTMLDivElement>(null)
+  const setNavbarHeight = useLayoutPublic((s) => s.setHeaderHeight)
+  const setFooterHeight = useLayoutPublic((s) => s.setFooterHeight)
 
   useEffect(() => {
     if (navbarRef.current) {
+      setNavbarHeight(navbarRef.current.offsetHeight)
       gsap.fromTo(
         navbarRef.current,
         { opacity: 0 },
@@ -29,6 +31,7 @@ function RouteComponent() {
       )
     }
     if (footerRef.current) {
+      setFooterHeight(footerRef.current.offsetHeight)
       gsap.fromTo(
         footerRef.current,
         { opacity: 0 },
@@ -38,41 +41,16 @@ function RouteComponent() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-linear-to-t from-zinc-950 to-background flex flex-col justify-center  gap-3">
+    <div className="min-h-screen flex flex-col bg-linear-to-t from-zinc-950 to-background">
       <Navbar ref={navbarRef} />
       {/* <BotLinks /> */}
-      <main className="p-3 flex-1 overflow-hidden">
-        <ScrollArea className="h-full w-full">
-          <Outlet />
-        </ScrollArea>
+      <main className="flex-1">
+        <Outlet />
       </main>
       <Footer ref={footerRef} />
     </div>
   )
 }
-
-// const BotLinks = () => {
-//   const botLinksRef = useRef<HTMLDivElement>(null)
-
-//   useEffect(() => {
-//     if (botLinksRef.current) {
-//       gsap.fromTo(
-//         botLinksRef.current,
-//         { y: 0, opacity: 0 },
-//         { y: 0, opacity: 1, duration: 3, ease: 'power3.out' },
-//       )
-//     }
-//   }, [])
-
-//   return (
-//     <div ref={botLinksRef} className="flex items-center justify-center gap-2">
-//       <Button size={'sm'} className="text-xs tracking-wide">
-//         <img className="w-5 h-5" src="/icons/telegram.svg" />
-//         Telegram
-//       </Button>
-//     </div>
-//   )
-// }
 
 const HowToUseButton = () => {
   const navigate = useNavigate()
@@ -86,9 +64,9 @@ const HowToUseButton = () => {
     animating.current = true
     if (btnRef.current) {
       gsap.to(btnRef.current, {
-        scale: 0.75,
+        scale: 0.5,
         boxShadow: '0 0 5px #0c4a6e, 0 0 5px #082f49',
-        duration: 0.15,
+        duration: 0.07,
         yoyo: true,
         repeat: 1,
         ease: 'power1.inOut',
@@ -136,19 +114,19 @@ const Footer = React.forwardRef<HTMLDivElement>((_, ref) => (
   >
     <Link
       to="/Pricing"
-      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-400 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
+      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       Pricing
     </Link>
     <Link
       to="/About"
-      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-400 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
+      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       about
     </Link>
     <Link
       to="/Terms"
-      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-400 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
+      className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       terms
     </Link>

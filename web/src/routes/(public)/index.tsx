@@ -1,7 +1,18 @@
+import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { SplitText } from 'gsap/SplitText'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { MoveDown } from 'lucide-react'
+import { publicData, useLayoutPublic } from '@/lib/data'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export const Route = createFileRoute('/(public)/')({
   component: RouteComponent,
@@ -10,143 +21,228 @@ export const Route = createFileRoute('/(public)/')({
 gsap.registerPlugin(SplitText)
 
 function RouteComponent() {
-  const headingRef = useRef<HTMLHeadingElement>(null)
-  const paragraphRefs = useRef<Array<HTMLParagraphElement | null>>([])
+  const headerHeight = useLayoutPublic((s) => s.headerHeight)
+  const footerHeight = useLayoutPublic((s) => s.footerHeight)
+  const offset = headerHeight + footerHeight
+  const indexTitle = useRef<HTMLHeadingElement>(null)
+  const indexDescription = useRef<HTMLParagraphElement>(null)
+  const reasonsDiv = useRef<HTMLDivElement>(null)
+  const buttonsDiv = useRef<HTMLDivElement>(null)
+  const section2 = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (headingRef.current) {
-      const split = new SplitText(headingRef.current, { type: 'chars' })
-      gsap.from(split.chars, {
+    const tl = gsap.timeline()
+
+    if (indexTitle.current) {
+      const split = new SplitText(indexTitle.current, { type: 'chars' })
+      tl.from(split.chars, {
         opacity: 0,
-        y: 40,
+        y: 20,
         stagger: 0.05,
-        duration: 0.8,
+        duration: 0.05,
         ease: 'power2.out',
       })
     }
-    paragraphRefs.current.forEach((el) => {
-      if (el) {
-        const split = new SplitText(el, { type: 'words' })
-        gsap.from(split.words, {
-          opacity: 0,
-          y: 20,
-          stagger: 0.08,
+
+    tl.to({}, { duration: 0.2 })
+
+    if (indexDescription.current) {
+      const split = new SplitText(indexDescription.current, { type: 'chars' })
+      tl.from(split.chars, {
+        opacity: 0,
+        y: 10,
+        stagger: 0.035,
+        duration: 0.05,
+        ease: 'power2.out',
+      })
+    }
+
+    tl.to({}, { duration: 0.1 })
+
+    if (reasonsDiv.current) {
+      tl.from(reasonsDiv.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.7,
+        ease: 'power3.out',
+      })
+    }
+
+    if (buttonsDiv.current) {
+      tl.fromTo(
+        buttonsDiv.current,
+        { opacity: 0, y: 5 },
+        {
+          opacity: 1,
+          y: 0,
           duration: 0.7,
-          ease: 'power2.out',
-        })
-      }
-    })
+          ease: 'back.out',
+        },
+      )
+    }
+
+    if (section2.current) {
+      tl.fromTo(
+        section2.current,
+        { opacity: 0, y: 5 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'back.out',
+        },
+      )
+    }
   }, [])
 
-  // Helper to assign refs
-  const setParagraphRef = (el: HTMLParagraphElement | null, idx: number) => {
-    paragraphRefs.current[idx] = el
+  const handleMoreInfoClick = () => {
+    if (section2.current) {
+      section2.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
   }
 
   return (
-    <div className="flex flex-col gap-6 md:gap-10 max-w-4xl mx-auto px-4 py-12 md:py-20 text-center md:text-left">
-      <div className="space-y-4">
-        <h1
-          ref={headingRef}
-          className="text-neutral-50 text-4xl md:text-5xl font-bold tracking-tight font-sans"
+    <div className="flex flex-col z-0">
+      <section
+        className="flex flex-col p-5 gap-10"
+        style={{ minHeight: `calc(100vh - ${offset}px)` }}
+      >
+        <div className="flex flex-col gap-3">
+          <h1
+            ref={indexTitle}
+            className="text-3xl font-mono tracking-tight font-semibold"
+          >
+            {publicData.indexTitle}
+          </h1>
+          <p
+            ref={indexDescription}
+            className="text-lg text-justify text-neutral-400"
+          >
+            {publicData.indexTitleDescription}
+          </p>
+        </div>
+        <Accordion
+          ref={reasonsDiv}
+          type="single"
+          collapsible
+          defaultValue={publicData.reasons[1].title}
         >
-          Why Store Bot?
-        </h1>
-        <p
-          ref={(el) => setParagraphRef(el, 0)}
-          className="text-neutral-300 text-xl md:text-2xl font-sans leading-relaxed"
+          {publicData.reasons.map((r) => {
+            return (
+              <AccordionItem key={r.title} value={r.title}>
+                <AccordionTrigger className="text-neutral-50 font-bold">
+                  {r.title}
+                </AccordionTrigger>
+                <AccordionContent className="text-neutral-400">
+                  {r.description}
+                </AccordionContent>
+              </AccordionItem>
+            )
+          })}
+        </Accordion>
+
+        <div
+          ref={buttonsDiv}
+          className="flex mt-auto justify-between gap-4 items-center"
         >
-          Sell digital products the effortless way — entirely inside Telegram.
-        </p>
-      </div>
+          <Button
+            onClick={() => {
+              setTimeout(() => {
+                window.open('https://t.me/usestorebot', '_blank')
+              }, 200)
+            }}
+            className="flex items-center font-semibold text-shadow-sm text-sky-200"
+            size={'sm'}
+          >
+            <img src="/icons/telegram.svg" alt="Telegram" className="w-5 h-5" />
+            Open Store Bot
+          </Button>
+          <Button
+            onClick={handleMoreInfoClick}
+            variant={'ghost'}
+            className="flex items-center text-sm text-neutral-500 font-semibold tracking-tight"
+          >
+            <MoveDown /> More Info
+          </Button>
+        </div>
+      </section>
+      <section
+        ref={section2}
+        className="flex flex-col"
+        style={{ minHeight: `calc(100vh - ${offset}px)` }}
+      >
+        <div className="flex-1 flex flex-col justify-center items-center gap-10">
+          <Card className="max-w-xs w-full bg-background ring ring-sky-800 border border-sky-950 rounded-sm py-3 ">
+            <CardContent>
+              <CardHeader className="p-0">
+                <p className="text-xs text-neutral-700 font-mono">version</p>
+              </CardHeader>
+              <CardTitle className="flex justify-between items-center text-neutral-300 capitalize">
+                {publicData.botInfo.versionName}
+                <span className="text-sky-800 text-shadow-2xs text-sm font-black font-mono lowercase">
+                  {publicData.botInfo.version}
+                </span>
+              </CardTitle>
+            </CardContent>
+          </Card>
+          <Tabs defaultValue="vf" className="max-w-xs w-full">
+            <TabsList variant={'line'} className="font-mono">
+              <TabsTrigger className="after:bg-sky-950" value="vf">
+                Version Features
+              </TabsTrigger>
+              <TabsTrigger className="after:bg-sky-950" value="vl">
+                Version Logs
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="vf" className="mt-3">
+              <Card className="w-full max-w-xs bg-background ring ring-sky-800 border border-sky-950 rounded-sm">
+                <CardHeader>
+                  <p className="text-xl font-mono text-sky-800">
+                    {publicData.botInfo.versionLog.at(-1)?.version ?? ''}
+                  </p>
+                  <CardTitle className="capitalize">
+                    {publicData.botInfo.versionLog.at(-1)?.versionName ?? ''}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="mt-3 text-neutral-400 text-sm flex flex-col gap-1">
+                  <p className="text-xs text-neutral-700 font-mono">
+                    features added
+                  </p>
+                  <div className="mt-auto">
+                    {publicData.botInfo.versionLog
+                      .at(-1)
+                      ?.versionFeatures.map((f) => (
+                        <p>{f}</p>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="vl" className="mt-3">
+              <Card className="w-full max-w-xs bg-background ring ring-sky-800 border border-sky-950 rounded-sm">
+                <CardContent>
+                  <div className="mt-auto">
+                    {publicData.botInfo.versionLog.map((v) => (
+                      <div className="flex justify-between items-center">
+                        <p className="text-neutral-300 text-sm capitalize font-semibold">
+                          {v.versionName}
+                        </p>
 
-      <div className="space-y-8 text-neutral-400 text-lg font-sans leading-relaxed">
-        <p ref={(el) => setParagraphRef(el, 1)}>
-          Your store lives 100% inside Telegram — no external website, no
-          hosting, no domains needed. Customers access and buy directly in
-          private chats or shared links.
-        </p>
-
-        <ul className="space-y-6 list-none text-left md:text-left">
-          <li className="flex items-start gap-4">
-            <span className="text-cyan-400 text-2xl font-bold">•</span>
-            <div>
-              <strong className="text-neutral-200">Private by default</strong>
-              <br />
-              <p ref={(el) => setParagraphRef(el, 2)}>
-                You decide who sees your store. Share privately with specific
-                people or groups — only those you allow get access. Perfect for
-                exclusive offers, memberships, or controlled sales.
-              </p>
-            </div>
-          </li>
-
-          <li className="flex items-start gap-4">
-            <span className="text-cyan-400 text-2xl font-bold">•</span>
-            <div>
-              <strong className="text-neutral-200">
-                No fees from us — 100% yours
-              </strong>
-              <br />
-              <p ref={(el) => setParagraphRef(el, 3)}>
-                StoreBot takes zero commission, zero platform cut, zero
-                transaction fees. Every cent (or crypto equivalent) from your
-                sales goes straight to you.
-              </p>
-            </div>
-          </li>
-
-          <li className="flex items-start gap-4">
-            <span className="text-cyan-400 text-2xl font-bold">•</span>
-            <div>
-              <strong className="text-neutral-200">
-                Your rules, your methods
-              </strong>
-              <br />
-              <p ref={(el) => setParagraphRef(el, 4)}>
-                Full freedom: choose whatever payment method works for you
-                (crypto wallets, bank transfers, cash apps, etc.). Handle
-                delivery your way — instant file links, access codes, or manual
-                for digital goods. No forced integrations.
-              </p>
-            </div>
-          </li>
-
-          <li className="flex items-start gap-4">
-            <span className="text-cyan-400 text-2xl font-bold">•</span>
-            <div>
-              <strong className="text-neutral-200">
-                Maximum customization
-              </strong>
-              <br />
-              <p ref={(el) => setParagraphRef(el, 5)}>
-                Make your shop truly yours. Customize products, descriptions,
-                images, buttons, layout, messages — as much as possible within
-                Telegram's native interface. No rigid templates holding you
-                back.
-              </p>
-            </div>
-          </li>
-        </ul>
-
-        <p
-          ref={(el) => setParagraphRef(el, 6)}
-          className="text-neutral-300 text-xl font-sans mt-10"
-        >
-          Built for creators, sellers, and makers who want simple, private,
-          fee-free digital selling — right where your audience already is.
-        </p>
-      </div>
-
-      {/* Optional small CTA */}
-      <div className="mt-8">
-        <Link
-          to="/HowToUse"
-          className="inline-block px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-medium rounded-lg transition text-lg"
-        >
-          See How to Get Started →
-        </Link>
-      </div>
+                        <p className="text-neutral-700 text-xs font-mono">
+                          {v.version}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
     </div>
   )
 }
