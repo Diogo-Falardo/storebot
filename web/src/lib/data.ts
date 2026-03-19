@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export const publicData = {
-  indexTitle: 'Why to use store bot?',
+  indexTitle: 'Why to Use StoreBot?',
   indexTitleDescription:
     'Build and run your digital store entirely inside Telegram — private, fee-free, and completely under your control.',
   reasons: [
@@ -53,32 +53,37 @@ export const publicData = {
   howToUse: {
     title: 'How to Use StoreBot',
     description:
-      'Everything you need to know to get started and manage your store.',
+      'Everything you need to know to get started and manage your store today.',
     steps: [
-      { command: '/create', text: 'Create your store (only in private chat)' },
-      { command: '/dashboard', text: 'Open your full management dashboard' },
-      { command: '/shop', text: 'Open your store privately for testing' },
-      { command: '/setshop', text: 'Share your store in groups or channels' },
-      { command: '/activate', text: 'Activate or extend your store' },
-      { command: '/pricing', text: 'See current activation prices' },
-      { command: '/openshop', text: 'Open any store by ID (for customers)' },
+      { command: '/create', text: 'Create your store.' },
+      { command: '/dashboard', text: 'Open your full management dashboard.' },
+      { command: '/shop', text: 'Open your store.' },
+      { command: '/share', text: 'Share your store in groups or channels.' },
+      { command: '/activate', text: 'Activate or extend your store.' },
+      { command: '/openshop', text: 'Open any store by store ID.' },
+      { command: '/pricing', text: 'See current activation prices.' },
     ] as const,
   },
 
   about: {
     title: 'About StoreBot',
     description:
-      'StoreBot lets you create and manage a complete digital store directly inside Telegram.',
-    features: [
-      'Create and manage your store',
-      'Add and edit products with photos',
-      'Real-time order management',
-      'Share your store in groups and channels',
-      'Secure ordering through private chats only',
-      'Full dashboard for complete control',
-    ] as const,
+      'StoreBot is a modern platform designed to empower creators, entrepreneurs, and businesses to sell digital products directly within Telegram. Our mission is to provide a secure, seamless, and cost-effective solution for digital commerce, eliminating unnecessary complexity and fees.',
+
+    mainStory:
+      'StoreBot enables you to launch and manage your digital store in the environment where your audience already engages, Telegram.',
+    barriers: [
+      'No complicated website setups',
+      'No recurring platform fees',
+      'No commission on your sales',
+    ],
+    highlights: [
+      'Full control over your products, pricing, and customer relationships',
+      'Private by default for a safe and exclusive experience',
+      'Built with robust security and privacy standards',
+    ],
     securityNote:
-      'For security reasons, Telegram only allows stores to be opened inside private chats with verified init data. This protects both store owners and customers.',
+      'StoreBot leverages Telegram’s secure infrastructure. Stores can only be accessed in private chats with verified init data, protecting both owners and customers from unauthorized access.',
   },
 
   terms: {
@@ -109,8 +114,10 @@ export const publicData = {
 type LayoutPublicState = {
   headerHeight: number
   footerHeight: number
+  offset: number
   setHeaderHeight: (h: number) => void
   setFooterHeight: (h: number) => void
+  setOffset: (n: number) => void
 }
 /**
  * this const was created with the intention of storing the height that:
@@ -120,6 +127,8 @@ type LayoutPublicState = {
 export const useLayoutPublic = create<LayoutPublicState>((set) => ({
   headerHeight: 0,
   footerHeight: 0,
+  offset: 0,
   setHeaderHeight: (h: number) => set({ headerHeight: h }),
   setFooterHeight: (h: number) => set({ footerHeight: h }),
+  setOffset: (n: number) => set({ offset: n }),
 }))

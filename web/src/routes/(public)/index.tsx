@@ -21,18 +21,17 @@ export const Route = createFileRoute('/(public)/')({
 gsap.registerPlugin(SplitText)
 
 function RouteComponent() {
-  const headerHeight = useLayoutPublic((s) => s.headerHeight)
-  const footerHeight = useLayoutPublic((s) => s.footerHeight)
-  const offset = headerHeight + footerHeight
+  const offset = useLayoutPublic((s) => s.offset)
   const indexTitle = useRef<HTMLHeadingElement>(null)
   const indexDescription = useRef<HTMLParagraphElement>(null)
   const reasonsDiv = useRef<HTMLDivElement>(null)
   const buttonsDiv = useRef<HTMLDivElement>(null)
   const section2 = useRef<HTMLDivElement>(null)
 
+  console.log(offset)
+
   useEffect(() => {
     const tl = gsap.timeline()
-
     if (indexTitle.current) {
       const split = new SplitText(indexTitle.current, { type: 'chars' })
       tl.from(split.chars, {
@@ -60,12 +59,16 @@ function RouteComponent() {
     tl.to({}, { duration: 0.1 })
 
     if (reasonsDiv.current) {
-      tl.from(reasonsDiv.current, {
-        opacity: 0,
-        y: 30,
-        duration: 0.7,
-        ease: 'power3.out',
-      })
+      tl.fromTo(
+        reasonsDiv.current,
+        { opacity: 0, y: 5 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: 'back.out',
+        },
+      )
     }
 
     if (buttonsDiv.current) {
@@ -75,7 +78,7 @@ function RouteComponent() {
         {
           opacity: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.5,
           ease: 'back.out',
         },
       )
@@ -88,7 +91,7 @@ function RouteComponent() {
         {
           opacity: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.5,
           ease: 'back.out',
         },
       )
@@ -103,11 +106,10 @@ function RouteComponent() {
       })
     }
   }
-
   return (
-    <div className="flex flex-col z-0">
+    <div className="flex flex-col w-full max-w-5xl z-0">
       <section
-        className="flex flex-col p-5 gap-10"
+        className="w-full flex flex-col p-3 gap-10 justify-center"
         style={{ minHeight: `calc(100vh - ${offset}px)` }}
       >
         <div className="flex flex-col gap-3">
@@ -133,10 +135,10 @@ function RouteComponent() {
           {publicData.reasons.map((r) => {
             return (
               <AccordionItem key={r.title} value={r.title}>
-                <AccordionTrigger className="text-neutral-50 font-bold">
+                <AccordionTrigger className=" font-bold">
                   {r.title}
                 </AccordionTrigger>
-                <AccordionContent className="text-neutral-400">
+                <AccordionContent className="">
                   {r.description}
                 </AccordionContent>
               </AccordionItem>
@@ -146,7 +148,7 @@ function RouteComponent() {
 
         <div
           ref={buttonsDiv}
-          className="flex mt-auto justify-between gap-4 items-center"
+          className="flex mt-auto justify-between  items-center"
         >
           <Button
             onClick={() => {
@@ -215,7 +217,7 @@ function RouteComponent() {
                     {publicData.botInfo.versionLog
                       .at(-1)
                       ?.versionFeatures.map((f) => (
-                        <p>{f}</p>
+                        <p key={f}>{f}</p>
                       ))}
                   </div>
                 </CardContent>
@@ -226,7 +228,10 @@ function RouteComponent() {
                 <CardContent>
                   <div className="mt-auto">
                     {publicData.botInfo.versionLog.map((v) => (
-                      <div className="flex justify-between items-center">
+                      <div
+                        key={v.versionName}
+                        className="flex justify-between items-center"
+                      >
                         <p className="text-neutral-300 text-sm capitalize font-semibold">
                           {v.versionName}
                         </p>

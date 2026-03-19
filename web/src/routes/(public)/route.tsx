@@ -19,7 +19,10 @@ function RouteComponent() {
   const navbarRef = useRef<HTMLDivElement>(null)
   const footerRef = useRef<HTMLDivElement>(null)
   const setNavbarHeight = useLayoutPublic((s) => s.setHeaderHeight)
+  const headerHeight = useLayoutPublic((s) => s.headerHeight)
   const setFooterHeight = useLayoutPublic((s) => s.setFooterHeight)
+  const footerHeight = useLayoutPublic((s) => s.footerHeight)
+  const setOffset = useLayoutPublic((s) => s.setOffset)
 
   useEffect(() => {
     if (navbarRef.current) {
@@ -40,11 +43,18 @@ function RouteComponent() {
     }
   }, [])
 
+  useEffect(() => {
+    if (headerHeight && footerHeight) {
+      setOffset(headerHeight + footerHeight)
+      console.log(`seted offset`)
+    }
+  }, [headerHeight, footerHeight])
+
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-t from-zinc-950 to-background">
       <Navbar ref={navbarRef} />
       {/* <BotLinks /> */}
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col items-center">
         <Outlet />
       </main>
       <Footer ref={footerRef} />
@@ -95,15 +105,17 @@ const HowToUseButton = () => {
 const Navbar = React.forwardRef<HTMLDivElement>((_, ref) => (
   <header
     ref={ref}
-    className="sticky top-0 z-50 bg-background font-mono flex items-center justify-between shadow p-5 border-b border-neutral-900"
+    className="sticky top-0 z-50 bg-background font-mono flex items-center justify-center shadow border-b border-neutral-900"
   >
-    <Link
-      to="/"
-      className="text-3xl tracking-wide font-semibold text-neutral-200"
-    >
-      StoreBot
-    </Link>
-    <HowToUseButton />
+    <div className="flex w-full justify-between items-center p-5 max-w-5xl">
+      <Link
+        to="/"
+        className="text-3xl tracking-wide font-semibold text-neutral-200"
+      >
+        StoreBot
+      </Link>
+      <HowToUseButton />
+    </div>
   </header>
 ))
 
