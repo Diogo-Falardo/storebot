@@ -8,7 +8,10 @@ import {
 } from "@grammyjs/conversations";
 import { createStoreConversation } from "./store/store.conversations.js";
 import { userHasStore, me } from "./user/user.request.js";
-import { getStoreExpireDate } from "./store/store.request.js";
+import {
+  getStoreExpireDate,
+  getStoreInfoByStoreId,
+} from "./store/store.request.js";
 import { createPaymentLink } from "./payments/payments.request.js";
 
 const token = process.env.BOT_TOKEN;
@@ -23,42 +26,26 @@ bot.use(conversations());
 // store start command
 bot.command("start", async (ctx) => {
   await ctx.reply(
-    `🛒 <b>Welcome to Store Bot</b>
+    `🛒 <b>Welcome to StoreBot</b>
 
-Create and manage your digital store directly inside Telegram.
-Share your store with others!
+Create and manage your full digital store directly inside Telegram.
+
+No websites. No monthly fees. No platform cuts — you keep 100% of every sale.
 
 <b>Main Commands</b>
-• /pricing – View store activation pricing  
-• /create – Create your store  
-• /activate – Activate or extend your store  
-• /dashboard – Open your store dashboard  
-• /shop – Open your store privately  
-• /setshop – Share your store in groups/channels  
-• /openshop – Open any store by ID  
-• /about – Learn how Store Bot works  
-• /terms – Terms & responsibilities
+• /create — Create your store
+• /dashboard — Open your management dashboard
+• /mystore — Preview your store privately
+• /share — Share your store in groups & channels
+• /activate — Activate or extend your store
+• /pricing — See activation prices
+• /about — Learn how it works
+• /terms — Terms & responsibilities
 
-Start by using <b>/create</b> to set up your store.`,
-    { parse_mode: "HTML" },
-  );
-});
+Want to see how it looks and explore more?
+Visit our website: <a href="https://storebot.cc">storebot.cc</a>
 
-// ---------------------
-// store pricing command
-bot.command("pricing", async (ctx) => {
-  await ctx.reply(
-    `💳 <b>Store Activation Pricing</b>
-
-Choose how long you want your store to stay active:
-
-• 1 Day — €1.50  
-• 1 Week — €5  
-• 1 Month — €10  
-• 3 Months — €25  
-• 1 Year — €80
-
-Use /activate to manage your store activation.`,
+Ready to start selling? Just type <b>/create</b> 👇`,
     { parse_mode: "HTML" },
   );
 });
@@ -90,7 +77,7 @@ bot.command("activate", async (ctx) => {
   const user = await me(tgUserId);
   const hasStore = await userHasStore(tgUserId);
 
-  if (hasStore === "has no shop") {
+  if (hasStore === "has no store") {
     return ctx.reply(
       "ℹ️ You don't have a store yet. Use /create to set up your store.",
     );
@@ -153,7 +140,7 @@ bot.command("dashboard", async (ctx) => {
   try {
     const hasStore = await userHasStore(tgUserId);
 
-    if (hasStore || !user.storeId) {
+    if (hasStore === "has no store" || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
@@ -180,8 +167,8 @@ bot.command("dashboard", async (ctx) => {
 });
 
 // ---------------------
-// open shop button
-bot.command("shop", async (ctx) => {
+// open store button
+bot.command("mystore", async (ctx) => {
   if (ctx.chat.type !== "private") {
     return ctx.reply(
       "⚠️ This command is only available in a private chat. Please message me directly to continue.",
@@ -197,7 +184,7 @@ bot.command("shop", async (ctx) => {
     const user = await me(tgUserId);
     const hasStore = await userHasStore(tgUserId);
 
-    if (hasStore === "has a shop" || !user.storeId) {
+    if (hasStore === "has no store" || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
@@ -224,8 +211,8 @@ bot.command("shop", async (ctx) => {
 });
 
 // ---------------------
-// Allows shop owner to post a shop button in a group or channel
-bot.command("setshop", async (ctx) => {
+// Allows store owner to post a store button in a group or channel
+bot.command("share", async (ctx) => {
   if (
     ctx.chat.type !== "group" &&
     ctx.chat.type !== "supergroup" &&
@@ -243,7 +230,7 @@ bot.command("setshop", async (ctx) => {
     const user = await me(tgUserId);
     const hasStore = await userHasStore(tgUserId);
 
-    if (hasStore === "has a shop" || !user.storeId) {
+    if (hasStore === "has no store" || !user.storeId) {
       return ctx.reply(
         "ℹ️ You don't have a store yet. Create one using /create.",
       );
@@ -267,43 +254,41 @@ bot.command("setshop", async (ctx) => {
 });
 
 // ---------------------
-// open a shop by id button
-// bot.command("openshop", async (ctx) => {
-//   const tgUserId = ctx.from?.id;
-//   if (!tgUserId) {
-//     return ctx.reply("⚠️ Unable to identify your account. Please try again.");
-//   }
+// open a store by id
+bot.command("store", async (ctx) => {
+  const tgUserId = ctx.from?.id;
+  if (!tgUserId) {
+    return ctx.reply("⚠️ Unable to identify your account. Please try again.");
+  }
 
-//   const args = ctx.match?.toString().trim();
-//   if (!args || !args.startsWith("store_")) {
-//     return ctx.reply(
-//       "ℹ️ Please provide a valid store ID. Example: /openstore store_1234",
-//     );
-//   }
+  const args = ctx.match?.toString().trim();
+  if (!args) {
+    return ctx.reply(
+      "ℹ️ Please provide a valid store ID. Example: /openstore store_1234",
+    );
+  }
 
-//   const shopId = args.replace("store_", "");
+  const storeId = args;
 
-//   try {
-//         const user = await me(tgUserId);
-//     const hasStore = await userHasStore(tgUserId);
+  try {
+    const store = await getStoreInfoByStoreId(tgUserId, storeId);
 
-//     if (!store) {
-//       return ctx.reply("❌ The store you are looking for was not found.");
-//     }
+    if (!store) {
+      return ctx.reply("❌ The store you are looking for was not found.");
+    }
 
-//     const storeUrl = `${webUrl}/store/${shopId}`;
+    const storeUrl = `${webUrl}/store/${store.storeId}`;
 
-//     await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
-//       parse_mode: "HTML",
-//       reply_markup: {
-//         inline_keyboard: [[{ text: "Open Store", web_app: { url: storeUrl } }]],
-//       },
-//     });
-//   } catch (err) {
-//     console.log(err);
-//     return ctx.reply("❌ Something went wrong. Please try again later.");
-//   }
-// });
+    await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [[{ text: "Open Store", web_app: { url: storeUrl } }]],
+      },
+    });
+  } catch (err) {
+    return ctx.reply("❌ Something went wrong. Please try again later.");
+  }
+});
 
 // ---------------------
 // about
@@ -353,18 +338,18 @@ bot.start({
   onStart: async (botInfo) => {
     await bot.api.setMyCommands([
       { command: "start", description: "Start the bot and view main menu" },
-      { command: "pricing", description: "View store activation pricing" },
       { command: "create", description: "Create your store" },
       { command: "activate", description: "Activate or extend your store" },
       { command: "dashboard", description: "Open your store dashboard" },
-      { command: "shop", description: "Open your store privately" },
+      { command: "mystore", description: "Open your store privately" },
       {
-        command: "setshop",
+        command: "share",
         description: "Share your store in groups/channels",
       },
-      { command: "openshop", description: "Open any store by ID" },
+      { command: "store", description: "Open any store by ID" },
       { command: "about", description: "Learn how Store Bot works" },
       { command: "terms", description: "Terms & responsibilities" },
+      { command: "pricing", description: "View store activation pricing" },
     ]);
 
     console.log(`

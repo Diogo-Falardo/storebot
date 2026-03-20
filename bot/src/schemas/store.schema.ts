@@ -1,5 +1,4 @@
 import { uuid, z } from "zod";
-import { category } from "../schema";
 
 export const STORE_TYPE_EMUM = z.enum(["public", "private"]);
 

@@ -6,15 +6,15 @@ const BOT_SECRET = process.env.BOT_SECRET!;
 const USER_URL = "/user";
 
 /**
- * true dont have a shop
+ * true dont have a store
  *
- * false have a shop
+ * false have a store
  * @param tgUserId
  * @returns boolean
  */
 export async function userHasStore(
   tgUserId: number,
-): Promise<"has a shop" | "has no shop"> {
+): Promise<"has a store" | "has no store"> {
   const res = await fetch(`${API_URL}${USER_URL}/validate-me`, {
     method: "GET",
     headers: {
@@ -25,14 +25,11 @@ export async function userHasStore(
   });
 
   const data = await res.json();
-  console.log(`
-  VALIDATE ME: ${JSON.stringify(data, null, 2)}
-  `);
 
-  if (data.valid === "true") {
-    return "has no shop";
+  if (data.valid === true) {
+    return "has no store";
   } else {
-    return "has a shop";
+    return "has a store";
   }
 }
 
@@ -48,8 +45,5 @@ export async function me(tgUserId: number): Promise<SELECT_ENTIRE_USER_type> {
   });
 
   const data: SELECT_ENTIRE_USER_type = await res.json();
-  console.log(`
-  ME: ${JSON.stringify(data, null, 2)}
-  `);
   return data;
 }

@@ -26,7 +26,7 @@ export const userController = {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const user = await userService.getUserIdFromTelegramId(tgUserId);
+    const user = await userService.checkTelegramUserId(tgUserId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

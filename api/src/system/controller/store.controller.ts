@@ -22,7 +22,6 @@ export const storeController = {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const storeCreateDto = INSERT_STORE.parse(req.body);
-    console.log(storeCreateDto);
     // db user id
     const userId = await userService.checkTelegramUserId(tg_userID);
     if (!userId) {

@@ -1,3 +1,5 @@
+import type { SELECT_PUBLIC_STORE_type } from "../schemas/store.schema.js";
+
 const API_URL = process.env.API_URL!;
 const BOT_SECRET = process.env.BOT_SECRET!;
 
@@ -24,7 +26,10 @@ export async function createStore(
   return res.json();
 }
 
-export async function getStoreInfoByStoreId(tgUserId: number, storeId: string) {
+export async function getStoreInfoByStoreId(
+  tgUserId: number,
+  storeId: string,
+): Promise<SELECT_PUBLIC_STORE_type | null> {
   const res = await fetch(`${API_URL}${urlStore}/public-info/${storeId}`, {
     method: "GET",
     headers: {
@@ -38,7 +43,13 @@ export async function getStoreInfoByStoreId(tgUserId: number, storeId: string) {
     console.error(res);
   }
 
-  return res.json();
+  const data = await res.json();
+
+  if (data.error) {
+    return null;
+  }
+
+  return data;
 }
 
 export async function getStoreExpireDate(tgUserId: number, storeId: string) {
