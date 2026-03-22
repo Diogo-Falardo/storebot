@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
-import { Route as publicTermsRouteImport } from './routes/(public)/Terms'
-import { Route as publicPricingRouteImport } from './routes/(public)/Pricing'
-import { Route as publicHowToUseRouteImport } from './routes/(public)/HowToUse'
-import { Route as publicAboutRouteImport } from './routes/(public)/About'
+import { Route as publicTermsRouteImport } from './routes/(public)/terms'
+import { Route as publicPricingRouteImport } from './routes/(public)/pricing'
+import { Route as publicHowToUseRouteImport } from './routes/(public)/how-to-use'
+import { Route as publicAboutRouteImport } from './routes/(public)/about'
 import { Route as storeStoreIdRouteImport } from './routes/(store)/store.$id'
 import { Route as storeDashboardIdRouteImport } from './routes/(store)/dashboard.$id'
 
@@ -28,23 +28,23 @@ const publicIndexRoute = publicIndexRouteImport.update({
   getParentRoute: () => publicRouteRoute,
 } as any)
 const publicTermsRoute = publicTermsRouteImport.update({
-  id: '/Terms',
-  path: '/Terms',
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const publicPricingRoute = publicPricingRouteImport.update({
-  id: '/Pricing',
-  path: '/Pricing',
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const publicHowToUseRoute = publicHowToUseRouteImport.update({
-  id: '/HowToUse',
-  path: '/HowToUse',
+  id: '/how-to-use',
+  path: '/how-to-use',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const publicAboutRoute = publicAboutRouteImport.update({
-  id: '/About',
-  path: '/About',
+  id: '/about',
+  path: '/about',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const storeStoreIdRoute = storeStoreIdRouteImport.update({
@@ -59,19 +59,19 @@ const storeDashboardIdRoute = storeDashboardIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/About': typeof publicAboutRoute
-  '/HowToUse': typeof publicHowToUseRoute
-  '/Pricing': typeof publicPricingRoute
-  '/Terms': typeof publicTermsRoute
+  '/about': typeof publicAboutRoute
+  '/how-to-use': typeof publicHowToUseRoute
+  '/pricing': typeof publicPricingRoute
+  '/terms': typeof publicTermsRoute
   '/': typeof publicIndexRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
 }
 export interface FileRoutesByTo {
-  '/About': typeof publicAboutRoute
-  '/HowToUse': typeof publicHowToUseRoute
-  '/Pricing': typeof publicPricingRoute
-  '/Terms': typeof publicTermsRoute
+  '/about': typeof publicAboutRoute
+  '/how-to-use': typeof publicHowToUseRoute
+  '/pricing': typeof publicPricingRoute
+  '/terms': typeof publicTermsRoute
   '/': typeof publicIndexRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
@@ -79,10 +79,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(public)': typeof publicRouteRouteWithChildren
-  '/(public)/About': typeof publicAboutRoute
-  '/(public)/HowToUse': typeof publicHowToUseRoute
-  '/(public)/Pricing': typeof publicPricingRoute
-  '/(public)/Terms': typeof publicTermsRoute
+  '/(public)/about': typeof publicAboutRoute
+  '/(public)/how-to-use': typeof publicHowToUseRoute
+  '/(public)/pricing': typeof publicPricingRoute
+  '/(public)/terms': typeof publicTermsRoute
   '/(public)/': typeof publicIndexRoute
   '/(store)/dashboard/$id': typeof storeDashboardIdRoute
   '/(store)/store/$id': typeof storeStoreIdRoute
@@ -90,29 +90,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/About'
-    | '/HowToUse'
-    | '/Pricing'
-    | '/Terms'
+    | '/about'
+    | '/how-to-use'
+    | '/pricing'
+    | '/terms'
     | '/'
     | '/dashboard/$id'
     | '/store/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/About'
-    | '/HowToUse'
-    | '/Pricing'
-    | '/Terms'
+    | '/about'
+    | '/how-to-use'
+    | '/pricing'
+    | '/terms'
     | '/'
     | '/dashboard/$id'
     | '/store/$id'
   id:
     | '__root__'
     | '/(public)'
-    | '/(public)/About'
-    | '/(public)/HowToUse'
-    | '/(public)/Pricing'
-    | '/(public)/Terms'
+    | '/(public)/about'
+    | '/(public)/how-to-use'
+    | '/(public)/pricing'
+    | '/(public)/terms'
     | '/(public)/'
     | '/(store)/dashboard/$id'
     | '/(store)/store/$id'
@@ -140,31 +140,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicIndexRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(public)/Terms': {
-      id: '/(public)/Terms'
-      path: '/Terms'
-      fullPath: '/Terms'
+    '/(public)/terms': {
+      id: '/(public)/terms'
+      path: '/terms'
+      fullPath: '/terms'
       preLoaderRoute: typeof publicTermsRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(public)/Pricing': {
-      id: '/(public)/Pricing'
-      path: '/Pricing'
-      fullPath: '/Pricing'
+    '/(public)/pricing': {
+      id: '/(public)/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
       preLoaderRoute: typeof publicPricingRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(public)/HowToUse': {
-      id: '/(public)/HowToUse'
-      path: '/HowToUse'
-      fullPath: '/HowToUse'
+    '/(public)/how-to-use': {
+      id: '/(public)/how-to-use'
+      path: '/how-to-use'
+      fullPath: '/how-to-use'
       preLoaderRoute: typeof publicHowToUseRouteImport
       parentRoute: typeof publicRouteRoute
     }
-    '/(public)/About': {
-      id: '/(public)/About'
-      path: '/About'
-      fullPath: '/About'
+    '/(public)/about': {
+      id: '/(public)/about'
+      path: '/about'
+      fullPath: '/about'
       preLoaderRoute: typeof publicAboutRouteImport
       parentRoute: typeof publicRouteRoute
     }

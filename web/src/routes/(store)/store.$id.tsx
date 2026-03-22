@@ -27,11 +27,11 @@ import { sf_ConvertCategoryIdIntoName } from '@/server/store/products/category/p
 import { ModeToggle } from '@/components/mode-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { usePublicstore } from '@/lib/hooks/shop/store.hooks'
-import StoreFilters from '@/components/shop/storeFilters'
-import Cart from '@/components/shop/cart'
-import { ProductInfo } from '@/components/shop/products/productInfo'
-import CartAdd from '@/components/shop/cartAdd'
-import Orders from '@/components/shop/orders/orders'
+import StoreFilters from '@/components/store/storeFilters'
+import Cart from '@/components/store/cart'
+import { ProductInfo } from '@/components/store/products/productInfo'
+import CartAdd from '@/components/store/cartAdd'
+import Orders from '@/components/store/orders/orders'
 import { sf_GetUserIdFromTelegramId } from '@/server/user/user.function'
 import {
   sf_IsStoreValid,

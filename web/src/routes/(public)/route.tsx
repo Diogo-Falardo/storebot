@@ -82,7 +82,7 @@ const HowToUseButton = () => {
         ease: 'power1.inOut',
         onComplete: () => {
           animating.current = false
-          navigate({ to: '/HowToUse' }) // Navigate after animation
+          navigate({ to: '/how-to-use' }) // Navigate after animation
         },
       })
     } else {
@@ -93,7 +93,7 @@ const HowToUseButton = () => {
   return (
     <Link
       ref={btnRef}
-      to="/HowToUse"
+      to="/how-to-use"
       className="text-base tracking-tighter font-semibold lowercase px-2 py-1 rounded-sm text-neutral-400 border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs"
       onClick={handleClick}
     >
@@ -125,19 +125,19 @@ const Footer = React.forwardRef<HTMLDivElement>((_, ref) => (
     className="sticky bottom-0 z-50 bg-background font-mono flex justify-center items-center shadow gap-3 p-5 border-t border-neutral-900 "
   >
     <Link
-      to="/Pricing"
+      to="/pricing"
       className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       Pricing
     </Link>
     <Link
-      to="/About"
+      to="/about"
       className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       about
     </Link>
     <Link
-      to="/Terms"
+      to="/terms"
       className="text-base capitalize font-semibold text-neutral-300 hover:text-sky-800 transition-colors duration-200 px-4 py-2 rounded-lg hover:bg-sky-950/20"
     >
       terms

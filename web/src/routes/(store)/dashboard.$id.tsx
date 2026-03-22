@@ -1,8 +1,8 @@
 import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
-import { Package, ReceiptText } from 'lucide-react'
-import { sf_telegramVerification } from '@/server/telegram/telegram.function'
+import { LayoutDashboard, Package, ReceiptText, Settings } from 'lucide-react'
+import { sf_validateTelegramInitData } from '@/server/telegram/telegram.function'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Spinner } from '@/components/ui/spinner'
@@ -14,20 +14,20 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-
 import { useGetstoreOrders } from '@/lib/hooks/order.hooks'
-
 import { ScrollArea } from '@/components/ui/scroll-area'
-import StoreUpdate from '@/components/shop/storeUpdate'
-import OrderCardADM from '@/components/shop/orders/orderCard.admin'
-import PaymentMethodAdd from '@/components/shop/paymentMethodAdd'
-import ShippingMethodAdd from '@/components/shop/shippingMethodAdd'
-import ProductAdd from '@/components/shop/products/productAdd'
-import ProductCardADM from '@/components/shop/products/productCard.admin'
-import ProductCategoryAdd from '@/components/shop/products/productCategoryAdd'
+import StoreUpdate from '@/components/store/storeUpdate'
+import OrderCardADM from '@/components/store/orders/orderCard.admin'
+import PaymentMethodAdd from '@/components/store/paymentMethodAdd'
+import ShippingMethodAdd from '@/components/store/shippingMethodAdd'
+import ProductAdd from '@/components/store/products/productAdd'
+import ProductCardADM from '@/components/store/products/productCard.admin'
+import ProductCategoryAdd from '@/components/store/products/productCategoryAdd'
 import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
-import { useGetUserstoreInfo } from '@/lib/hooks/shop/store.hooks'
-import { sf_ValidateStore } from '@/server/store/store.functions'
+import { useGetUserStoreInfo } from '@/lib/hooks/shop/store.hooks'
+import { sf_validateIfStoreIsActivated } from '@/server/store/store.functions'
+import { test_data } from '@/lib/test.data'
+import DashboardSettings from '@/components/store/dashboard/settings/dashboardSettings'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -39,35 +39,37 @@ export const Route = createFileRoute('/(store)/dashboard/$id')({
 })
 
 function RouteComponent() {
-  // storeId
   const { id: storeId } = Route.useParams()
-  // store data
   const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
+  const [activeTab, setActiveTab] = useState('dashboard')
 
-  const verifyTelegram = useServerFn(sf_telegramVerification)
-  const verifyStore = useServerFn(sf_ValidateStore)
+  const validateTelegramInitData = useServerFn(sf_validateTelegramInitData)
+  const validateIfStoreIsActivated = useServerFn(sf_validateIfStoreIsActivated)
 
-  // auto renders
+  // authentication || validation of the user on CLIENT LOAD
   useEffect(() => {
     const authenticate = async () => {
       try {
-        const { WebApp } = await import('@grammyjs/web-app')
-        WebApp.ready()
+        // const { WebApp } = await import('@grammyjs/web-app')
+        // WebApp.ready()
 
-        const user = await verifyTelegram({
-          data: { initData: WebApp.initData },
+        // const user = await validateTelegramInitData({
+        //   data: { initData: WebApp.initData },
+        // })
+
+        const user = await validateTelegramInitData({
+          data: { initData: test_data.initData },
         })
 
-        const isValidStore = await verifyStore({
+        const isStoreActivated = await validateIfStoreIsActivated({
           data: { userId: user.userId, storeId: storeId },
         })
 
-        if (!isValidStore) throw new Error('Unauthorized...')
+        if (!isStoreActivated) throw new Error('Unauthorized...')
 
         setUserId(user.userId)
       } catch (err: any) {
-        console.error('Auth error:', err)
         setError(err ?? new Error('Authentication failed'))
       }
     }
@@ -75,18 +77,20 @@ function RouteComponent() {
     authenticate()
   }, [])
 
+  // store information
   const {
     data: storeInfo,
     isLoading: storeLoading,
     error: storeError,
-  } = useGetUserstoreInfo({
+  } = useGetUserStoreInfo({
     userId: userId ?? '',
     storeId,
   })
 
+  // store products
   const { data: products, isLoading: productsLoading } = useGetstoreProducts(
     storeInfo
-      ? { userId: storeInfo.userId, storeId: storeInfo.id }
+      ? { userId: storeInfo.userId, storeId: storeInfo.storeId }
       : { userId: '', storeId: '' },
   )
 
@@ -99,157 +103,60 @@ function RouteComponent() {
   if (!userId || storeLoading || !storeInfo || !userId) return <Spinner />
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* header */}
-      {/* following code should render the store name, store Update dialog and a theme toogler */}
-      <header className="flex justify-center w-full p-3 border-b">
-        <div className="w-full lg:max-w-7xl flex items-center justify-between">
-          <Link to="/" className="select-none text-4xl font-bold tracking-wide">
-            {storeInfo.storeName}
-          </Link>
-          <div className="flex items-center gap-3">
-            {/* FIX: ---- */}
-            {/* <ClientOnly>
-                <ModeToggle />
-              </ClientOnly> */}
-            <StoreUpdate userId={storeInfo.userId} storeId={storeInfo.id} />
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col bg-linear-to-t from-zinc-950 to-background">
+      <header className="sticky top-0 z-50 bg-background border-b p-4 border-primary flex justify-center items-center">
+        <h1 className="text-4xl font-mono tracking-tight font-semibold">
+          {storeInfo.storeName}
+        </h1>
       </header>
-      {/* container number 1 */}
-      {/* the dashboard... */}
-      <main className="w-full flex-1  min-h-0 p-3 flex justify-center">
-        <Tabs defaultValue={'product'} className="flex-1 flex flex-col min-h-0">
-          {/* tab swithcer to switch between products and orders */}
-          <TabsList className="w-full rounded-sm">
-            <TabsTrigger value="product" className="cursor-pointer ">
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="cursor-pointer">
-              Orders
-            </TabsTrigger>
-          </TabsList>
-          {/* page products */}
-          <TabsContent
-            value="product"
-            className="flex-1 flex flex-col min-h-0 gap-3"
-          >
-            {/* container 1 */}
-            {/* top actions */}
-            <div className="flex justify-end gap-2">
-              <ProductAdd userId={storeInfo.userId} storeId={storeInfo.id} />
-              <ProductCategoryAdd storeId={storeInfo.id} />
-            </div>
-            {/* while products are loading */}
-            {productsLoading && (
-              <div>
-                <Spinner />
-                Loading your products
-              </div>
-            )}
-            {/* container 2 */}
-            {/* products render or empty */}
-            <div className="flex-1 flex flex-col min-h-0">
-              {!productsLoading && products && products.length > 0 ? (
-                // products display gid
-                <ScrollArea className="h-full">
-                  <div className="flex flex-col h-full min-h-0">
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
-                      {products
-                        .slice()
-                        .sort((a, b) => a.id.localeCompare(b.id))
-                        .map((product) => (
-                          <ProductCardADM
-                            key={product.id}
-                            {...product}
-                            storeCurrency={storeInfo.storeCurrency}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                </ScrollArea>
-              ) : (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant={'icon'}>
-                      <Package />
-                    </EmptyMedia>
-                    <EmptyTitle>No products yet</EmptyTitle>
-                    <EmptyDescription>
-                      You haven&apos;t inserted any product yet. Add your first
-                      product
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <ProductAdd
-                      userId={storeInfo.userId}
-                      storeId={storeInfo.id}
-                    />
-                  </EmptyContent>
-                </Empty>
-              )}
-            </div>
-          </TabsContent>
-          {/* page orders */}
-          <TabsContent
-            value="orders"
-            className="flex-1 flex flex-col min-h-0 gap-3"
-          >
-            {/* container 1 */}
-            {/* top actions */}
-            <div className="flex justify-end gap-2">
-              <ShippingMethodAdd userId={userId} storeId={storeInfo.id} />
-              <PaymentMethodAdd userId={userId} storeId={storeInfo.id} />
-            </div>
-            {/* while orders are loading */}
-            {ordersLoading && (
-              <div>
-                <Spinner />
-                Loading your orders
-              </div>
-            )}
-            {/* container 2 */}
-            {/* orders render or empty */}
-            <div className="flex-1 flex flex-col min-h-0">
-              {!ordersLoading && orders && orders.length > 0 ? (
-                <ScrollArea className="h-full">
-                  <div className="flex flex-col h-full min-h-0">
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
-                      {orders
-                        .sort(
-                          (a, b) =>
-                            new Date(b.createdAt).getTime() -
-                            new Date(a.createdAt).getTime(),
-                        )
-                        .map((order) => (
-                          <OrderCardADM
-                            key={order.id}
-                            storeId={storeId}
-                            storeCurrency={storeInfo.storeCurrency}
-                            order={order}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                </ScrollArea>
-              ) : (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant={'icon'}>
-                      <ReceiptText />
-                    </EmptyMedia>
-                    <EmptyTitle>No orders for now</EmptyTitle>
-                    <EmptyDescription>
-                      Stay active and keep showcasing your products. Success
-                      often begins with small steps.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+      {/* content */}
+      <main className="flex-1 p-2 relative">
+        <ScrollArea className="flex-1 h-full">
+          {activeTab === 'settings' && (
+            <DashboardSettings storeId={storeId} userId={userId} />
+          )}
+          {activeTab === 'dashboard' && <></>}
+          {activeTab === 'orders' && <></>}
+        </ScrollArea>
       </main>
+      {/* menu */}
+      <footer className="sticky bottom-0 z-50 bg-background p-4 ">
+        <nav className="flex justify-center items-center">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="gap-5 p-1 bg-background border ring ring-primary border-primary/50 group-data-[orientation=horizontal]/tabs:h-fit">
+              <TabsTrigger
+                value="settings"
+                className="flex w-20 flex-col py-3 px-4 dark:data-[state=active]:bg-neutral-900/35 dark:data-[state=active]:border-neutral-700/50"
+              >
+                <Settings className="size-7" />
+                <p className="text-xs font-light tracking-tight text-neutral-600">
+                  settings
+                </p>
+              </TabsTrigger>
+              <TabsTrigger
+                value="dashboard"
+                className="flex w-20 flex-col py-3 px-4 dark:data-[state=active]:bg-neutral-900/35 dark:data-[state=active]:border-neutral-700/50"
+              >
+                <LayoutDashboard className="size-7" />
+
+                <p className="text-xs font-light tracking-tight text-neutral-600">
+                  dashboard
+                </p>
+              </TabsTrigger>
+              <TabsTrigger
+                value="orders"
+                className="flex w-20 flex-col py-3 px-4 dark:data-[state=active]:bg-neutral-900/35 dark:data-[state=active]:border-neutral-700/50"
+              >
+                <ReceiptText className="size-7" />
+
+                <p className="text-xs font-light tracking-tight text-neutral-600">
+                  orders
+                </p>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </nav>
+      </footer>
     </div>
   )
 }

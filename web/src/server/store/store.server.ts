@@ -8,9 +8,99 @@ import {
   VISUALIZE_store_SCHEMA,
   store_SCHEMA,
 } from '@/schemas/store.schema'
+import {
+  INSERT_STORE_type,
+  SELECT_STORE,
+  SELECT_STORE_type,
+} from '@/db/schemas/store.schema'
 
 export class serverStore {
-  async ValidateStore(userId: string, storeId: string): Promise<boolean> {
+  // obtain the store info by store id
+  async getStoreByStoreId(
+    userId: string,
+    storeId: string,
+  ): Promise<SELECT_STORE_type> {
+    try {
+      const store = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
+        .limit(1)
+
+      if (!store[0]) throw new Error('Store was not found!')
+
+      const info = {
+        storeId: store[0].id,
+        ...store[0],
+        storeCreatedAt: new Date(store[0].createdAt),
+      }
+
+      return SELECT_STORE.parse(info)
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE BY STORE ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'Error getting store')
+    }
+  }
+
+  /**
+   * Validates if a user is owner of the store
+   *
+   * true: means its the owner
+   * false: means its not the user or simply the store was not found...
+   * @param userId internal user id
+   * @param storeId
+   * @returns boolean ("owner" | "not owner")
+   */
+  async validateUserStoreOwnership(
+    userId: string,
+    storeId: string,
+  ): Promise<boolean> {
+    try {
+      await this.getStoreByStoreId(userId, storeId)
+      return true
+    } catch (err: any) {
+      // if server.getstoreById
+      // returned the error store not found, means user is trying to access something that its not his..
+      if (err.message === 'store not found') {
+        return false
+      }
+      console.log(`
+          -------------------------
+          ERROR VALIDATING USER STORE OWNERSHIP
+  
+          ${err}
+  
+          -------------------------
+       `)
+      throw new Error(err.message ?? 'Error validating store ownership')
+    }
+  }
+
+  /**
+   * validate if the store is activated
+   *
+   * if user is owner of the store he can have access to it = true
+   * if store is not active yet = false
+   * if store is active = true
+   *
+   * true = allowed access
+   * false = access denied
+   *
+   * @param userId
+   * @param storeId
+   * @returns boolean ("allowed access" || "access denied")
+   */
+  async validateIfStoreIsActivated(
+    userId: string,
+    storeId: string,
+  ): Promise<boolean> {
     try {
       const isOwner = await this.validateUserStoreOwnership(userId, storeId)
       if (isOwner) {
@@ -36,10 +126,11 @@ export class serverStore {
 
         -------------------------
         `)
-      throw new (err.message ?? 'Error validating store')()
+      throw new Error(err.message ?? 'Error validating store')
     }
   }
 
+  // obtains the store expire date by a store id
   async getStoreExpireDate(storeId: string) {
     try {
       const expireDate = await db
@@ -59,83 +150,18 @@ export class serverStore {
         ${err}
 
         -------------------------
-      `)
-      throw new (err.message ?? 'Error fetching store')()
+        `)
+      throw new Error(err.message ?? 'Error fetching store')
     }
   }
 
   /**
-   * Validates if a user is owner of the store
-   *
-   * true: means its the owner
-   * false: means its not the user or simply the store was not found...
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @returns boolean
+   * create a store
+   * @param userId intenal user id
+   * @param dto create store schema
+   * @returns "msg"
    */
-  async validateUserStoreOwnership(
-    userId: string,
-    storeId: string,
-  ): Promise<boolean> {
-    try {
-      await this.getStoreById(userId, storeId)
-      return true
-    } catch (err: any) {
-      // if server.getstoreById
-      // returned the error store not found, means user is trying to access something that its not his..
-      if (err.message === 'store not found') {
-        return false
-      }
-      console.log(`
-        -------------------------
-        ERROR VALIDATING USER STORE OWNERSHIP
-
-        ${err}
-
-        -------------------------
-     `)
-      throw new Error(err.message ?? 'Error validating store ownership')
-    }
-  }
-
-  /**
-   * Obtain a store by its storeId
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @returns parsed store schema
-   */
-  async getStoreById(userId: string, storeId: string): Promise<store_SCHEMA> {
-    try {
-      const store = await db
-        .select()
-        .from(stores)
-        .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
-        .limit(1)
-
-      if (!store[0]) throw new Error('Store was not found!')
-
-      return VISUALIZE_store_SCHEMA.parse(store[0])
-    } catch (err: any) {
-      console.log(`
-        -------------------------
-        ERROR GETTING STORE BY STORE ID
-
-        ${err}
-
-        -------------------------
-     `)
-      throw new Error(err.message ?? 'Error getting store')
-    }
-  }
-
-  /**
-   * Create a store to a user
-   *
-   * @param userId uuid internal user id
-   * @param dto create store object
-   */
-  async createstore(userId: string, dto: DTO_CREATE_store) {
+  async createStore(userId: string, dto: INSERT_STORE_type) {
     try {
       await db.insert(stores).values({
         id: uuidv4(),
@@ -159,23 +185,23 @@ export class serverStore {
   }
 
   /**
-   * Update a store related to an user
+   * Update a store
    *
-   * @param userId uuid internal user id
+   * @param userId intenal user id
    * @param storeId uuid
-   * @param dto create store object
+   * @param dto update store schema
    * @returns
    */
-  async updatestore(userId: string, storeId: string, dto: DTO_CREATE_store) {
+  async updateStore(userId: string, storeId: string, dto: INSERT_STORE_type) {
     // validate user ownership
     const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
     if (!ownership) {
-      throw new Error('Ups... This is restricted area! - not authorized')
+      throw new Error('Ups... This is restricted area! - not authorized!')
     }
 
     // obtains the current store info
-    const store = await this.getStoreById(userId, storeId)
+    const store = await this.getStoreByStoreId(userId, storeId)
 
     // object to compare what data have changed
     const updateObj: Record<string, any> = {}
@@ -225,11 +251,11 @@ export class serverStore {
    * ANNIQUILATION OF A store......
    * GOODBYEstore NEVER SEEN AGAIN
    *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @returns bool
+   * @param userId internal user id
+   * @param storeId
+   * @returns "msg"
    */
-  async deletestore(userId: string, storeId: string) {
+  async deleteStore(userId: string, storeId: string) {
     // validate user ownership
     const ownership = await this.validateUserStoreOwnership(userId, storeId)
     // returned false
@@ -241,9 +267,16 @@ export class serverStore {
         .delete(stores)
         .where(and(eq(stores.userId, userId), eq(stores.id, storeId)))
 
-      return true
+      return 'store deleted'
     } catch (err: any) {
-      console.error(err)
+      console.log(`
+        -------------------------
+        ERROR DELETING STORE
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error deleting store')
     }
   }

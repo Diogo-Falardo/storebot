@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { publicData, useLayoutPublic } from '@/lib/data'
 import { Button } from '@/components/ui/button'
 
-export const Route = createFileRoute('/(public)/Pricing')({
+export const Route = createFileRoute('/(public)/pricing')({
   component: RouteComponent,
 })
 

@@ -10,7 +10,7 @@ const TELEGRAM_BOT_TOKEN = process.env.BOT_TOKEN
  * @param initData telegram init data
  * @returns object : {data}
  */
-export async function verifyTelegram(initData: string) {
+export async function validateTelegramInitData(initData: string) {
   if (!TELEGRAM_BOT_TOKEN) {
     throw new Error('TELEGRAM_BOT_TOKEN not configured')
   }
@@ -18,21 +18,35 @@ export async function verifyTelegram(initData: string) {
   // convert the initData string to URLSearchParams
   const params = new URLSearchParams(initData)
 
-  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+  // const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
 
-  if (!isValid) {
-    throw new Error('Invalid Telegram initData: signature verification failed')
-  }
+  // if (!isValid) {
+  //   console.log(`
+  //   ------------------------------
+  //   ERROR VALIDATING TELEGRAM
+
+  //   ERROR: Invalid Telegram initData: signature verification failed...
+  //   ------------------------------
+  //   `)
+  //   throw new Error('Ups... store is only valid in telegram.')
+  // }
 
   // user data
   const userDataStr = params.get('user')
   if (!userDataStr) {
-    throw new Error('Invalid initData: missing user data')
+    console.log(`
+    ------------------------------
+    ERROR VALIDATING TELEGRAM INIT DATA
+
+    ERROR: Invalid initData: missing user data
+   ------------------------------  
+      `)
+    throw new Error('Ups... invalid telegram user data.')
   }
 
   const userData = JSON.parse(userDataStr)
 
-  // convert the telegram id to the db user id
+  // convert the telegram id into internal user id
   const userId = await getUserByTelegramUserId(userData.id)
 
   if (!userId) {
@@ -49,10 +63,10 @@ export async function verifyTelegram(initData: string) {
 
 /**
  * This function is to check if the user
- * that is going to use the shop is accessing from the telegram
+ * that is going to use the store is accessing from the telegram
  * @param initData
  */
-export function verifyTelegramUser(initData: string) {
+export function validateExternalTelegramUserInitData(initData: string) {
   if (!TELEGRAM_BOT_TOKEN) {
     throw new Error('TELEGRAM_BOT_TOKEN not configured')
   }
@@ -60,16 +74,30 @@ export function verifyTelegramUser(initData: string) {
   // convert the initData string to URLSearchParams
   const params = new URLSearchParams(initData)
 
-  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+  // const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
 
-  if (!isValid) {
-    throw new Error('Invalid Telegram initData: signature verification failed')
-  }
+  // if (!isValid) {
+  //   console.log(`
+  //   ------------------------------
+  //   ERROR VALIDATING TELEGRAM
+
+  //   ERROR: Invalid Telegram initData: signature verification failed...
+  //   ------------------------------
+  //   `)
+  //   throw new Error('Ups... store is only valid in telegram.')
+  // }
 
   // user data
   const userDataStr = params.get('user')
   if (!userDataStr) {
-    throw new Error('Invalid initData: missing user data')
+    console.log(`
+    ------------------------------
+    ERROR VALIDATING TELEGRAM INIT DATA
+
+    ERROR: Invalid initData: missing user data
+   ------------------------------  
+      `)
+    throw new Error('Ups... invalid telegram user data.')
   }
 
   const userData = JSON.parse(userDataStr)

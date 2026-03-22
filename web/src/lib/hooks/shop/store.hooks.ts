@@ -3,16 +3,10 @@ import {
   sf_GetStorePaymentMethods,
   sf_GetstoreShippingMethods,
   sf_PublicStore,
-  sf_StoreInfo,
+  sf_getStoreByStoreId,
 } from '@/server/store/store.functions'
 
-/**
- * Hook to fetch the user store info from a user
- *
- * @param param0 userId and storeId
- * @returns server function: sf_storeInfo
- */
-export function useGetUserstoreInfo({
+export function useGetUserStoreInfo({
   userId,
   storeId,
 }: {
@@ -21,7 +15,7 @@ export function useGetUserstoreInfo({
 }) {
   return useQuery({
     queryKey: ['store', storeId],
-    queryFn: () => sf_StoreInfo({ data: { userId, storeId } }),
+    queryFn: () => sf_getStoreByStoreId({ data: { userId, storeId } }),
     enabled: !!userId,
   })
 }
