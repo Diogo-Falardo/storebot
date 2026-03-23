@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { PackageSearch, Tags, X } from 'lucide-react'
+import { Tags, X } from 'lucide-react'
 import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
 import { sf_DeleteCategory } from '@/server/store/products/category/productCategory.functions'
 import {

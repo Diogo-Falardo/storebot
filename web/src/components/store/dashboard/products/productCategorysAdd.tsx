@@ -18,17 +18,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-interface ProductsCategorysAddProps {
+interface ProductCategoryAddProps {
   storeId: string
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const ProductsCategorysAdd = ({
+const ProductCategorysAdd = ({
   storeId,
   open,
   setOpen,
-}: ProductsCategorysAddProps) => {
+}: ProductCategoryAddProps) => {
   const addCategory = useServerFn(sf_CreateCategory)
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
@@ -112,4 +112,4 @@ const ProductsCategorysAdd = ({
   )
 }
 
-export default ProductsCategorysAdd
+export default ProductCategorysAdd

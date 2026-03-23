@@ -1,9 +1,10 @@
+import { Dispatch, SetStateAction, useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
+import { useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRef } from 'react'
-import { Pencil } from 'lucide-react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -12,9 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import {
   Field,
   FieldDescription,
@@ -24,7 +23,6 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
 import {
   Select,
   SelectContent,
@@ -32,35 +30,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { sf_UpdateProductFromstore } from '@/server/store/products/product.functions'
-import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
 
-type productProps = {
-  id: string
+import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
+import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
+import { sf_AddProductTostore } from '@/server/store/products/product.functions'
+
+interface ProductAddProps {
+  userId: string
   storeId: string
-  productName?: string
-  productPrice?: string
-  productDesc?: string | null
-  categoryId?: string | null
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const ProductUpdate = (product: productProps) => {
-  // get current store categorys
-  const { data, isLoading } = useGetstoreCategorys({ storeId: product.storeId })
+const ProductAdd = ({ userId, storeId, open, setOpen }: ProductAddProps) => {
+  const router = useRouter()
+  // load current categories
+  const { data: categories, isLoading } = useGetstoreCategorys({ storeId })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  // server fn
-  const update = useServerFn(sf_UpdateProductFromstore)
+  const add = useServerFn(sf_AddProductTostore)
 
   const form = useForm({
     defaultValues: {
-      productName: product.productName ?? '',
-      productPrice: product.productPrice ?? '',
-      productDesc: product.productDesc ?? '',
-      categoryId: product.categoryId ?? 'null',
+      productName: '',
+      productPrice: '',
+      productDesc: '',
+      categoryId: 'none',
       visible: 1,
     },
     validators: {
@@ -68,34 +65,28 @@ const ProductUpdate = (product: productProps) => {
     },
     onSubmit: async ({ value }) => {
       try {
-        const service = await update({
-          data: { storeId: product.storeId, productId: product.id, dto: value },
-        })
-        toast.success(service)
+        await add({ data: { userId, storeId, dto: value } })
+        toast.success('Added' + value.productName)
         queryClient.invalidateQueries({ queryKey: ['products'] })
+        router.invalidate()
         closeDialogRef.current?.click()
       } catch (err: any) {
-        toast.error(err.message ?? 'Error while updating product')
+        toast.error(err.message ?? 'Error while adding product')
       }
     },
   })
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex  items-center gap-2">
-          <Pencil />
-          Edit
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>update Product</DialogTitle>
+          <DialogTitle>Add Product</DialogTitle>
           <DialogDescription>
-            You are updating: {product.productName}
+            Add what ever you want to sell on your store!
           </DialogDescription>
         </DialogHeader>
         <form
-          id="update-product-form"
+          id="add-product-form"
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
@@ -118,7 +109,7 @@ const ProductUpdate = (product: productProps) => {
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder={product.productName}
+                      placeholder="Protein Cookie"
                       autoComplete="off"
                     />
                     {isInvalid && (
@@ -147,7 +138,7 @@ const ProductUpdate = (product: productProps) => {
                         field.handleChange(value)
                       }}
                       aria-invalid={isInvalid}
-                      placeholder={product.productPrice}
+                      placeholder="5.99"
                       autoComplete="off"
                       inputMode="decimal"
                     />
@@ -169,7 +160,9 @@ const ProductUpdate = (product: productProps) => {
                     <FieldLabel htmlFor={field.name}>
                       Product Description
                     </FieldLabel>
-                    <FieldDescription>{product.productDesc}</FieldDescription>
+                    <FieldDescription>
+                      Small Description for your product...
+                    </FieldDescription>
                     <Textarea
                       id={field.name}
                       name={field.name}
@@ -187,7 +180,6 @@ const ProductUpdate = (product: productProps) => {
                 )
               }}
             />
-            {/* product category */}
             <form.Field
               name="categoryId"
               children={(field) => {
@@ -209,8 +201,8 @@ const ProductUpdate = (product: productProps) => {
                         <SelectItem value="none">None</SelectItem>
                         {isLoading && <div>Loading...</div>}
                         {!isLoading &&
-                          data &&
-                          data.map((category) => (
+                          categories &&
+                          categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
                               {category.category}
                             </SelectItem>
@@ -228,12 +220,16 @@ const ProductUpdate = (product: productProps) => {
         </form>
         <DialogFooter>
           <DialogClose asChild>
-            <Button ref={closeDialogRef} variant={'outline'}>
+            <Button ref={closeDialogRef} variant="outline">
               Cancel
             </Button>
           </DialogClose>
-          <Button form="update-product-form" type="submit">
-            update product
+          <Button
+            form="add-product-form"
+            type="submit"
+            disabled={form.state.isSubmitting}
+          >
+            {form.state.isSubmitting ? 'Adding...' : 'add product'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -241,4 +237,4 @@ const ProductUpdate = (product: productProps) => {
   )
 }
 
-export default ProductUpdate
+export default ProductAdd

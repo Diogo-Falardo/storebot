@@ -1,6 +1,6 @@
 import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { LayoutDashboard, Package, ReceiptText, Settings } from 'lucide-react'
 import { sf_validateTelegramInitData } from '@/server/telegram/telegram.function'
 import ErrorWrapper from '@/components/errorWrapper'
@@ -29,6 +29,7 @@ import { sf_validateIfStoreIsActivated } from '@/server/store/store.functions'
 import { test_data } from '@/lib/test.data'
 import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
 import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
+import { useLayoutDashboard, useLayoutPublic } from '@/lib/data'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -47,6 +48,15 @@ function RouteComponent() {
 
   const validateTelegramInitData = useServerFn(sf_validateTelegramInitData)
   const validateIfStoreIsActivated = useServerFn(sf_validateIfStoreIsActivated)
+
+  const dashboardNavbarRef = useRef<HTMLDivElement>(null)
+  const dashboardNavbarHeight = useLayoutDashboard((s) => s.headerHeight)
+  const setDashboardNavbarHeight = useLayoutDashboard((s) => s.setHeaderHeight)
+  const dashboardFooterRef = useRef<HTMLDivElement>(null)
+  const dashboardFooterHeight = useLayoutDashboard((s) => s.footerHeight)
+  const setDashboardFooterHeight = useLayoutDashboard((s) => s.setFooterHeight)
+  const setDashboardOffset = useLayoutDashboard((s) => s.setOffset)
+  const dashboardOffset = useLayoutDashboard((s) => s.offset)
 
   // authentication || validation of the user on CLIENT LOAD
   useEffect(() => {
@@ -74,9 +84,24 @@ function RouteComponent() {
         setError(err ?? new Error('Authentication failed'))
       }
     }
-
     authenticate()
   }, [])
+
+  useLayoutEffect(() => {
+    if (dashboardNavbarRef.current) {
+      setDashboardNavbarHeight(dashboardNavbarRef.current.offsetHeight)
+    }
+
+    if (dashboardFooterRef.current) {
+      setDashboardFooterHeight(dashboardFooterRef.current.offsetHeight)
+    }
+  })
+
+  useEffect(() => {
+    if (dashboardNavbarHeight && dashboardFooterHeight) {
+      setDashboardOffset(dashboardNavbarHeight + dashboardFooterHeight)
+    }
+  }, [dashboardFooterHeight, dashboardNavbarHeight])
 
   // store information
   const {
@@ -98,25 +123,34 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-t from-zinc-950 to-background">
-      <header className="sticky top-0 z-50 bg-background border-b p-4 border-primary flex justify-center items-center">
+      <header
+        ref={dashboardNavbarRef}
+        className="sticky top-0 z-50 p-3 bg-background border-b border-primary flex justify-center items-center"
+      >
         <h1 className="text-4xl font-mono tracking-tight font-semibold">
           {storeInfo.storeName}
         </h1>
       </header>
       {/* content */}
-      <main className="flex-1 p-2 relative">
-        <ScrollArea className="flex-1 h-full">
-          {activeTab === 'settings' && (
-            <DashboardSettings storeId={storeId} userId={userId} />
-          )}
-          {activeTab === 'dashboard' && (
-            <DashboardDashboard storeId={storeId} userId={userId} />
-          )}
-          {activeTab === 'orders' && <></>}
-        </ScrollArea>
+      <main className="flex-1 flex flex-col">
+        {activeTab === 'settings' && (
+          <DashboardSettings storeId={storeId} userId={userId} />
+        )}
+        {activeTab === 'dashboard' && (
+          <DashboardDashboard
+            storeId={storeId}
+            userId={userId}
+            storeCurrency={storeInfo.storeCurrency}
+            dashboardOffset={dashboardOffset}
+          />
+        )}
+        {activeTab === 'orders' && <></>}
       </main>
       {/* menu */}
-      <footer className="sticky bottom-0 z-50 bg-background p-4 ">
+      <footer
+        ref={dashboardFooterRef}
+        className="sticky bottom-0 z-50 p-3 bg-background"
+      >
         <nav className="flex justify-center items-center">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="gap-5 p-1 bg-background border ring ring-primary border-primary/50 group-data-[orientation=horizontal]/tabs:h-fit">

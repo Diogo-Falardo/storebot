@@ -1,11 +1,8 @@
-import { useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import { Dispatch, SetStateAction, useRef } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
-import { PackagePlus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -14,8 +11,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import {
   Field,
   FieldDescription,
@@ -25,6 +22,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+
 import {
   Select,
   SelectContent,
@@ -32,33 +30,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
 import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
+import { sf_UpdateProductFromstore } from '@/server/store/products/product.functions'
 import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
-import { sf_AddProductTostore } from '@/server/store/products/product.functions'
 
-const ProductAdd = ({
-  userId,
-  storeId,
-}: {
-  userId: string
+type productProps = {
+  id: string
   storeId: string
-}) => {
-  const router = useRouter()
-  // load current categories
-  const { data: categories, isLoading } = useGetstoreCategorys({ storeId })
+  productName?: string
+  productPrice?: string
+  productDesc?: string | null
+  categoryId?: string | null
+}
+
+type ProductUpdateProps = {
+  product: productProps
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+}
+
+const ProductUpdate = ({ product, open, setOpen }: ProductUpdateProps) => {
+  // get current store categorys
+  const { data, isLoading } = useGetstoreCategorys({ storeId: product.storeId })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const add = useServerFn(sf_AddProductTostore)
+  // server fn
+  const update = useServerFn(sf_UpdateProductFromstore)
 
   const form = useForm({
     defaultValues: {
-      productName: '',
-      productPrice: '',
-      productDesc: '',
-      categoryId: 'none',
+      productName: product.productName ?? '',
+      productPrice: product.productPrice ?? '',
+      productDesc: product.productDesc ?? '',
+      categoryId: product.categoryId ?? 'null',
       visible: 1,
     },
     validators: {
@@ -66,34 +72,28 @@ const ProductAdd = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        await add({ data: { userId, storeId, dto: value } })
-        toast.success('Added' + value.productName)
+        const service = await update({
+          data: { storeId: product.storeId, productId: product.id, dto: value },
+        })
+        toast.success(service)
         queryClient.invalidateQueries({ queryKey: ['products'] })
-        router.invalidate()
         closeDialogRef.current?.click()
       } catch (err: any) {
-        toast.error(err.message ?? 'Error while adding product')
+        toast.error(err.message ?? 'Error while updating product')
       }
     },
   })
-
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>
-          <PackagePlus />
-          add product
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Product</DialogTitle>
+          <DialogTitle>update Product</DialogTitle>
           <DialogDescription>
-            Add what ever you want to sell on your store!
+            You are updating: {product.productName}
           </DialogDescription>
         </DialogHeader>
         <form
-          id="add-product-form"
+          id="update-product-form"
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
@@ -116,7 +116,7 @@ const ProductAdd = ({
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder="Protein Cookie"
+                      placeholder={product.productName}
                       autoComplete="off"
                     />
                     {isInvalid && (
@@ -145,7 +145,7 @@ const ProductAdd = ({
                         field.handleChange(value)
                       }}
                       aria-invalid={isInvalid}
-                      placeholder="5.99"
+                      placeholder={product.productPrice}
                       autoComplete="off"
                       inputMode="decimal"
                     />
@@ -167,9 +167,7 @@ const ProductAdd = ({
                     <FieldLabel htmlFor={field.name}>
                       Product Description
                     </FieldLabel>
-                    <FieldDescription>
-                      Small Description for your product...
-                    </FieldDescription>
+                    <FieldDescription>{product.productDesc}</FieldDescription>
                     <Textarea
                       id={field.name}
                       name={field.name}
@@ -187,6 +185,7 @@ const ProductAdd = ({
                 )
               }}
             />
+            {/* product category */}
             <form.Field
               name="categoryId"
               children={(field) => {
@@ -208,8 +207,8 @@ const ProductAdd = ({
                         <SelectItem value="none">None</SelectItem>
                         {isLoading && <div>Loading...</div>}
                         {!isLoading &&
-                          categories &&
-                          categories.map((category) => (
+                          data &&
+                          data.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
                               {category.category}
                             </SelectItem>
@@ -227,16 +226,12 @@ const ProductAdd = ({
         </form>
         <DialogFooter>
           <DialogClose asChild>
-            <Button ref={closeDialogRef} variant="outline">
+            <Button ref={closeDialogRef} variant={'outline'}>
               Cancel
             </Button>
           </DialogClose>
-          <Button
-            form="add-product-form"
-            type="submit"
-            disabled={form.state.isSubmitting}
-          >
-            {form.state.isSubmitting ? 'Adding...' : 'add product'}
+          <Button form="update-product-form" type="submit">
+            update product
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -244,4 +239,4 @@ const ProductAdd = ({
   )
 }
 
-export default ProductAdd
+export default ProductUpdate

@@ -111,7 +111,7 @@ export const publicData = {
   },
 }
 
-type LayoutPublicState = {
+type LayoutState = {
   headerHeight: number
   footerHeight: number
   offset: number
@@ -124,7 +124,16 @@ type LayoutPublicState = {
  * its between the header and footer so every section can have the
  * proper space
  */
-export const useLayoutPublic = create<LayoutPublicState>((set) => ({
+export const useLayoutPublic = create<LayoutState>((set) => ({
+  headerHeight: 0,
+  footerHeight: 0,
+  offset: 0,
+  setHeaderHeight: (h: number) => set({ headerHeight: h }),
+  setFooterHeight: (h: number) => set({ footerHeight: h }),
+  setOffset: (n: number) => set({ offset: n }),
+}))
+
+export const useLayoutDashboard = create<LayoutState>((set) => ({
   headerHeight: 0,
   footerHeight: 0,
   offset: 0,

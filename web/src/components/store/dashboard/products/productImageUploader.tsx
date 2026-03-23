@@ -1,27 +1,36 @@
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { Image } from 'lucide-react'
+import { ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
 import { sf_AddProductImage } from '@/server/store/products/product.functions'
+import { Dialog } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 
 const CLOUD_NAME = 'ddpkwh9th'
 const UPLOAD_PRESET = 'KiraBot'
 
-const ImgUploader = ({
+const ProductImageUploader = ({
   storeId,
   productId,
+  productName,
+  open,
+  setOpen,
 }: {
   storeId: string
   productId: string
+  productName: string
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
 }) => {
-  const [uploading, setUploading] = useState(false)
-  const uploadImg = useServerFn(sf_AddProductImage)
-  const queryClient = useQueryClient()
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const uploadImg = useServerFn(sf_AddProductImage)
+  const [uploading, setUploading] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // upload image
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +59,7 @@ const ImgUploader = ({
         data: { productId, imageUrl: data.secure_url },
       })
       if (ok) {
-        toast.success('Image updated!')
+        toast.success(`Image updated, ${productName}`)
         queryClient.invalidateQueries({ queryKey: ['products', storeId] })
         router.invalidate()
       }
@@ -60,22 +69,16 @@ const ImgUploader = ({
   const inputId = `product-image-${productId}`
 
   return (
-    <>
-      <label htmlFor={inputId}>
-        <Button asChild variant={'outline'}>
-          <span className="flex items-center gap-1">
-            {uploading ? (
-              'Uploading...'
-            ) : (
-              <>
-                <Image className="w-4 h-4" />
-                Update image
-              </>
-            )}
-          </span>
-        </Button>
-      </label>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button
+        size={'icon'}
+        onClick={() => inputRef.current?.click()}
+        variant="outline"
+      >
+        {uploading ? <Spinner /> : <ImageIcon />}
+      </Button>
       <Input
+        ref={inputRef}
         id={inputId}
         type="file"
         className="hidden"
@@ -84,8 +87,8 @@ const ImgUploader = ({
         disabled={uploading}
         placeholder="Image"
       />
-    </>
+    </Dialog>
   )
 }
 
-export default ImgUploader
+export default ProductImageUploader
