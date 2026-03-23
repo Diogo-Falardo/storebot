@@ -27,7 +27,8 @@ import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
 import { useGetUserStoreInfo } from '@/lib/hooks/shop/store.hooks'
 import { sf_validateIfStoreIsActivated } from '@/server/store/store.functions'
 import { test_data } from '@/lib/test.data'
-import DashboardSettings from '@/components/store/dashboard/settings/dashboardSettings'
+import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
+import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -87,13 +88,6 @@ function RouteComponent() {
     storeId,
   })
 
-  // store products
-  const { data: products, isLoading: productsLoading } = useGetstoreProducts(
-    storeInfo
-      ? { userId: storeInfo.userId, storeId: storeInfo.storeId }
-      : { userId: '', storeId: '' },
-  )
-
   const { data: orders, isLoading: ordersLoading } = useGetstoreOrders({
     storeId,
   })
@@ -115,7 +109,9 @@ function RouteComponent() {
           {activeTab === 'settings' && (
             <DashboardSettings storeId={storeId} userId={userId} />
           )}
-          {activeTab === 'dashboard' && <></>}
+          {activeTab === 'dashboard' && (
+            <DashboardDashboard storeId={storeId} userId={userId} />
+          )}
           {activeTab === 'orders' && <></>}
         </ScrollArea>
       </main>

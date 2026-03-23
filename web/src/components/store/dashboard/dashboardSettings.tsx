@@ -1,6 +1,6 @@
-import StoreConfig from './store/storeConfig'
-import StorePaymentMethod from './store/storePaymentMethods'
-import StoreShippingMethod from './store/storeShippingMethods'
+import StoreConfig from './settings/storeConfig'
+import StoreShippingMethod from './settings/storeShippingMethods'
+import StorePaymentMethod from './settings/storePaymentMethods'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const DashboardSettings = ({
@@ -30,10 +30,10 @@ const DashboardSettings = ({
             Payment Methods
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="Shipping" className="mt-2 h-full">
+        <TabsContent value="Shipping" className="mt-2 px-2 h-full">
           <StoreShippingMethod userId={userId} storeId={storeId} />
         </TabsContent>
-        <TabsContent value="Payment" className="mt-2 h-full">
+        <TabsContent value="Payment" className="mt-2 px-2 h-full">
           <StorePaymentMethod userId={userId} storeId={storeId} />
         </TabsContent>
       </Tabs>

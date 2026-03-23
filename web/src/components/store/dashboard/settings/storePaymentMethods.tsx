@@ -3,23 +3,23 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
-import { MoreHorizontalIcon, SendHorizonal } from 'lucide-react'
-import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/store.schema'
-import { useGetstoreShippingMethods } from '@/lib/hooks/shop/store.hooks'
+import { MoreHorizontal, SendHorizonal } from 'lucide-react'
+import { CREATE_PAYMENT_METHOD_SCHEMA } from '@/schemas/store.schema'
+import { useGetstorePaymentMethods } from '@/lib/hooks/shop/store.hooks'
 import {
-  sf_CreateStoreShippingMethod,
-  sf_DeletestoreShippingMethod,
+  sf_CreatestorePaymentMethod,
+  sf_DeletestorePaymentMethod,
 } from '@/server/store/store.functions'
 import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,43 +27,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-const StoreShippingMethod = ({
+const StorePaymentMethod = ({
   userId,
   storeId,
 }: {
   userId: string
   storeId: string
 }) => {
-  // load current shipping methods
-  const { data, isLoading } = useGetstoreShippingMethods({ storeId })
+  // load current payment methods
+  const { data, isLoading } = useGetstorePaymentMethods({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateStoreShippingMethod)
-  const deleteMethod = useServerFn(sf_DeletestoreShippingMethod)
-
-  console.log(data)
+  const addMethod = useServerFn(sf_CreatestorePaymentMethod)
+  const deleteMethod = useServerFn(sf_DeletestorePaymentMethod)
 
   const form = useForm({
     defaultValues: {
       method: '',
     },
     validators: {
-      onSubmit: CREATE_SHIPPING_METHOD_SCHEMA,
+      onSubmit: CREATE_PAYMENT_METHOD_SCHEMA,
     },
     onSubmit: async ({ value }) => {
       try {
         await addMethod({
-          data: { userId, storeId, shippingMethod: value.method },
+          data: { userId, storeId, paymentMethod: value.method },
         })
-        toast.success(`NEW Shipping Method: ${value.method}`)
-        queryClient.invalidateQueries({
-          queryKey: ['shippingMethods', storeId],
-        })
+        toast.success(`NEW Payment Method: ${value.method}`)
+        queryClient.invalidateQueries({ queryKey: ['paymentMethods', storeId] })
       } catch (err: any) {
-        toast.error(err.message ?? 'Error adding shipping method.')
+        toast.error(err.message ?? 'Error adding payment method.')
       }
     },
   })
@@ -74,8 +70,8 @@ const StoreShippingMethod = ({
       await deleteMethod({
         data: { userId, storeId, methodId },
       })
-      queryClient.invalidateQueries({ queryKey: ['shippingMethods', storeId] })
-      toast.success('Shipping method deleted!')
+      queryClient.invalidateQueries({ queryKey: ['paymentMethods', storeId] })
+      toast.success('Payment method deleted!')
       await new Promise((res) => setTimeout(res, 500))
     } catch (err) {
       toast.error('Error deleting method!')
@@ -89,7 +85,7 @@ const StoreShippingMethod = ({
       <div className="flex gap-2">
         <form
           className="flex-1"
-          id="add-shipping-method-form"
+          id="add-payment-method-form"
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
@@ -110,7 +106,7 @@ const StoreShippingMethod = ({
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder="New Shipping Method"
+                      placeholder="New Payment Method"
                       autoComplete="off"
                       className="border-primary ring ring-primary dark:bg-secondary px-2 py-3 tracking-widest text-sm"
                     />
@@ -125,7 +121,7 @@ const StoreShippingMethod = ({
         </form>
         <Button
           type="submit"
-          form="add-shipping-method-form"
+          form="add-payment-method-form"
           variant={'outline'}
         >
           <SendHorizonal />
@@ -134,18 +130,18 @@ const StoreShippingMethod = ({
       <div className="flex-1 py-2">
         {!data && isLoading && <div>is loading</div>}
         <div className="border rounded-sm">
-          {data && data === 'There are a total of 0 Shipping Methods...' ? (
+          {data && data === 'There are a total of 0 Payment Methods...' ? (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>No Shipping Methods Yet</EmptyTitle>
+                <EmptyTitle>No Payment Methods Yet</EmptyTitle>
                 <EmptyDescription>
-                  Add your first shipping method to start delivering orders to
+                  Add your first payment method to start accepting payments from
                   your customers.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
-            <ScrollArea className="h-full flex max-h-40 flex-col gap-4">
+            <ScrollArea className="h-full flex max-h-47 flex-col gap-4">
               {Array.isArray(data) &&
                 data.length > 0 &&
                 data.map((method) => {
@@ -163,7 +159,7 @@ const StoreShippingMethod = ({
                             className={'size-8'}
                             disabled={deletingId === method.id}
                           >
-                            <MoreHorizontalIcon />
+                            <MoreHorizontal />
                             <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
@@ -187,4 +183,4 @@ const StoreShippingMethod = ({
   )
 }
 
-export default StoreShippingMethod
+export default StorePaymentMethod

@@ -112,7 +112,7 @@ const StoreConfig = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 px-2">
       <div className="flex justify-between items-center">
         <h1 className="font-mono text-xl font-medium">Store Configuration</h1>
         <div className="flex items-center gap-2">
