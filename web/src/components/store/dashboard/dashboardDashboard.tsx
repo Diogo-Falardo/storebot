@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { EllipsisVertical, Search } from 'lucide-react'
+import { EllipsisVertical, PackageIcon, Search, Tags } from 'lucide-react'
 import ProductsCategorys from './products/productsCategorys'
 import ProductCategorysAdd from './products/productCategorysAdd'
 import ProductAdd from './products/productAdd'
@@ -102,19 +102,28 @@ remain: ${remainingScreenSize}
                 <EllipsisVertical />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="end">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>products</DropdownMenuLabel>
+
                 {/* new product */}
                 <DropdownMenuItem>
-                  <Button onClick={() => setOpenProductAdd(true)}>
-                    add product
+                  <Button
+                    variant={'outline'}
+                    className="w-full"
+                    onClick={() => setOpenProductAdd(true)}
+                  >
+                    <PackageIcon /> add product
                   </Button>
                 </DropdownMenuItem>
                 {/* new category */}
                 <DropdownMenuItem>
-                  <Button onClick={() => setOpenProductCategoryAdd(true)}>
-                    add category
+                  <Button
+                    variant={'outline'}
+                    className="w-full"
+                    onClick={() => setOpenProductCategoryAdd(true)}
+                  >
+                    <Tags /> add category
                   </Button>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

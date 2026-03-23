@@ -52,7 +52,7 @@ const ProductsCategorys = ({ storeId }: { storeId: string }) => {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="py-2 px-1 border-primary/50 ring ring-primary"
+        className="py-2 px-1 border-primary/50 ring ring-primary bg-background"
       >
         {/* new category */}
 
@@ -68,7 +68,10 @@ const ProductsCategorys = ({ storeId }: { storeId: string }) => {
             <ScrollArea className="max-h-50 w-full">
               <div className="flex flex-col gap-2">
                 {data.map((category) => (
-                  <Card key={category.id} className="w-full p-1 rounded-sm">
+                  <Card
+                    key={category.id}
+                    className="w-full p-1 rounded-sm bg-primary/5 border-primary/30"
+                  >
                     <div className="px-1 select-none flex flex-row justify-between items-center text-neutral-400">
                       <CardTitle className="capitalize font-medium cursor-pointer w-full">
                         {category.category}

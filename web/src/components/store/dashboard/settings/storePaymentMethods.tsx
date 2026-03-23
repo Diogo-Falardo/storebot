@@ -108,7 +108,6 @@ const StorePaymentMethod = ({
                       aria-invalid={isInvalid}
                       placeholder="New Payment Method"
                       autoComplete="off"
-                      className="border-primary ring ring-primary dark:bg-secondary px-2 py-3 tracking-widest text-sm"
                     />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

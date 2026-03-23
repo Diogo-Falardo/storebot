@@ -4,24 +4,12 @@ import { DTO_CREATE_PRODUCT, PRODUCT_SCHEMA } from '@/schemas/product.schema'
 
 const productServer = new serverProduct()
 
-/**
- * "GET"
- * products from a store
- *
- * required: userId & storeId
- */
 export const sf_ProductsFromstore = createServerFn({ method: 'GET' })
   .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
     return await productServer.getProductsFromstoreId(data.userId, data.storeId)
   })
 
-/**
- * "POST"
- * create a product
- *
- * required: userId, storeId, product objects
- */
 export const sf_AddProductTostore = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: { userId: string; storeId: string; dto: DTO_CREATE_PRODUCT }) =>
@@ -35,12 +23,6 @@ export const sf_AddProductTostore = createServerFn({ method: 'POST' })
     )
   })
 
-/**
- * "POST"
- * update a product from a store
- *
- * required: storeId, productId, product object
- */
 export const sf_UpdateProductFromstore = createServerFn({
   method: 'POST',
 })
@@ -56,12 +38,6 @@ export const sf_UpdateProductFromstore = createServerFn({
     )
   })
 
-/**
- * "POST"
- * delete a product
- *
- * required: storeId & productId
- */
 export const sf_DeleteProductFromstore = createServerFn({
   method: 'POST',
 })
@@ -70,12 +46,6 @@ export const sf_DeleteProductFromstore = createServerFn({
     return await productServer.deleteProduct(data.storeId, data.productId)
   })
 
-/**
- * "POST"
- * switch product visibility
- *
- * required: storeId & productId
- */
 export const sf_ToogleProductVisibilty = createServerFn({
   method: 'POST',
 })
@@ -91,12 +61,6 @@ export const sf_ToogleProductVisibilty = createServerFn({
     return await productServer.toogleVisibility(data.productId, newVisibility)
   })
 
-/**
- * "POST"
- * add image
- *
- * required: productId & img url
- */
 export const sf_AddProductImage = createServerFn({
   method: 'POST',
 })
@@ -105,12 +69,6 @@ export const sf_AddProductImage = createServerFn({
     return await productServer.insertImage(data.productId, data.imageUrl)
   })
 
-/**
- * "GET"
- * validate if a product still exists in store
- *
- * required: storeId & productId
- */
 export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }): Promise<'invalid' | 'valid'> => {
@@ -124,12 +82,6 @@ export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
     return 'valid'
   })
 
-/**
- * "GET"
- * return a product from its id
- *
- * required storeId & productId
- */
 export const sf_GetProductFromId = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }): Promise<PRODUCT_SCHEMA> => {

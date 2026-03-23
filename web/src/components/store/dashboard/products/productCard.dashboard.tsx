@@ -5,18 +5,12 @@ import { useServerFn } from '@tanstack/react-start'
 import {
   Edit2Icon,
   EllipsisVerticalIcon,
-  Eye,
   EyeIcon,
-  EyeOff,
   EyeOffIcon,
-  ImageIcon,
-  Trash2,
   Trash2Icon,
-  X,
-  XIcon,
 } from 'lucide-react'
 import ProductUpdate from './productUpdate'
-
+import ProductImageUploader from './productImageUploader'
 import ConfirmationDialog from '@/components/confirmationDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import ProductImageUploader from './productImageUploader'
 import {
   sf_DeleteProductFromstore,
   sf_ToogleProductVisibilty,
@@ -34,7 +27,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -104,7 +96,7 @@ const ProductCardDashboard = (product: productProps) => {
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <Card className="w-full p-2.5  bg-background ring ring-primary border-primary/50">
+    <Card className="w-full p-2.5 bg-background ring ring-primary border-primary/50">
       <CardContent className="flex w-full items-center justify-between p-0 gap-4">
         <div className="flex-1 flex gap-2 items-center">
           <div className="relative w-15 h-15 shrink-0">
@@ -143,7 +135,7 @@ const ProductCardDashboard = (product: productProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="border-primary p-2 bg-popover rounded-lg shadow-lg w-auto min-w-11 flex flex-col gap-1"
+            className="p-2 w-auto min-w-11 flex flex-col gap-1"
             align="end"
           >
             {/* visibily toogler button */}
@@ -184,7 +176,7 @@ const ProductCardDashboard = (product: productProps) => {
             <DropdownMenuItem asChild>
               <Button
                 size={'icon'}
-                onClick={deleteProduct}
+                onClick={() => setOpenConfirmDeleteProduct(true)}
                 variant={'destructive'}
               >
                 <Trash2Icon />
@@ -201,6 +193,7 @@ const ProductCardDashboard = (product: productProps) => {
           <ConfirmationDialog
             open={openConfirmDeleteProduct}
             onOpenChange={setOpenConfirmDeleteProduct}
+            onConfirm={deleteProduct}
           />
         </DropdownMenu>
       </CardContent>
