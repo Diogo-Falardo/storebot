@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-export const Route = createFileRoute('/(public)/')({
+export const Route = createFileRoute('/(public)/(pages)/')({
   component: RouteComponent,
 })
 
@@ -191,7 +191,7 @@ function RouteComponent() {
             </CardContent>
           </Card>
           <Tabs defaultValue="vf" className="max-w-xs w-full">
-            <TabsList variant={'line'} className="font-mono">
+            <TabsList variant={'line'} className='font-mono'>
               <TabsTrigger className="after:bg-sky-950" value="vf">
                 Version Features
               </TabsTrigger>

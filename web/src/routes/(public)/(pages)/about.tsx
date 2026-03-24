@@ -3,7 +3,7 @@ import { gsap } from 'gsap'
 import { createFileRoute } from '@tanstack/react-router'
 import { publicData, useLayoutPublic } from '@/lib/data'
 
-export const Route = createFileRoute('/(public)/about')({
+export const Route = createFileRoute('/(public)/(pages)/about')({
   component: RouteComponent,
 })
 

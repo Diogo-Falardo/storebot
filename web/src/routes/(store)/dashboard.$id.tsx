@@ -23,13 +23,13 @@ import ShippingMethodAdd from '@/components/store/shippingMethodAdd'
 import ProductAdd from '@/components/store/products/productAdd'
 import ProductCardADM from '@/components/store/products/productCard.admin'
 import ProductCategoryAdd from '@/components/store/products/productCategoryAdd'
-import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
+
 import { useGetUserStoreInfo } from '@/lib/hooks/shop/store.hooks'
 import { sf_validateIfStoreIsActivated } from '@/server/store/store.functions'
 import { test_data } from '@/lib/test.data'
 import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
 import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
-import { useLayoutDashboard, useLayoutPublic } from '@/lib/data'
+import { useLayoutDashboard } from '@/lib/data'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -132,7 +132,7 @@ function RouteComponent() {
         </h1>
       </header>
       {/* content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col ">
         {activeTab === 'settings' && (
           <DashboardSettings storeId={storeId} userId={userId} />
         )}

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-export const Route = createFileRoute('/(public)/how-to-use')({
+export const Route = createFileRoute('/(public)/(pages)/how-to-use')({
   component: RouteComponent,
 })
 

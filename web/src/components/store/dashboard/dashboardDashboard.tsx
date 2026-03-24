@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { EllipsisVertical, PackageIcon, Search, Tags } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  EllipsisVertical,
+  PackageIcon,
+  Search,
+  Tags,
+} from 'lucide-react'
 import ProductsCategorys from './products/productsCategorys'
 import ProductCategorysAdd from './products/productCategorysAdd'
 import ProductAdd from './products/productAdd'
 import ProductCardDashboard from './products/productCard.dashboard'
+import { ProductInfoDashboard } from './products/productInfo.dashboard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
@@ -16,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useLayoutDashboard } from '@/lib/data'
 
 const DashboardDashboard = ({
   userId,
@@ -33,7 +41,7 @@ const DashboardDashboard = ({
   const [openProductAdd, setOpenProductAdd] = useState<boolean>(false)
   const screenRef = useRef<HTMLDivElement>(null)
   const searchAndButtonsRef = useRef<HTMLDivElement>(null)
-  const categorysRef = useRef<HTMLDivElement>(null)
+  const container2Ref = useRef<HTMLDivElement>(null)
   const [screenSize, setScreenSize] = useState(0)
   const [
     ocupatedScreenSizeByOtherElements,
@@ -41,6 +49,13 @@ const DashboardDashboard = ({
   ] = useState(0)
   // we set this for the products scroll area size h-
   const [remainingScreenSize, setRemainingScreenSize] = useState(0)
+  const activeProductInfo = useLayoutDashboard((s) => s.productInfoActive)
+  const deactivateProductInfo = useLayoutDashboard(
+    (pId) => pId.setProductInfoActive,
+  )
+  const removeActiveCategoryId = useLayoutDashboard(
+    (cId) => cId.setProductInfoActiveCategoryId,
+  )
 
   // store products
   const { data: products, isLoading: productsLoading } = useGetstoreProducts({
@@ -60,8 +75,8 @@ const DashboardDashboard = ({
       elsSpaceOcupated += searchAndButtonsRef.current.offsetHeight
     }
 
-    if (categorysRef.current) {
-      elsSpaceOcupated += categorysRef.current.offsetHeight
+    if (container2Ref.current) {
+      elsSpaceOcupated += container2Ref.current.offsetHeight
     }
 
     if (elsSpaceOcupated !== 0) {
@@ -74,20 +89,17 @@ const DashboardDashboard = ({
   }, [screenSize, ocupatedScreenSizeByOtherElements])
 
   console.log(`
-offset: ${dashboardOffset}
-screen size: ${screenSize}    
-ocupated: ${ocupatedScreenSizeByOtherElements}
-remain: ${remainingScreenSize}
-    
-    
-    
-`)
+ screenSize = ${screenSize}
+ ocupated = ${ocupatedScreenSizeByOtherElements}
+ remain = ${remainingScreenSize} 
+  
+  `)
 
   return (
     <div
       ref={screenRef}
       style={{ maxHeight: `calc(100vh - ${dashboardOffset}px)` }}
-      className="flex-1 flex flex-col gap-2 p-2"
+      className="flex-1 flex flex-col"
     >
       <div className="p-2 flex flex-col gap-2">
         {/* search bar and buttons */}
@@ -143,27 +155,57 @@ remain: ${remainingScreenSize}
             setOpen={setOpenProductCategoryAdd}
           />
         </div>
-        {/* categorys */}
-        <div ref={categorysRef} className="flex justify-end">
+        {/* container 2 */}
+        <div ref={container2Ref} className="flex justify-between items-center">
+          {activeProductInfo !== null ? (
+            <Button
+              onClick={() => {
+                deactivateProductInfo(null)
+                removeActiveCategoryId(null)
+              }}
+              size={'icon'}
+              variant="secondary"
+              aria-label="Back"
+            >
+              <ArrowLeftIcon />
+            </Button>
+          ) : (
+            <div></div>
+          )}
+
           <ProductsCategorys storeId={storeId} />
         </div>
       </div>
 
       <div className="flex-1">
-        <ScrollArea style={{ height: `${remainingScreenSize - 50}px` }}>
-          <div className="px-2 pb-4 flex flex-col gap-4 p-2">
-            {!productsLoading &&
-              Array.isArray(products) &&
-              products.length > 0 &&
-              products.map((product) => (
-                <ProductCardDashboard
-                  key={product.id}
-                  storeCurrency={storeCurrency}
-                  {...product}
+        {activeProductInfo !== null ? (
+          <>
+            <div className="px-2"></div>
+            <ScrollArea style={{ height: `${remainingScreenSize}px` }}>
+              <div className="px-2 pb-8 flex flex-col gap-4 pt-2">
+                <ProductInfoDashboard
+                  storeId={storeId}
+                  productId={activeProductInfo}
                 />
-              ))}
-          </div>
-        </ScrollArea>
+              </div>
+            </ScrollArea>
+          </>
+        ) : (
+          <ScrollArea style={{ height: `${remainingScreenSize}px` }}>
+            <div className="px-2 pb-8 flex flex-col gap-4 pt-2">
+              {!productsLoading &&
+                Array.isArray(products) &&
+                products.length > 0 &&
+                products.map((product) => (
+                  <ProductCardDashboard
+                    key={product.id}
+                    storeCurrency={storeCurrency}
+                    {...product}
+                  />
+                ))}
+            </div>
+          </ScrollArea>
+        )}
       </div>
     </div>
   )

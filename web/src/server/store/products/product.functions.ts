@@ -51,7 +51,7 @@ export const sf_ToogleProductVisibilty = createServerFn({
 })
   .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }) => {
-    const product = await productServer.getProductById(
+    const product = await productServer.getProductByProductId(
       data.storeId,
       data.productId,
     )
@@ -82,8 +82,11 @@ export const sf_ValidateIfProductExists = createServerFn({ method: 'GET' })
     return 'valid'
   })
 
-export const sf_GetProductFromId = createServerFn({ method: 'GET' })
+export const sf_getProductFromProductId = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string; productId: string }) => data)
   .handler(async ({ data }): Promise<PRODUCT_SCHEMA> => {
-    return await productServer.getProductById(data.storeId, data.productId)
+    return await productServer.getProductByProductId(
+      data.storeId,
+      data.productId,
+    )
   })

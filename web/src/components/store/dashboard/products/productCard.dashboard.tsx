@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
+import { useLayoutDashboard } from '@/lib/data'
 
 type productProps = {
   id: string
@@ -46,15 +47,22 @@ type productProps = {
 }
 
 const ProductCardDashboard = (product: productProps) => {
+  const queryClient = useQueryClient()
   const [openProductUpdate, setOpenProductUpdate] = useState<boolean>(false)
   const [openProductImageUploader, setOpenProductImageUploader] =
     useState<boolean>(false)
   const [openConfirmDeleteProduct, setOpenConfirmDeleteProduct] =
-    useState(false)
+    useState<boolean>(false)
+  const dropDowmMenuRef = useRef<HTMLDivElement>(null)
+  const setOpenProductInfoCard = useLayoutDashboard(
+    (pId) => pId.setProductInfoActive,
+  )
+  const setOpenProductInfoCardCategoryId = useLayoutDashboard(
+    (cId) => cId.setProductInfoActiveCategoryId,
+  )
+
   const deleted = useServerFn(sf_DeleteProductFromstore)
   const visibility = useServerFn(sf_ToogleProductVisibilty)
-
-  const queryClient = useQueryClient()
 
   const deleteProduct = async () => {
     try {
@@ -96,9 +104,15 @@ const ProductCardDashboard = (product: productProps) => {
 
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
-    <Card className="w-full p-2.5 bg-background ring ring-primary border-primary/50">
+    <Card className="cursor-pointer w-full p-2.5 bg-background ring ring-primary border-primary/50">
       <CardContent className="flex w-full items-center justify-between p-0 gap-4">
-        <div className="flex-1 flex gap-2 items-center">
+        <div
+          onClick={() => {
+            setOpenProductInfoCardCategoryId(product.categoryId ?? null)
+            setOpenProductInfoCard(product.id)
+          }}
+          className="flex-1 flex gap-2 items-center"
+        >
           <div className="relative w-15 h-15 shrink-0">
             <img
               src={product.imageUrl || PLACEHOLDER_IMG}
@@ -124,78 +138,80 @@ const ProductCardDashboard = (product: productProps) => {
             </CardDescription>
           </CardHeader>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={'outline'}
-              className="cursor-pointer"
-              size={'icon'}
-            >
-              <EllipsisVerticalIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="p-2 w-auto min-w-11 flex flex-col gap-1"
-            align="end"
-          >
-            {/* visibily toogler button */}
-            <DropdownMenuItem asChild>
+        <div ref={dropDowmMenuRef}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant={'outline'}
-                size={'icon'}
                 className="cursor-pointer"
-                onClick={visibilityToogler}
-                aria-label={product.visible ? 'Hide product' : 'Show product'}
-                title={product.visible ? 'Hide product' : 'Show product'}
-              >
-                {product.visible ? <EyeOffIcon /> : <EyeIcon />}
-              </Button>
-            </DropdownMenuItem>
-            {/* edit button  */}
-            <DropdownMenuItem asChild>
-              <Button
-                variant={'outline'}
-                size="icon"
-                onClick={() => setOpenProductUpdate(true)}
-              >
-                <Edit2Icon />
-              </Button>
-            </DropdownMenuItem>
-            {/* change image button */}
-            <DropdownMenuItem asChild>
-              <ProductImageUploader
-                open={openProductImageUploader}
-                setOpen={setOpenProductImageUploader}
-                storeId={product.storeId}
-                productId={product.id}
-                productName={product.productName}
-              />
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {/* delete button */}
-            <DropdownMenuItem asChild>
-              <Button
                 size={'icon'}
-                onClick={() => setOpenConfirmDeleteProduct(true)}
-                variant={'destructive'}
               >
-                <Trash2Icon />
+                <EllipsisVerticalIcon />
               </Button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-          {/* item - edit */}
-          <ProductUpdate
-            open={openProductUpdate}
-            setOpen={setOpenProductUpdate}
-            product={product}
-          />
-          {/* item - delete dialog */}
-          <ConfirmationDialog
-            open={openConfirmDeleteProduct}
-            onOpenChange={setOpenConfirmDeleteProduct}
-            onConfirm={deleteProduct}
-          />
-        </DropdownMenu>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="p-2 w-auto min-w-11 flex flex-col gap-1"
+              align="end"
+            >
+              {/* visibily toogler button */}
+              <DropdownMenuItem asChild>
+                <Button
+                  variant={'outline'}
+                  size={'icon'}
+                  className="cursor-pointer"
+                  onClick={visibilityToogler}
+                  aria-label={product.visible ? 'Hide product' : 'Show product'}
+                  title={product.visible ? 'Hide product' : 'Show product'}
+                >
+                  {product.visible ? <EyeOffIcon /> : <EyeIcon />}
+                </Button>
+              </DropdownMenuItem>
+              {/* edit button  */}
+              <DropdownMenuItem asChild>
+                <Button
+                  variant={'outline'}
+                  size="icon"
+                  onClick={() => setOpenProductUpdate(true)}
+                >
+                  <Edit2Icon />
+                </Button>
+              </DropdownMenuItem>
+              {/* change image button */}
+              <DropdownMenuItem asChild>
+                <ProductImageUploader
+                  open={openProductImageUploader}
+                  setOpen={setOpenProductImageUploader}
+                  storeId={product.storeId}
+                  productId={product.id}
+                  productName={product.productName}
+                />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {/* delete button */}
+              <DropdownMenuItem asChild>
+                <Button
+                  size={'icon'}
+                  onClick={() => setOpenConfirmDeleteProduct(true)}
+                  variant={'destructive'}
+                >
+                  <Trash2Icon />
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+            {/* item - edit */}
+            <ProductUpdate
+              open={openProductUpdate}
+              setOpen={setOpenProductUpdate}
+              product={product}
+            />
+            {/* item - delete dialog */}
+            <ConfirmationDialog
+              open={openConfirmDeleteProduct}
+              onOpenChange={setOpenConfirmDeleteProduct}
+              onConfirm={deleteProduct}
+            />
+          </DropdownMenu>
+        </div>
       </CardContent>
     </Card>
   )

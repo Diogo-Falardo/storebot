@@ -14,12 +14,11 @@ const storeServer = new serverStore()
 export class serverProduct {
   /**
    * Obtain product by id
-   *
-   * @param storeId uuid
-   * @param productId uuid
+   * @param storeId
+   * @param productId
    * @returns parsed product
    */
-  async getProductById(
+  async getProductByProductId(
     storeId: string,
     productId: string,
   ): Promise<PRODUCT_SCHEMA> {
@@ -140,7 +139,7 @@ export class serverProduct {
     productId: string,
     dto: DTO_CREATE_PRODUCT,
   ) {
-    const product = await this.getProductById(storeId, productId)
+    const product = await this.getProductByProductId(storeId, productId)
 
     // object for the updated product fields
     const updateObj: Record<string, any> = {}
@@ -199,7 +198,7 @@ export class serverProduct {
    * @returns "msg" string
    */
   async deleteProduct(storeId: string, productId: string) {
-    await this.getProductById(storeId, productId)
+    await this.getProductByProductId(storeId, productId)
 
     try {
       await db

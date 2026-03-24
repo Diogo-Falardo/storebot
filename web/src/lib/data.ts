@@ -133,11 +133,23 @@ export const useLayoutPublic = create<LayoutState>((set) => ({
   setOffset: (n: number) => set({ offset: n }),
 }))
 
-export const useLayoutDashboard = create<LayoutState>((set) => ({
+interface LayoutDashboardState extends LayoutState {
+  productInfoActive: string | null // product id
+  productInfoActiveCategoryId: string | null
+  setProductInfoActive: (pId: string | null) => void
+  setProductInfoActiveCategoryId: (cId: string | null) => void
+}
+
+export const useLayoutDashboard = create<LayoutDashboardState>((set) => ({
   headerHeight: 0,
   footerHeight: 0,
   offset: 0,
+  productInfoActive: null,
+  productInfoActiveCategoryId: null,
   setHeaderHeight: (h: number) => set({ headerHeight: h }),
   setFooterHeight: (h: number) => set({ footerHeight: h }),
   setOffset: (n: number) => set({ offset: n }),
+  setProductInfoActive: (pId: string | null) => set({ productInfoActive: pId }),
+  setProductInfoActiveCategoryId: (cId: string | null) =>
+    set({ productInfoActiveCategoryId: cId }),
 }))

@@ -51,7 +51,7 @@ export const sf_DeleteCategory = createServerFn({
  *
  * required: storeId & categoryId
  */
-export const sf_ConvertCategoryIdIntoName = createServerFn({
+export const sf_getCategoryNameByCategoryId = createServerFn({
   method: 'GET',
 })
   .inputValidator((data: { storeId: string; categoryId: string }) => data)

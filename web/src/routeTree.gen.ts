@@ -10,41 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
-import { Route as publicIndexRouteImport } from './routes/(public)/index'
-import { Route as publicTermsRouteImport } from './routes/(public)/terms'
-import { Route as publicPricingRouteImport } from './routes/(public)/pricing'
-import { Route as publicHowToUseRouteImport } from './routes/(public)/how-to-use'
-import { Route as publicAboutRouteImport } from './routes/(public)/about'
+import { Route as publicpagesIndexRouteImport } from './routes/(public)/(pages)/index'
 import { Route as storeStoreIdRouteImport } from './routes/(store)/store.$id'
 import { Route as storeDashboardIdRouteImport } from './routes/(store)/dashboard.$id'
+import { Route as publicpagesTermsRouteImport } from './routes/(public)/(pages)/terms'
+import { Route as publicpagesPricingRouteImport } from './routes/(public)/(pages)/pricing'
+import { Route as publicpagesHowToUseRouteImport } from './routes/(public)/(pages)/how-to-use'
+import { Route as publicpagesAboutRouteImport } from './routes/(public)/(pages)/about'
 
 const publicRouteRoute = publicRouteRouteImport.update({
   id: '/(public)',
   getParentRoute: () => rootRouteImport,
 } as any)
-const publicIndexRoute = publicIndexRouteImport.update({
-  id: '/',
+const publicpagesIndexRoute = publicpagesIndexRouteImport.update({
+  id: '/(pages)/',
   path: '/',
-  getParentRoute: () => publicRouteRoute,
-} as any)
-const publicTermsRoute = publicTermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => publicRouteRoute,
-} as any)
-const publicPricingRoute = publicPricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => publicRouteRoute,
-} as any)
-const publicHowToUseRoute = publicHowToUseRouteImport.update({
-  id: '/how-to-use',
-  path: '/how-to-use',
-  getParentRoute: () => publicRouteRoute,
-} as any)
-const publicAboutRoute = publicAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => publicRouteRoute,
 } as any)
 const storeStoreIdRoute = storeStoreIdRouteImport.update({
@@ -57,35 +37,55 @@ const storeDashboardIdRoute = storeDashboardIdRouteImport.update({
   path: '/dashboard/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const publicpagesTermsRoute = publicpagesTermsRouteImport.update({
+  id: '/(pages)/terms',
+  path: '/terms',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicpagesPricingRoute = publicpagesPricingRouteImport.update({
+  id: '/(pages)/pricing',
+  path: '/pricing',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicpagesHowToUseRoute = publicpagesHowToUseRouteImport.update({
+  id: '/(pages)/how-to-use',
+  path: '/how-to-use',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicpagesAboutRoute = publicpagesAboutRouteImport.update({
+  id: '/(pages)/about',
+  path: '/about',
+  getParentRoute: () => publicRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/about': typeof publicAboutRoute
-  '/how-to-use': typeof publicHowToUseRoute
-  '/pricing': typeof publicPricingRoute
-  '/terms': typeof publicTermsRoute
-  '/': typeof publicIndexRoute
+  '/about': typeof publicpagesAboutRoute
+  '/how-to-use': typeof publicpagesHowToUseRoute
+  '/pricing': typeof publicpagesPricingRoute
+  '/terms': typeof publicpagesTermsRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
+  '/': typeof publicpagesIndexRoute
 }
 export interface FileRoutesByTo {
-  '/about': typeof publicAboutRoute
-  '/how-to-use': typeof publicHowToUseRoute
-  '/pricing': typeof publicPricingRoute
-  '/terms': typeof publicTermsRoute
-  '/': typeof publicIndexRoute
+  '/about': typeof publicpagesAboutRoute
+  '/how-to-use': typeof publicpagesHowToUseRoute
+  '/pricing': typeof publicpagesPricingRoute
+  '/terms': typeof publicpagesTermsRoute
   '/dashboard/$id': typeof storeDashboardIdRoute
   '/store/$id': typeof storeStoreIdRoute
+  '/': typeof publicpagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(public)': typeof publicRouteRouteWithChildren
-  '/(public)/about': typeof publicAboutRoute
-  '/(public)/how-to-use': typeof publicHowToUseRoute
-  '/(public)/pricing': typeof publicPricingRoute
-  '/(public)/terms': typeof publicTermsRoute
-  '/(public)/': typeof publicIndexRoute
+  '/(public)/(pages)/about': typeof publicpagesAboutRoute
+  '/(public)/(pages)/how-to-use': typeof publicpagesHowToUseRoute
+  '/(public)/(pages)/pricing': typeof publicpagesPricingRoute
+  '/(public)/(pages)/terms': typeof publicpagesTermsRoute
   '/(store)/dashboard/$id': typeof storeDashboardIdRoute
   '/(store)/store/$id': typeof storeStoreIdRoute
+  '/(public)/(pages)/': typeof publicpagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,28 +94,28 @@ export interface FileRouteTypes {
     | '/how-to-use'
     | '/pricing'
     | '/terms'
-    | '/'
     | '/dashboard/$id'
     | '/store/$id'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
     | '/how-to-use'
     | '/pricing'
     | '/terms'
-    | '/'
     | '/dashboard/$id'
     | '/store/$id'
+    | '/'
   id:
     | '__root__'
     | '/(public)'
-    | '/(public)/about'
-    | '/(public)/how-to-use'
-    | '/(public)/pricing'
-    | '/(public)/terms'
-    | '/(public)/'
+    | '/(public)/(pages)/about'
+    | '/(public)/(pages)/how-to-use'
+    | '/(public)/(pages)/pricing'
+    | '/(public)/(pages)/terms'
     | '/(store)/dashboard/$id'
     | '/(store)/store/$id'
+    | '/(public)/(pages)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,39 +133,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(public)/': {
-      id: '/(public)/'
+    '/(public)/(pages)/': {
+      id: '/(public)/(pages)/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof publicIndexRouteImport
-      parentRoute: typeof publicRouteRoute
-    }
-    '/(public)/terms': {
-      id: '/(public)/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof publicTermsRouteImport
-      parentRoute: typeof publicRouteRoute
-    }
-    '/(public)/pricing': {
-      id: '/(public)/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof publicPricingRouteImport
-      parentRoute: typeof publicRouteRoute
-    }
-    '/(public)/how-to-use': {
-      id: '/(public)/how-to-use'
-      path: '/how-to-use'
-      fullPath: '/how-to-use'
-      preLoaderRoute: typeof publicHowToUseRouteImport
-      parentRoute: typeof publicRouteRoute
-    }
-    '/(public)/about': {
-      id: '/(public)/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof publicAboutRouteImport
+      preLoaderRoute: typeof publicpagesIndexRouteImport
       parentRoute: typeof publicRouteRoute
     }
     '/(store)/store/$id': {
@@ -182,23 +154,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof storeDashboardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(public)/(pages)/terms': {
+      id: '/(public)/(pages)/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof publicpagesTermsRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/(pages)/pricing': {
+      id: '/(public)/(pages)/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof publicpagesPricingRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/(pages)/how-to-use': {
+      id: '/(public)/(pages)/how-to-use'
+      path: '/how-to-use'
+      fullPath: '/how-to-use'
+      preLoaderRoute: typeof publicpagesHowToUseRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/(pages)/about': {
+      id: '/(public)/(pages)/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof publicpagesAboutRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
   }
 }
 
 interface publicRouteRouteChildren {
-  publicAboutRoute: typeof publicAboutRoute
-  publicHowToUseRoute: typeof publicHowToUseRoute
-  publicPricingRoute: typeof publicPricingRoute
-  publicTermsRoute: typeof publicTermsRoute
-  publicIndexRoute: typeof publicIndexRoute
+  publicpagesAboutRoute: typeof publicpagesAboutRoute
+  publicpagesHowToUseRoute: typeof publicpagesHowToUseRoute
+  publicpagesPricingRoute: typeof publicpagesPricingRoute
+  publicpagesTermsRoute: typeof publicpagesTermsRoute
+  publicpagesIndexRoute: typeof publicpagesIndexRoute
 }
 
 const publicRouteRouteChildren: publicRouteRouteChildren = {
-  publicAboutRoute: publicAboutRoute,
-  publicHowToUseRoute: publicHowToUseRoute,
-  publicPricingRoute: publicPricingRoute,
-  publicTermsRoute: publicTermsRoute,
-  publicIndexRoute: publicIndexRoute,
+  publicpagesAboutRoute: publicpagesAboutRoute,
+  publicpagesHowToUseRoute: publicpagesHowToUseRoute,
+  publicpagesPricingRoute: publicpagesPricingRoute,
+  publicpagesTermsRoute: publicpagesTermsRoute,
+  publicpagesIndexRoute: publicpagesIndexRoute,
 }
 
 const publicRouteRouteWithChildren = publicRouteRoute._addFileChildren(
