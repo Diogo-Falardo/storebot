@@ -1,13 +1,18 @@
 import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
-import { serverStore } from '../store.server'
+import { serverStore } from '../store/store.server'
 import { db } from '@/db'
 import { products } from '@/db/schema'
 import {
-  DTO_CREATE_PRODUCT,
   PRODUCT_SCHEMA,
   VISUALIZE_PRODUCT_SCHEMA,
 } from '@/schemas/product.schema'
+import {
+  schema_PRODUCT,
+  type_create_PRODUCT,
+  type_patch_PRODUCT,
+  type_schema_PRODUCT,
+} from '@/db/schemas/product.schema'
 
 const storeServer = new serverStore()
 
@@ -18,10 +23,10 @@ export class serverProduct {
    * @param productId
    * @returns parsed product
    */
-  async getProductByProductId(
+  async get_ProductByProductId(
     storeId: string,
     productId: string,
-  ): Promise<PRODUCT_SCHEMA> {
+  ): Promise<type_schema_PRODUCT> {
     try {
       const product = await db
         .select()
@@ -31,23 +36,30 @@ export class serverProduct {
       if (!product[0]) {
         throw new Error('Product not found!')
       }
-      return VISUALIZE_PRODUCT_SCHEMA.parse(product[0])
+      return schema_PRODUCT.parse(product[0])
     } catch (err: any) {
-      console.log(err)
-      throw new Error(err.message ?? 'Error while loading product...')
+      console.log(`
+        -------------------------
+        ERROR GETTING  PRODUCT BY PRODUCT ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching products')
     }
   }
 
   /**
    * Obtain a produt by name
-   * @param storeId uuid
-   * @param productName string
+   * @param storeId
+   * @param productName
    * @returns parsed product or "product not found"
    */
-  async getProductByName(
+  async get_ProductByProductName(
     storeId: string,
     productName: string,
-  ): Promise<PRODUCT_SCHEMA | string> {
+  ): Promise<type_schema_PRODUCT | 'product not found'> {
     try {
       const product = await db
         .select()
@@ -63,51 +75,48 @@ export class serverProduct {
         return 'product not found'
       }
 
-      return VISUALIZE_PRODUCT_SCHEMA.parse(product[0])
+      return schema_PRODUCT.parse(product[0])
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error while loading product...')
+      console.log(`
+        -------------------------
+        ERROR GETTING PRODUCT BY PRODUCT NAME
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching products')
     }
   }
 
   /**
    * Create a new product
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @param dto create product object
-   * @returns "product created" if success
+   * @param userId
+   * @param storeId
+   * @param dto create product
+   * @returns "msg"
    */
-  async createProduct(
+  async create_Product(
     userId: string,
     storeId: string,
-    dto: DTO_CREATE_PRODUCT,
+    dto: type_create_PRODUCT,
   ) {
-    // validate user ownership
-    const ownership = await storeServer.validateUserStoreOwnership(
+    const ownership = await storeServer.validate_IfUserIsOwnerOfTheStore(
       userId,
       storeId,
     )
-    // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
-    // gets the product by name adn verify if there is already a product with that names
-    const product = await this.getProductByName(storeId, dto.productName)
-    console.log(product)
+    // gets the product by name and verify if there is already a product with that names
+    const product = await this.get_ProductByProductName(
+      storeId,
+      dto.productName,
+    )
+
     if (product !== 'product not found')
       throw new Error('Product already inserted!')
-
-    let productDesc: string | null = null
-    if (dto.productDesc.trim() !== '') {
-      productDesc = dto.productDesc
-    }
-
-    let productCategory: string | null = null
-    if (dto.categoryId !== 'none') {
-      productCategory = dto.categoryId
-    }
 
     try {
       await db.insert(products).values({
@@ -115,31 +124,37 @@ export class serverProduct {
         storeId: storeId,
         productName: dto.productName,
         productPrice: dto.productPrice,
-        productDesc: productDesc,
-        categoryId: productCategory,
+        productDesc: dto.productDesc,
+        categoryId: dto.productCategoryId,
       })
 
       return 'product created!'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error creating product')
+      console.log(`
+        -------------------------
+        ERROR CREATING PRODUCT
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error creating product')
     }
   }
 
   /**
    * Update product
-   *
-   * @param storeId uuid internal user id
-   * @param productId uuid
-   * @param dto create product object
-   * @returns "msg" string
+   * @param storeId
+   * @param productId
+   * @param dto
+   * @returns "msg"
    */
-  async updateProduct(
+  async update_Product(
     storeId: string,
     productId: string,
-    dto: DTO_CREATE_PRODUCT,
+    dto: type_patch_PRODUCT,
   ) {
-    const product = await this.getProductByProductId(storeId, productId)
+    const product = await this.get_ProductByProductId(storeId, productId)
 
     // object for the updated product fields
     const updateObj: Record<string, any> = {}
@@ -163,13 +178,13 @@ export class serverProduct {
       updateObj.productDesc = dto.productDesc
     }
     if (
-      typeof dto.categoryId !== 'undefined' &&
-      dto.categoryId !== product.categoryId
+      typeof dto.productCategoryId !== 'undefined' &&
+      dto.productCategoryId !== product.productCategoryId
     ) {
-      if (dto.categoryId === 'null') {
+      if (dto.productCategoryId === 'null') {
         updateObj.categoryId = null
       } else {
-        updateObj.categoryId = dto.categoryId
+        updateObj.categoryId = dto.productCategoryId
       }
     }
 
@@ -186,19 +201,26 @@ export class serverProduct {
 
       return 'Product updated!'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error updating product')
+      console.log(`
+        -------------------------
+        ERROR UPDATING PRODUCT
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error updating product')
     }
   }
 
   /**
    * Delete product
-   * @param storeId uuid
-   * @param productId uuid
-   * @returns "msg" string
+   * @param storeId
+   * @param productId
+   * @returns "msg"
    */
-  async deleteProduct(storeId: string, productId: string) {
-    await this.getProductByProductId(storeId, productId)
+  async delete_Product(storeId: string, productId: string) {
+    await this.get_ProductByProductId(storeId, productId)
 
     try {
       await db
@@ -207,28 +229,32 @@ export class serverProduct {
 
       return 'product deleted!'
     } catch (err: any) {
-      console.error(err)
+      console.log(`
+        -------------------------
+        ERROR DELETING PRODUCT
+
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error deleting product')
     }
   }
 
   /**
    * Obtain a list of products from a store
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
+   * @param userId
+   * @param storeId
    * @returns parsed list of products
    */
-  async getProductsFromstoreId(
+  async get_ProductsFromStoreId(
     userId: string,
     storeId: string,
   ): Promise<Array<PRODUCT_SCHEMA>> {
-    // validate user ownership
-    const ownership = await storeServer.validateUserStoreOwnership(
+    const ownership = await storeServer.validate_IfUserIsOwnerOfTheStore(
       userId,
       storeId,
     )
-    // returned false
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
@@ -241,12 +267,25 @@ export class serverProduct {
 
       return VISUALIZE_PRODUCT_SCHEMA.array().parse(productsList)
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error getting products')
+      console.log(`
+        -------------------------
+        ERROR GETTING PRODUCTS FROM STORE ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching products')
     }
   }
 
-  async toogleVisibility(productId: string, visibility: number) {
+  /**
+   * toogle product visibility
+   * @param productId
+   * @param visibility "0" || "1"
+   * @returns "msg"
+   */
+  async toogle_ProductVisibility(productId: string, visibility: number) {
     try {
       await db
         .update(products)
@@ -255,19 +294,26 @@ export class serverProduct {
 
       return 'Product visibilty changed!'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error changing visibility')
+      console.log(`
+        -------------------------
+        ERROR CHANGING PRODUCT VISIBILITY
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error changing visibility')
     }
   }
 
   /**
    * Adds an image to a product
    *
-   * @param productId uuid
-   * @param imgUrl string -> url
+   * @param productId
+   * @param imgUrl
    * @returns "msg"
    */
-  async insertImage(productId: string, imgUrl: string) {
+  async add_ProductImage(productId: string, imgUrl: string) {
     try {
       await db
         .update(products)
@@ -276,19 +322,25 @@ export class serverProduct {
 
       return 'image inserted!'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error adding image')
+      console.log(`
+        -------------------------
+        ERROR ADDING PRODUCT IMAGE
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error adding image')
     }
   }
 
   /**
    * Validates if a product id is still in store
-   *
-   * @param storeId uuid
-   * @param productId uuid
-   * @returns boolean
+   * @param storeId
+   * @param productId
+   * @returns
    */
-  async validateIfProductExists(
+  async validate_IfProductExists(
     storeId: string,
     productId: string,
   ): Promise<boolean> {
@@ -307,26 +359,5 @@ export class serverProduct {
       console.error(err)
       throw new Error(err.message ?? 'Error validating product')
     }
-  }
-}
-
-/**
- * Obtains all the products related to a store
- * @param storeId uuid
- * @returns list of products
- */
-export async function getProductsFromPublicstore(
-  storeId: string,
-): Promise<Array<PRODUCT_SCHEMA>> {
-  try {
-    const productsList = await db
-      .select()
-      .from(products)
-      .where(eq(products.storeId, storeId))
-
-    return VISUALIZE_PRODUCT_SCHEMA.array().parse(productsList)
-  } catch (err: any) {
-    console.error(err)
-    throw new Error('Error while getting products')
   }
 }

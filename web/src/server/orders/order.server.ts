@@ -2,31 +2,30 @@ import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
 import { serverProduct } from '../products/products.server'
 import { db } from '@/db'
-import {
-  DTO_RECEIVE_ORDER,
-  ORDER_SCHEMA,
-  ORDER_VISUALIZATION,
-  OrderStatus,
-} from '@/schemas/order.schema'
 import { orders, productsOrders } from '@/db/schema'
+import {
+  schema_ORDER,
+  type_create_ORDER,
+  type_enum_ORDER_STATUS,
+  type_schema_ORDER,
+} from '@/db/schemas/order.schema'
 
 const productServer = new serverProduct()
 
 export class serverOrder {
   /**
-   * Place an order [store]
+   * Create || place an order from store.$id.tsx "page"
    *
    * Indentifies who placed the order by its telegramUserId and order Indentifier
-   *
-   * @param telegramUserId number
-   * @param storeId uuid
-   * @param dto receive order
+   * @param telegramUserId
+   * @param storeId
+   * @param dto create order
    * @returns "msg"
    */
-  async placeOrder(
+  async create_Order(
     telegramUserId: number,
     storeId: string,
-    dto: DTO_RECEIVE_ORDER,
+    dto: type_create_ORDER,
   ) {
     // generate an order id
     const orderId = uuidv4()
@@ -61,70 +60,91 @@ export class serverOrder {
 
       return 'order placed'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error while placing order')
+      console.log(`
+      -------------------------
+        ERROR CREATING ORDER
+
+        ${err}
+
+        -------------------------
+     `)
+
+      throw new Error(err.message ?? 'error while placing order')
     }
   }
 
   /**
    * Returns all the orders corresponding to a store
-   * @param storeId uuid
-   * @returns storeOrders.Parsed(ORDER_VISUALIZATION)
+   * @param storeId
+   * @returns parsed orders
    */
-  async getOrdersFromstoreId(storeId: string): Promise<Array<ORDER_SCHEMA>> {
+  async get_OrdersFromStoreId(
+    storeId: string,
+  ): Promise<Array<type_schema_ORDER>> {
     try {
       const storeOrders = await db
         .select()
         .from(orders)
         .where(eq(orders.storeId, storeId))
 
-      return ORDER_VISUALIZATION.array().parse(storeOrders)
+      return schema_ORDER.array().parse(storeOrders)
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? `Error getting the store orders`)
+      console.log(`
+      -------------------------
+        ERROR GETTING ORDERS FROM STORE ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching orders')
     }
   }
 
   /**
-   * return the list of products from an order
-   *
+   * Returns the list of products from an order
    * @param orderId uuid
-   * @returns "msg" or products
+   * @returns parsed products
    */
-  async getProductsFromOrderId(storeId: string, orderId: string) {
+  async get_ProductsFromOrderId(storeId: string, orderId: string) {
     try {
       const products = await db
         .select()
         .from(productsOrders)
         .where(eq(productsOrders.orderId, orderId))
 
-      if (products.length === 0) {
-        return 'No Products'
-      }
-
       // Fetch all product info in parallel and collect results
       const productInfos = await Promise.all(
         products.map(async (product) => {
-          return await productServer.getProductById(storeId, product.productId)
+          return await productServer.get_ProductByProductId(
+            storeId,
+            product.productId,
+          )
         }),
       )
 
       return productInfos
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error getting products from order')
+      console.log(`
+      -------------------------
+        ERROR GETTING PRODUCTS FROM ORDER ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching orders')
     }
   }
 
   /**
    * Add a Order Custom Message to an order
-   *
-   * @param orderId uuid
-   * @param storeId uuid
-   * @param message string
+   * @param orderId
+   * @param storeId
+   * @param message
    * @returns "msg"
    */
-  async addOrderCustomMessage(
+  async add_OrderCustomMessage(
     storeId: string,
     orderId: string,
     message: string,
@@ -137,23 +157,28 @@ export class serverOrder {
 
       return 'Added Order Custom Message'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error adding order custom message')
+      console.log(`
+      -------------------------
+        ERROR ADDING ORDER CUSTOM MESSAGE
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error adding order custom message')
     }
   }
 
   /**
    * Update the order status of an order
-   *
-   * @param storeId uuid
-   * @param orderId uuid
-   * @param orderStatus enum
+   * @param storeId
+   * @param orderId
+   * @param orderStatus
    * @returns "msg"
    */
-  async changeOrderStatus(
+  async update_OrderStatus(
     storeId: string,
     orderId: string,
-    orderStatus: OrderStatus,
+    orderStatus: type_enum_ORDER_STATUS,
   ) {
     try {
       await db
@@ -163,7 +188,13 @@ export class serverOrder {
 
       return 'Updated Order Status'
     } catch (err: any) {
-      console.error(err)
+      console.log(`
+      -------------------------
+        ERROR UPDATING ORDER STATUS
+        ${err}
+
+        -------------------------
+     `)
       throw new Error(err.message ?? 'Error updating order status')
     }
   }
@@ -174,7 +205,7 @@ export class serverOrder {
    * @param storeId
    * @returns
    */
-  async getOrdersFromTelegramId(storeId: string, telegramUserId: number) {
+  async get_OrdersFromTelegramUserId(storeId: string, telegramUserId: number) {
     try {
       const userOrders = await db
         .select()
@@ -192,8 +223,14 @@ export class serverOrder {
 
       return userOrders
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error while getting telegram orders')
+      console.log(`
+      -------------------------
+        ERROR GETTING ORDERS FROM TELEGRAM ID
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching orders')
     }
   }
 }

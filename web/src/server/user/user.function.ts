@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getUserByTelegramUserId } from './user.server'
+import { get_UserByTelegramUserId } from './user.server'
 
-export const sf_GetUserIdFromTelegramId = createServerFn({ method: 'GET' })
+export const sf_get_UserIdFromTelegramId = createServerFn({ method: 'GET' })
   .inputValidator((data: { telegramId: number }) => data)
   .handler(async ({ data }) => {
-    return await getUserByTelegramUserId(data.telegramId)
+    return await get_UserByTelegramUserId(data.telegramId)
   })

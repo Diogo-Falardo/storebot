@@ -7,9 +7,11 @@ import { users } from '@/db/schema'
  * into internal database id
  *
  * @param id number telegram user id
- * @returns uuid internal user id
+ * @returns uuid internal user id or null
  */
-export async function getUserByTelegramUserId(id: number) {
+export async function get_InternalUserIdByTelegramUserId(
+  id: number,
+): Promise<string | null> {
   try {
     const user = await db
       .select()

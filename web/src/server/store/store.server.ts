@@ -1,25 +1,27 @@
 import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
+import { get_InternalUserIdByTelegramUserId } from '../user/user.server'
 import { db } from '@/db'
 import { paymentMethods, shippingMethods, stores } from '@/db/schema'
 import {
-  DTO_CREATE_store,
-  VISUALIZE_METHOD_SCHEMA,
-  VISUALIZE_store_SCHEMA,
-  store_SCHEMA,
-} from '@/schemas/store.schema'
-import {
-  INSERT_STORE_type,
-  SELECT_STORE,
-  SELECT_STORE_type,
+  schema_STORE,
+  select_STORE_METHODS,
+  type_patch_STORE,
+  type_schema_STORE,
+  type_select_STORE_METHODS,
 } from '@/db/schemas/store.schema'
 
 export class serverStore {
-  // obtain the store info by store id
-  async getStoreByStoreId(
+  /**
+   * Obtain store info from its store id
+   * @param userId
+   * @param storeId
+   * @returns parsed store info
+   */
+  async get_StoreInfoByStoreId(
     userId: string,
     storeId: string,
-  ): Promise<SELECT_STORE_type> {
+  ): Promise<type_schema_STORE> {
     try {
       const store = await db
         .select()
@@ -35,7 +37,7 @@ export class serverStore {
         storeCreatedAt: new Date(store[0].createdAt),
       }
 
-      return SELECT_STORE.parse(info)
+      return schema_STORE.parse(info)
     } catch (err: any) {
       console.log(`
         -------------------------
@@ -45,93 +47,16 @@ export class serverStore {
 
         -------------------------
      `)
-      throw new Error(err.message ?? 'Error getting store')
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
   /**
-   * Validates if a user is owner of the store
-   *
-   * true: means its the owner
-   * false: means its not the user or simply the store was not found...
-   * @param userId internal user id
+   * Obtain the store expire date by a store id
    * @param storeId
-   * @returns boolean ("owner" | "not owner")
+   * @returns expire date
    */
-  async validateUserStoreOwnership(
-    userId: string,
-    storeId: string,
-  ): Promise<boolean> {
-    try {
-      await this.getStoreByStoreId(userId, storeId)
-      return true
-    } catch (err: any) {
-      // if server.getstoreById
-      // returned the error store not found, means user is trying to access something that its not his..
-      if (err.message === 'store not found') {
-        return false
-      }
-      console.log(`
-          -------------------------
-          ERROR VALIDATING USER STORE OWNERSHIP
-  
-          ${err}
-  
-          -------------------------
-       `)
-      throw new Error(err.message ?? 'Error validating store ownership')
-    }
-  }
-
-  /**
-   * validate if the store is activated
-   *
-   * if user is owner of the store he can have access to it = true
-   * if store is not active yet = false
-   * if store is active = true
-   *
-   * true = allowed access
-   * false = access denied
-   *
-   * @param userId
-   * @param storeId
-   * @returns boolean ("allowed access" || "access denied")
-   */
-  async validateIfStoreIsActivated(
-    userId: string,
-    storeId: string,
-  ): Promise<boolean> {
-    try {
-      const isOwner = await this.validateUserStoreOwnership(userId, storeId)
-      if (isOwner) {
-        return true
-      }
-
-      const storeExperireDate = await this.getStoreExpireDate(storeId)
-
-      if (
-        storeExperireDate &&
-        new Date(storeExperireDate).getTime() < Date.now()
-      ) {
-        return false
-      }
-
-      return true
-    } catch (err: any) {
-      console.log(`
-        -------------------------
-        ERROR VALIDATING STORE
-
-        ${err}
-
-        -------------------------
-        `)
-      throw new Error(err.message ?? 'Error validating store')
-    }
-  }
-
-  // obtains the store expire date by a store id
-  async getStoreExpireDate(storeId: string) {
+  async get_StoreExpireDateByStoreId(storeId: string) {
     try {
       const expireDate = await db
         .select({ storeExpireDate: stores.storeExpireDate })
@@ -156,57 +81,28 @@ export class serverStore {
   }
 
   /**
-   * create a store
-   * @param userId intenal user id
-   * @param dto create store schema
+   * Update a store
+   * @param userId
+   * @param storeId
+   * @param dto patch store schema
    * @returns "msg"
    */
-  async createStore(userId: string, dto: INSERT_STORE_type) {
-    try {
-      await db.insert(stores).values({
-        id: uuidv4(),
-        userId: userId,
-        storeName: dto.storeName,
-        storeType: dto.storeType,
-      })
-
-      return 'Store created'
-    } catch (err: any) {
-      console.log(`
-        -------------------------
-        ERROR CREATING STORE
-
-        ${err}
-
-        -------------------------
-     `)
-      throw new Error('Error creating store')
-    }
-  }
-
-  /**
-   * Update a store
-   *
-   * @param userId intenal user id
-   * @param storeId uuid
-   * @param dto update store schema
-   * @returns
-   */
-  async updateStore(userId: string, storeId: string, dto: INSERT_STORE_type) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+  async update_Store(userId: string, storeId: string, dto: type_patch_STORE) {
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized!')
     }
 
     // obtains the current store info
-    const store = await this.getStoreByStoreId(userId, storeId)
+    const store = await this.get_StoreInfoByStoreId(userId, storeId)
 
     // object to compare what data have changed
     const updateObj: Record<string, any> = {}
 
-    // storeName
+    // store name
     if (
       typeof dto.storeName !== 'undefined' &&
       dto.storeName !== store.storeName
@@ -214,7 +110,15 @@ export class serverStore {
       updateObj.storeName = dto.storeName
     }
 
-    // storeCurrency
+    // store type
+    if (
+      typeof dto.storeType !== 'undefined' &&
+      dto.storeType !== store.storeType
+    ) {
+      updateObj.storeType = dto.storeType
+    }
+
+    // store currency
     if (
       typeof dto.storeCurrency !== 'undefined' &&
       dto.storeCurrency !== store.storeCurrency
@@ -233,7 +137,7 @@ export class serverStore {
         .set(updateObj)
         .where(and(eq(stores.id, storeId), eq(stores.userId, userId)))
 
-      return 'Store has been updated'
+      return 'Store has been updated!'
     } catch (err: any) {
       console.log(`
         -------------------------
@@ -243,22 +147,21 @@ export class serverStore {
 
         -------------------------
      `)
-      throw new Error(err.message ?? 'Error updating store')
+      throw new Error(err.message ?? 'error updating store')
     }
   }
 
   /**
-   * ANNIQUILATION OF A store......
-   * GOODBYEstore NEVER SEEN AGAIN
-   *
-   * @param userId internal user id
+   * Delete a store
+   * @param userId
    * @param storeId
    * @returns "msg"
    */
-  async deleteStore(userId: string, storeId: string) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+  async delete_Store(userId: string, storeId: string) {
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
@@ -277,17 +180,18 @@ export class serverStore {
 
         -------------------------
      `)
-      throw new Error(err.message ?? 'Error deleting store')
+      throw new Error(err.message ?? 'error deleting store')
     }
   }
 
   /**
    * Obtain the list of shipping methods from a store
-   *
-   * @param storeId uuid
-   * @returns "0" methods string || array of methods
+   * @param storeId
+   * @returns null || array of methods
    */
-  async getStoreShippingMethods(storeId: string) {
+  async get_StoreShippingMethods(
+    storeId: string,
+  ): Promise<Array<type_select_STORE_METHODS> | null> {
     try {
       const methods = await db
         .select()
@@ -295,13 +199,20 @@ export class serverStore {
         .where(eq(shippingMethods.storeId, storeId))
 
       if (methods.length === 0) {
-        return `There are a total of 0 Shipping Methods...`
+        return null
       }
 
-      return VISUALIZE_METHOD_SCHEMA.array().parse(methods)
+      return select_STORE_METHODS.array().parse(methods)
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error finding methods')
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE SHIPPING METHODS
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
@@ -311,11 +222,11 @@ export class serverStore {
    * valid means its availables
    * invalid means its already in use
    *
-   * @param storeId uuid
-   * @param shippingMethodName string
+   * @param storeId
+   * @param shippingMethodName
    * @returns valid | invalid
    */
-  async ValidateShippingMethodName(
+  async validate_StoreShippingMethodName(
     storeId: string,
     shippingMethodName: string,
   ): Promise<'valid' | 'invalid'> {
@@ -334,32 +245,39 @@ export class serverStore {
       if (method[0]) return 'invalid'
       return 'valid'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error validating shipping method')
+      console.log(`
+        -------------------------
+        ERROR VALIDATING STORE SHIPPING METHOD NAME
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
   /**
    * Add a shipping method to a store
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @param shippingMethod string
+   * @param userId
+   * @param storeId
+   * @param shippingMethod
    * @returns "msg"
    */
-  async addShippingMethod(
+  async create_StoreShippingMethod(
     userId: string,
     storeId: string,
     shippingMethod: string,
   ) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
-    const validMethod = await this.ValidateShippingMethodName(
+    const validMethod = await this.validate_StoreShippingMethodName(
       storeId,
       shippingMethod,
     )
@@ -377,27 +295,34 @@ export class serverStore {
 
       return `New shipping method: ${shippingMethod}`
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error adding shipping method')
+      console.log(`
+        -------------------------
+        ERROR CREATING STORE SHIPPING METHOD
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error adding shipping method')
     }
   }
 
   /**
    * Delete a shipping method
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @param methodId uuid
+   * @param userId
+   * @param storeId
+   * @param methodId
    * @returns "msg"
    */
-  async deleteShippingMethod(
+  async delete_StoreShippingMethod(
     userId: string,
     storeId: string,
     methodId: string,
   ) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
@@ -413,18 +338,24 @@ export class serverStore {
 
       return `Shipping method deleted!`
     } catch (err: any) {
-      console.log(err)
-      throw new Error(err.message ?? 'Error deleting shipping method')
+      console.log(`
+        -------------------------
+        ERROR DELETING STORE SHIPPING METHOD
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error deleting shipping method')
     }
   }
 
   /**
-   * Returns the method name from its id
-   *
+   * Returns the method name from its method id
    * @param shippingMethodId
    * @returns method name
    */
-  async getStoreShippingMethodFromId(shippingMethodId: string) {
+  async get_StoreShippingMethodNameFromMethodId(shippingMethodId: string) {
     try {
       const method = await db
         .select()
@@ -436,18 +367,26 @@ export class serverStore {
 
       return method[0].method
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error retrieving shipping method')
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE SHIPPING METHOD FROM METHOD ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
   /**
-   * Obtain the list of  payment methods from a store
-   *
-   * @param storeId uuid
-   * @returns "0" methods string || array of methods
+   * Obtain the list of payment methods from a store
+   * @param storeId
+   * @returns nulls || array of methods
    */
-  async getStorePaymentMethods(storeId: string) {
+  async get_StorePaymentMethods(
+    storeId: string,
+  ): Promise<Array<type_select_STORE_METHODS> | null> {
     try {
       const methods = await db
         .select()
@@ -455,27 +394,34 @@ export class serverStore {
         .where(eq(paymentMethods.storeId, storeId))
 
       if (methods.length === 0) {
-        return `There are a total of 0 Payment Methods...`
+        return null
       }
 
-      return VISUALIZE_METHOD_SCHEMA.array().parse(methods)
+      return select_STORE_METHODS.array().parse(methods)
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error finding methods')
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE PAYMENT METHODS
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
   /**
    * Validate if a payment method already exists on db
    *
-   * valid means its availables
+   * valid means its available
    * invalid means its already in use
    *
-   * @param storeId uuid
-   * @param shippingMethodName string
+   * @param storeId
+   * @param shippingMethodName
    * @returns valid | invalid
    */
-  async ValidatePaymentMethodName(
+  async validate_StorePaymentMethodName(
     storeId: string,
     shippingMethodName: string,
   ): Promise<'valid' | 'invalid'> {
@@ -494,38 +440,45 @@ export class serverStore {
       if (method[0]) return 'invalid'
       return 'valid'
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error validating payment method')
+      console.log(`
+        -------------------------
+        ERROR VALIDATING STORE PAYMENT METHOD NAME
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
     }
   }
 
   /**
    * add a payment method to a store
-   *
-   * @param userId uuid internal user id
-   * @param storeId uuid
-   * @param paymentMethod storeid
+   * @param userId
+   * @param storeId
+   * @param paymentMethod
    * @returns "msg"
    */
-  async addPaymentMethod(
+  async create_StorePaymentMethod(
     userId: string,
     storeId: string,
     paymentMethod: string,
   ) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
 
-    const validMethod = await this.ValidatePaymentMethodName(
+    const validMethod = await this.validate_StorePaymentMethodName(
       storeId,
       paymentMethod,
     )
 
     if (validMethod === 'invalid') {
-      throw new Error('Shipping Method already exists!')
+      throw new Error('Payment Method already exists!')
     }
 
     try {
@@ -537,8 +490,15 @@ export class serverStore {
 
       return `New shipping method: ${paymentMethod}`
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error adding shipping method')
+      console.log(`
+        -------------------------
+        ERROR CREATING STORE PAYMENT METHOD 
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error adding payment method')
     }
   }
 
@@ -550,10 +510,15 @@ export class serverStore {
    * @param methodId uuid
    * @returns "msg"
    */
-  async deletePaymentMethod(userId: string, storeId: string, methodId: string) {
-    // validate user ownership
-    const ownership = await this.validateUserStoreOwnership(userId, storeId)
-    // returned false
+  async delete_StorePaymentMethod(
+    userId: string,
+    storeId: string,
+    methodId: string,
+  ) {
+    const ownership = await this.validate_IfUserIsOwnerOfTheStore(
+      userId,
+      storeId,
+    )
     if (!ownership) {
       throw new Error('Ups... This is restricted area! - not authorized')
     }
@@ -569,18 +534,24 @@ export class serverStore {
 
       return `Payment method deleted!`
     } catch (err: any) {
-      console.log(err)
-      throw new Error(err.message ?? 'Error deleting payment method')
+      console.log(`
+        -------------------------
+        ERROR DELETING STORE PAYMENT METHOD 
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error deleting payment method')
     }
   }
 
   /**
    * Returns the method name from its id
-   *
    * @param paymentMethodId
    * @returns method name
    */
-  async getstorePaymentMethodFromId(paymentMethodId: string) {
+  async get_StorePaymentMethodNameFromMethodId(paymentMethodId: string) {
     try {
       const method = await db
         .select()
@@ -592,74 +563,133 @@ export class serverStore {
 
       return method[0].method
     } catch (err: any) {
-      console.error(err)
-      throw new Error(err.message ?? 'Error retrieving payment method')
+      console.log(`
+        -------------------------
+        ERROR GETTING STORE PAYMENT METHOD FROM METHOD ID 
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
+    }
+  }
+
+  /**
+   * Validates if a user is owner of the store
+   *
+   * true: means its the owner
+   * false: means its not the user or simply the store was not found...
+   * @param userId internal user id
+   * @param storeId
+   * @returns boolean ("owner" | "not owner")
+   */
+  async validate_IfUserIsOwnerOfTheStore(
+    userId: string,
+    storeId: string,
+  ): Promise<boolean> {
+    try {
+      await this.get_StoreInfoByStoreId(userId, storeId)
+      return true
+    } catch (err: any) {
+      // if server.getstoreById
+      // returned the error store not found, means user is trying to access something that its not his..
+      if (err.message === 'store not found') {
+        return false
+      }
+      console.log(`
+          -------------------------
+          ERROR VALIDATING USER STORE OWNERSHIP
+  
+          ${err}
+  
+          -------------------------
+       `)
+      throw new Error(err.message ?? 'error fetching store')
+    }
+  }
+
+  /**
+   * validate if the store is activated
+   * @param userId
+   * @param storeId
+   * @returns "msg" active || inactive
+   */
+  async validate_IfStoreIsActivated(
+    storeId: string,
+  ): Promise<'active' | 'inactive'> {
+    try {
+      const storeExperireDate = await this.get_StoreExpireDateByStoreId(storeId)
+
+      if (
+        storeExperireDate &&
+        new Date(storeExperireDate).getTime() < Date.now()
+      ) {
+        return 'inactive'
+      }
+
+      return 'active'
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR VALIDATING STORE
+
+        ${err}
+
+        -------------------------
+        `)
+      throw new Error(err.message ?? 'error fetching store')
+    }
+  }
+
+  /**
+   * created with the intention of validating any user access to the store.$id.tsx "page"
+   *
+   * In this page every user should be treated as an "external user" for security reasons
+   * this method cames to solve this problem by trying to match the telegramUserId with a internal_userId
+   * if telegramUserId is in db and its owner of this store -> return true
+   * if telegramUserId is in db but its not the owner of this store is treated as "external user"
+   *
+   * @param telegramUserId
+   * @param storeId
+   * @returns true if store is active || false if store is not active
+   */
+  async validate_ExternalUserAccess(
+    telegramUserId: number,
+    storeId: string,
+  ): Promise<boolean> {
+    try {
+      const isStoreActivated = await this.validate_IfStoreIsActivated(storeId)
+      const internalUserId =
+        await get_InternalUserIdByTelegramUserId(telegramUserId)
+      if (internalUserId) {
+        const isOwner = await this.validate_IfUserIsOwnerOfTheStore(
+          internalUserId,
+          storeId,
+        )
+        // if user is the owner access is allowed
+        if (isOwner) {
+          return true
+        } else {
+          if (isStoreActivated === 'active') {
+            return true
+          } else return false
+        }
+      } else {
+        if (isStoreActivated === 'active') {
+          return true
+        } else return false
+      }
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR VALIDATING EXTERNAL USER ACCESS
+
+        ${err}
+
+        -------------------------
+        `)
+      throw new Error(err.message ?? 'error authenticating....')
     }
   }
 }
-
-/**
- * Obtains the store and product information about a store
- *
- * SHOULD ONLY BE RENDERER on **store VIEW ROUTE**,
- * THIS FUNCTION SHOULD ONLY BE USED TO RENDER WHEN ACTUALY NEEDED
- *
- * @param storeId uuid
- */
-export async function publicStore(storeId: string) {
-  try {
-    const store = await db
-      .select({
-        storeName: stores.storeName,
-        storeCurrency: stores.storeCurrency,
-      })
-      .from(stores)
-      .where(eq(stores.id, storeId))
-      .limit(1)
-
-    if (!store[0]) throw new Error('store was not found')
-
-    return store[0]
-  } catch (err: any) {
-    console.error(err)
-    throw new Error(err.message ?? 'Error finding store')
-  }
-}
-
-// get all the user stores from its id
-// export async function getUserstoresByUserId(
-//   userId: string,
-// ): Promise<Array<storeExtendedSchemaType> | null> {
-//   try {
-//     const userstores = await db
-//       .select()
-//       .from(stores)
-//       .where(eq(stores.userId, userId))
-
-//     if (userstores.length === 0) return null
-//     return storeExtendedSchema.array().parse(userstores)
-//   } catch (err: any) {
-//     console.error(err)
-//     throw new Error('Error getting user stores')
-//   }
-// }
-
-// get store by id
-// export async function getNameBystoreId(storeId: string) {
-//   try {
-//     const store = await db
-//       .select({
-//         storeName: stores.storeName,
-//       })
-//       .from(stores)
-//       .where(eq(stores.id, storeId))
-//       .limit(1)
-
-//     console.log(store.length)
-//     if (store.length === 0) throw new Error('store not found')
-//     return store[0].storeName
-//   } catch (err: any) {
-//     console.error(err)
-//     throw new Error(err.message ?? 'Error getting store')
-//   }
-// }

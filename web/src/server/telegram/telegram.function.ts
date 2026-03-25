@@ -1,19 +1,19 @@
 import { createServerFn } from '@tanstack/react-start'
 import {
-  validateExternalTelegramUserInitData,
-  validateTelegramInitData,
+  validate_ExternalTelegramUserInitData,
+  validate_TelegramInitData,
 } from './telegram.server'
 
-export const sf_validateTelegramInitData = createServerFn({ method: 'GET' })
+export const sf_validate_TelegramInitData = createServerFn({ method: 'GET' })
   .inputValidator((data: { initData: string }) => data)
   .handler(async ({ data }) => {
-    return await validateTelegramInitData(data.initData)
+    return await validate_TelegramInitData(data.initData)
   })
 
-export const sf_validateExternalTelegramUserInitData = createServerFn({
+export const sf_validate_ExternalTelegramUserInitData = createServerFn({
   method: 'GET',
 })
   .inputValidator((data: { initData: string }) => data)
   .handler(({ data }) => {
-    return validateExternalTelegramUserInitData(data.initData)
+    return validate_ExternalTelegramUserInitData(data.initData)
   })

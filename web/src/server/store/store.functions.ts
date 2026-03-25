@@ -1,197 +1,113 @@
 import { createServerFn } from '@tanstack/react-start'
-import { publicStore, serverStore } from './store.server'
-import { getProductsFromPublicstore } from './products/products.server'
-import { PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { DTO_CREATE_store } from '@/schemas/store.schema'
-import { INSERT_STORE_type } from '@/db/schemas/store.schema'
+import { serverStore } from './store.server'
+import { type_patch_STORE } from '@/db/schemas/store.schema'
 
 const storeServer = new serverStore()
 
-export const sf_getStoreByStoreId = createServerFn({ method: 'GET' })
+export const sf_get_StoreInfoByStoreId = createServerFn({ method: 'GET' })
   .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.getStoreByStoreId(data.userId, data.storeId)
+    return await storeServer.get_StoreInfoByStoreId(data.userId, data.storeId)
   })
 
-export const sf_updateStore = createServerFn({ method: 'POST' })
+export const sf_update_Store = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: { userId: string; storeId: string; dto: INSERT_STORE_type }) => data,
+    (data: { userId: string; storeId: string; dto: type_patch_STORE }) => data,
   )
   .handler(async ({ data }) => {
-    return await storeServer.updateStore(data.userId, data.storeId, data.dto)
+    return await storeServer.update_Store(data.userId, data.storeId, data.dto)
   })
 
-export const sf_deleteStore = createServerFn({ method: 'POST' })
+export const sf_delete_Store = createServerFn({ method: 'POST' })
   .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.deleteStore(data.userId, data.storeId)
+    return await storeServer.delete_Store(data.userId, data.storeId)
   })
 
-type PublicstoreResponse = {
-  store: {
-    storeName: string
-    storeCurrency: string | null
-  }
-  products: Array<PRODUCT_SCHEMA>
-}
-/**
- * "GET"
- * public store
- *
- * required: storeId
- */
-
-export const sf_PublicStore = createServerFn({ method: 'GET' })
-  .inputValidator((data: { storeId: string }) => data)
-  .handler(async ({ data }): Promise<PublicstoreResponse> => {
-    const store = await publicStore(data.storeId)
-    const products = await getProductsFromPublicstore(data.storeId)
-
-    return {
-      store: store,
-      products: products,
-    }
-  })
-
-/**
- * "GET"
- * obtain the shipping methods from a store
- *
- * required: storeId
- */
-export const sf_GetstoreShippingMethods = createServerFn({ method: 'GET' })
+export const sf_get_storeShippingMethods = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.getStoreShippingMethods(data.storeId)
+    return await storeServer.get_StoreShippingMethods(data.storeId)
   })
 
-/**
- * "GET"
- * obtain the payment methods from a store
- *
- * required: storeId
- */
-export const sf_GetStorePaymentMethods = createServerFn({ method: 'GET' })
+export const sf_get_StorePaymentMethods = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.getStorePaymentMethods(data.storeId)
+    return await storeServer.get_StorePaymentMethods(data.storeId)
   })
 
-/**
-   * "POST"
-   * create a shipping method to a store
-
-   */
-export const sf_CreateStoreShippingMethod = createServerFn({ method: 'POST' })
+export const sf_create_StoreShippingMethod = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: { userId: string; storeId: string; shippingMethod: string }) => data,
   )
   .handler(async ({ data }) => {
-    return await storeServer.addShippingMethod(
+    return await storeServer.create_StoreShippingMethod(
       data.userId,
       data.storeId,
       data.shippingMethod,
     )
   })
 
-/**
- * "POST"
- * create a payment method to a store
- */
-export const sf_CreatestorePaymentMethod = createServerFn({ method: 'POST' })
+export const sf_create_StorePaymentMethod = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: { userId: string; storeId: string; paymentMethod: string }) => data,
   )
   .handler(async ({ data }) => {
-    return await storeServer.addPaymentMethod(
+    return await storeServer.create_StorePaymentMethod(
       data.userId,
       data.storeId,
       data.paymentMethod,
     )
   })
 
-/**
- * "POST"
- * delete a shipping method from a store
- *
- * required: userId, storeId, methodId
- */
-export const sf_DeletestoreShippingMethod = createServerFn({ method: 'POST' })
+export const sf_delete_StoreShippingMethod = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: { userId: string; storeId: string; methodId: string }) => data,
   )
   .handler(async ({ data }) => {
-    return await storeServer.deleteShippingMethod(
+    return await storeServer.delete_StoreShippingMethod(
       data.userId,
       data.storeId,
       data.methodId,
     )
   })
 
-/**
- * "POST"
- * delete a payment method from a store
- *
- * required: userId, storeId, methodId
- */
-export const sf_DeletestorePaymentMethod = createServerFn({ method: 'POST' })
+export const sf_delete_StorePaymentMethod = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: { userId: string; storeId: string; methodId: string }) => data,
   )
   .handler(async ({ data }) => {
-    return await storeServer.deletePaymentMethod(
+    return await storeServer.delete_StorePaymentMethod(
       data.userId,
       data.storeId,
       data.methodId,
     )
   })
 
-/**
- * "GET"
- * from an shipping method id return the method name
- */
-export const sf_GetShippingMethodName = createServerFn({
+export const sf_get_StoreShippingMethodNameFromMethodId = createServerFn({
   method: 'GET',
 })
   .inputValidator((data: { shippingMethodId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.getStoreShippingMethodFromId(data.shippingMethodId)
+    return await storeServer.get_StoreShippingMethodNameFromMethodId(
+      data.shippingMethodId,
+    )
   })
 
-/**
- * "GET"
- * from an payment method id return the method name
- */
-export const sf_GetPaymentMethodName = createServerFn({
+export const sf_get_StorePaymentMethodNameFromMethodId = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { paymentMethodId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.getstorePaymentMethodFromId(data.paymentMethodId)
+    return await storeServer.get_StorePaymentMethodNameFromMethodId(
+      data.paymentMethodId,
+    )
   })
 
-export const sf_validateIfStoreIsActivated = createServerFn({
+export const sf_validate_IfStoreIsActivated = createServerFn({
   method: 'GET',
 })
   .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await storeServer.validateIfStoreIsActivated(
-      data.userId,
-      data.storeId,
-    )
-  })
-
-export const sf_IsStoreValid = createServerFn({ method: 'GET' })
-  .inputValidator((data: { storeId: string }) => data)
-  .handler(async ({ data }) => {
-    const storeExperireDate = await storeServer.getStoreExpireDate(data.storeId)
-
-    if (
-      storeExperireDate &&
-      new Date(storeExperireDate).getTime() < Date.now()
-    ) {
-      return false
-    }
-
-    return true
+    return await storeServer.validate_IfStoreIsActivated(data.storeId)
   })
