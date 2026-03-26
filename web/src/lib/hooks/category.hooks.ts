@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { sf_getCategoryNameByCategoryId } from '@/server/store/products/category/productCategory.functions'
+import {
+  sf_get_CategoryNameByCategoryId,
+  sf_get_CategorysFromStoreId,
+} from '@/server/category/category.functions'
 
-export const use_getCategoryNameByCategoryId = ({
+export const use_get_CategoryNamesByCategoryId = ({
   storeId,
   categoryId,
 }: {
@@ -12,10 +15,25 @@ export const use_getCategoryNameByCategoryId = ({
     queryKey: ['category', categoryId, storeId],
     queryFn: async () => {
       if (categoryId) {
-        return await sf_getCategoryNameByCategoryId({ data: { storeId, categoryId } })
+        return await sf_get_CategoryNameByCategoryId({
+          data: { storeId, categoryId },
+        })
       }
       return null
     },
     enabled: !!categoryId, // only fetch if categoryId is truthy
+  })
+}
+
+export const use_get_CategorysFromStoreId = ({
+  storeId,
+}: {
+  storeId: string
+}) => {
+  return useQuery({
+    queryKey: ['categorys', storeId],
+    queryFn: async () => {
+      return await sf_get_CategorysFromStoreId({ data: { storeId } })
+    },
   })
 }
