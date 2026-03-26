@@ -1,6 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { serverStore } from './store.server'
-import { type_patch_STORE } from '@/db/schemas/store.schema'
+import {
+  type_patch_STORE,
+  type_schema_PUBLIC_STORE,
+} from '@/db/schemas/store.schema'
 
 const storeServer = new serverStore()
 
@@ -24,7 +27,7 @@ export const sf_delete_Store = createServerFn({ method: 'POST' })
     return await storeServer.delete_Store(data.userId, data.storeId)
   })
 
-export const sf_get_storeShippingMethods = createServerFn({ method: 'GET' })
+export const sf_get_StoreShippingMethods = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string }) => data)
   .handler(async ({ data }) => {
     return await storeServer.get_StoreShippingMethods(data.storeId)
@@ -110,4 +113,19 @@ export const sf_validate_IfStoreIsActivated = createServerFn({
   .inputValidator((data: { userId: string; storeId: string }) => data)
   .handler(async ({ data }) => {
     return await storeServer.validate_IfStoreIsActivated(data.storeId)
+  })
+
+export const sf_validate_ExternalUserAccess = createServerFn({ method: 'GET' })
+  .inputValidator((data: { telegramUserId: number; storeId: string }) => data)
+  .handler(async ({ data }): Promise<boolean> => {
+    return await storeServer.validate_ExternalUserAccess(
+      data.telegramUserId,
+      data.storeId,
+    )
+  })
+
+export const sf_get_PublicStoreInfoByStoreId = createServerFn({ method: 'GET' })
+  .inputValidator((data: { storeId: string }) => data)
+  .handler(async ({ data }): Promise<type_schema_PUBLIC_STORE | null> => {
+    return await storeServer.get_PublicStoreInfoByStoreId(data.storeId)
   })

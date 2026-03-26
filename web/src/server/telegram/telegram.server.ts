@@ -89,6 +89,7 @@ export function validate_ExternalTelegramUserInitData(initData: string) {
 
   // user data
   const userDataStr = params.get('user')
+
   if (!userDataStr) {
     console.log(`
     ------------------------------

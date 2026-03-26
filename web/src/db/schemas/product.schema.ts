@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-export const PRODUCT_SCHEMA = z.object({
+// db product schema
+export const schema_PRODUCT = z.object({
   productId: z.uuid(),
   storeId: z.uuid(),
   productName: z
@@ -9,7 +10,7 @@ export const PRODUCT_SCHEMA = z.object({
     .max(120, { message: 'limit of 120 characters to product name' }),
   productPrice: z.string().regex(/^(?:\d{1,8})(?:\.\d{1,2})?$/, {
     message:
-      'Product price must be a decimal with up to 2 decimal places and max 10 digits (8 before, 2 after decimal).',
+      'product price must be a decimal with up to 2 decimal places and max 10 digits (8 before, 2 after decimal).',
   }),
   productDesc: z
     .string()
@@ -20,5 +21,28 @@ export const PRODUCT_SCHEMA = z.object({
   productImageUrl: z.string().optional().nullable(),
   productVisible: z.number(),
   productCategoryId: z.string(),
-  productCreated_at: z.string(),
+  productCreatedAt: z.string(),
 })
+export type type_schema_PRODUCT = z.infer<typeof schema_PRODUCT>
+
+// create a product
+export const create_PRODUCT = schema_PRODUCT.pick({
+  productName: true,
+  productPrice: true,
+  productDesc: true,
+  productVisible: true,
+  productCategoryId: true,
+})
+export type type_create_PRODUCT = z.infer<typeof create_PRODUCT>
+
+// update a product
+export const patch_PRODUCT = schema_PRODUCT
+  .pick({
+    productName: true,
+    productPrice: true,
+    productDesc: true,
+    productVisible: true,
+    productCategoryId: true,
+  })
+  .partial()
+export type type_patch_PRODUCT = z.infer<typeof patch_PRODUCT>

@@ -14,7 +14,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { useGetstoreOrders } from '@/lib/hooks/order.hooks'
+
 import { ScrollArea } from '@/components/ui/scroll-area'
 import StoreUpdate from '@/components/store/storeUpdate'
 import OrderCardADM from '@/components/store/orders/orderCard.admin'
@@ -30,6 +30,7 @@ import { test_data } from '@/lib/test.data'
 import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
 import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
 import { useLayoutDashboard } from '@/lib/data'
+import DashboardOrders from '@/components/store/dashboard/dashboardOrders'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -81,7 +82,7 @@ function RouteComponent() {
 
         setUserId(user.userId)
       } catch (err: any) {
-        setError(err ?? new Error('Authentication failed'))
+        setError(err.message ?? new Error('Authentication failed'))
       }
     }
     authenticate()
@@ -113,10 +114,6 @@ function RouteComponent() {
     storeId,
   })
 
-  const { data: orders, isLoading: ordersLoading } = useGetstoreOrders({
-    storeId,
-  })
-
   if (error) return <DashboardErrorComponent error={error} />
   if (storeError) return <DashboardErrorComponent error={storeError} />
   if (!userId || storeLoading || !storeInfo || !userId) return <Spinner />
@@ -144,7 +141,7 @@ function RouteComponent() {
             dashboardOffset={dashboardOffset}
           />
         )}
-        {activeTab === 'orders' && <></>}
+        {activeTab === 'orders' && <DashboardOrders storeId={storeId} />}
       </main>
       {/* menu */}
       <footer

@@ -9,12 +9,9 @@ import {
 const productServer = new serverProduct()
 
 export const sf_get_ProductsFromStoreId = createServerFn({ method: 'GET' })
-  .inputValidator((data: { userId: string; storeId: string }) => data)
+  .inputValidator((data: { storeId: string }) => data)
   .handler(async ({ data }) => {
-    return await productServer.get_ProductsFromStoreId(
-      data.userId,
-      data.storeId,
-    )
+    return await productServer.get_ProductsFromStoreId(data.storeId)
   })
 
 export const sf_create_Product = createServerFn({ method: 'POST' })

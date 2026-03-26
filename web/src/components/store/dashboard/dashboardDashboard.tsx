@@ -24,6 +24,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useLayoutDashboard } from '@/lib/data'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 
 const DashboardDashboard = ({
   userId,
@@ -88,12 +95,12 @@ const DashboardDashboard = ({
     setRemainingScreenSize(() => screenSize - ocupatedScreenSizeByOtherElements)
   }, [screenSize, ocupatedScreenSizeByOtherElements])
 
-  console.log(`
- screenSize = ${screenSize}
- ocupated = ${ocupatedScreenSizeByOtherElements}
- remain = ${remainingScreenSize} 
-  
-  `)
+  //   console.log(`
+  //  screenSize = ${screenSize}
+  //  ocupated = ${ocupatedScreenSizeByOtherElements}
+  //  remain = ${remainingScreenSize}
+
+  //   `)
 
   return (
     <div
@@ -204,6 +211,22 @@ const DashboardDashboard = ({
                   />
                 ))}
             </div>
+            {!productsLoading &&
+              Array.isArray(products) &&
+              products.length === 0 && (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant={'icon'}>
+                      <PackageIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No Products Yet</EmptyTitle>
+                    <EmptyDescription>
+                      Add your first product to start building your store and
+                      attracting customers!
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
           </ScrollArea>
         )}
       </div>

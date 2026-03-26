@@ -19,9 +19,21 @@ export async function get_InternalUserIdByTelegramUserId(
       .where(eq(users.telegramUserId, id))
       .limit(1)
 
-    return user[0].id || null
+    if (!user[0]) {
+      return null
+    }
+
+    return user[0].id
   } catch (err) {
-    console.error(err)
+    console.log(`
+        -------------------------
+        ERROR GETTING INTERNAL USER ID BY TELEGRAM USER ID
+
+        ${err}
+
+        -------------------------
+        `)
+
     throw new Error('Error fetching user')
   }
 }

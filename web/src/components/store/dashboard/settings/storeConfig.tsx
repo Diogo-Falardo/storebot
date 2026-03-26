@@ -58,10 +58,6 @@ const StoreConfig = ({
   const deleteStore = useServerFn(sf_deleteStore)
   const [openDeleteStoreDialog, setOpenDeleteStoreDialog] = useState(false)
 
-  if (data) {
-    console.log(data)
-  }
-
   const form = useForm({
     defaultValues: {
       storeName: data?.storeName ?? '',

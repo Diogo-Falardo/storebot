@@ -4,14 +4,58 @@ import { get_InternalUserIdByTelegramUserId } from '../user/user.server'
 import { db } from '@/db'
 import { paymentMethods, shippingMethods, stores } from '@/db/schema'
 import {
+  schema_PUBLIC_STORE,
   schema_STORE,
   select_STORE_METHODS,
   type_patch_STORE,
+  type_schema_PUBLIC_STORE,
   type_schema_STORE,
   type_select_STORE_METHODS,
 } from '@/db/schemas/store.schema'
 
 export class serverStore {
+  /**
+   * Obtain the public store info
+   *
+   * public store info is the info that is not sensitive or private for the store owner
+   * this info can bee seen by everyone with no prolem
+   * @param storeId
+   * @returns public store schema
+   */
+  async get_PublicStoreInfoByStoreId(
+    storeId: string,
+  ): Promise<type_schema_PUBLIC_STORE | null> {
+    try {
+      const store = await db
+        .select({
+          storeName: stores.storeName,
+          storeCurrency: stores.storeCurrency,
+        })
+        .from(stores)
+        .where(eq(stores.id, storeId))
+
+      if (!store[0]) throw new Error('Store was not found!')
+
+      const publicInfo = {
+        storeId: storeId,
+        storeName: store[0].storeName,
+        storeCurrency: store[0].storeCurrency,
+      }
+
+      return schema_PUBLIC_STORE.parse(publicInfo)
+    } catch (err: any) {
+      console.log(`
+        -------------------------
+        ERROR GETTING PUBLIC STORE INFO BY STORE ID
+
+        ${err}
+
+        -------------------------
+     `)
+      throw new Error(err.message ?? 'error fetching store')
+    }
+  }
+
   /**
    * Obtain store info from its store id
    * @param userId
@@ -621,14 +665,15 @@ export class serverStore {
     try {
       const storeExperireDate = await this.get_StoreExpireDateByStoreId(storeId)
 
-      if (
-        storeExperireDate &&
-        new Date(storeExperireDate).getTime() < Date.now()
-      ) {
+      if (!storeExperireDate) {
         return 'inactive'
       }
 
-      return 'active'
+      if (new Date(storeExperireDate).getTime() < Date.now()) {
+        return 'active'
+      }
+
+      return 'inactive'
     } catch (err: any) {
       console.log(`
         -------------------------
@@ -662,6 +707,7 @@ export class serverStore {
       const isStoreActivated = await this.validate_IfStoreIsActivated(storeId)
       const internalUserId =
         await get_InternalUserIdByTelegramUserId(telegramUserId)
+
       if (internalUserId) {
         const isOwner = await this.validate_IfUserIsOwnerOfTheStore(
           internalUserId,

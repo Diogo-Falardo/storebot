@@ -4,10 +4,6 @@ import { serverStore } from '../store/store.server'
 import { db } from '@/db'
 import { products } from '@/db/schema'
 import {
-  PRODUCT_SCHEMA,
-  VISUALIZE_PRODUCT_SCHEMA,
-} from '@/schemas/product.schema'
-import {
   schema_PRODUCT,
   type_create_PRODUCT,
   type_patch_PRODUCT,
@@ -243,29 +239,29 @@ export class serverProduct {
 
   /**
    * Obtain a list of products from a store
-   * @param userId
+   
    * @param storeId
    * @returns parsed list of products
    */
   async get_ProductsFromStoreId(
-    userId: string,
     storeId: string,
-  ): Promise<Array<PRODUCT_SCHEMA>> {
-    const ownership = await storeServer.validate_IfUserIsOwnerOfTheStore(
-      userId,
-      storeId,
-    )
-    if (!ownership) {
-      throw new Error('Ups... This is restricted area! - not authorized')
-    }
-
+  ): Promise<Array<type_schema_PRODUCT>> {
     try {
       const productsList = await db
         .select()
         .from(products)
         .where(eq(products.storeId, storeId))
 
-      return VISUALIZE_PRODUCT_SCHEMA.array().parse(productsList)
+      return schema_PRODUCT.array().parse(
+        productsList.map((p) => ({
+          ...p,
+          productId: p.id,
+          productCategoryId: p.categoryId,
+          productImageUrl: p.imageUrl,
+          productVisible: p.visible,
+          productCreatedAt: p.createdAt,
+        })),
+      )
     } catch (err: any) {
       console.log(`
         -------------------------

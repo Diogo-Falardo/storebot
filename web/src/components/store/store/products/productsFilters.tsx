@@ -1,22 +1,26 @@
-import { HandCoins, ListFilter, Tag } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Button } from '../ui/button'
+import { HandCoins, ListFilter, ListFilterIcon, Tag } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '../ui/collapsible'
-import { Input } from '../ui/input'
-import { Slider } from '../ui/slider'
-import { Empty, EmptyHeader, EmptyTitle } from '../ui/empty'
-import { Field, FieldGroup } from '../ui/field'
-import { Checkbox } from '../ui/checkbox'
-import { Label } from '../ui/label'
+} from '@/components/ui/collapsible'
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { Field, FieldGroup } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Slider } from '@/components/ui/slider'
 
 const MIN = 0
 const MAX = 100000
 
-type storeFiltersProps = {
+type productsFiltersProps = {
   categoryNames: Array<string>
   priceRange: [number, number]
   setPriceRange: (range: [number, number]) => void
@@ -24,7 +28,7 @@ type storeFiltersProps = {
   setSelectedCategories: (categories: Array<string>) => void
 }
 
-const StoreFilters = (filters: storeFiltersProps) => {
+const ProductsFilters = (filters: productsFiltersProps) => {
   // Handlers for input changes
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const valueStr = e.target.value.replace(',', '.')
@@ -53,11 +57,11 @@ const StoreFilters = (filters: storeFiltersProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={'outline'}>
-          <ListFilter /> Filters
+        <Button variant={'secondary'}>
+          <ListFilterIcon />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="space-y-4">
+      <PopoverContent align="end" className="space-y-4">
         {/* price collapse */}
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex items-center gap-2">
@@ -128,4 +132,4 @@ const StoreFilters = (filters: storeFiltersProps) => {
   )
 }
 
-export default StoreFilters
+export default ProductsFilters

@@ -25,7 +25,7 @@ export const sf_get_StoreOrdersFromStoreId = createServerFn({ method: 'GET' })
     return await orderServer.get_OrdersFromStoreId(data.storeId)
   })
 
-export const sf_get_ProductsFromOrder = createServerFn({ method: 'GET' })
+export const sf_get_ProductsFromOrderId = createServerFn({ method: 'GET' })
   .inputValidator((data: { storeId: string; orderId: string }) => data)
   .handler(async ({ data }) => {
     return await orderServer.get_ProductsFromOrderId(data.storeId, data.orderId)
