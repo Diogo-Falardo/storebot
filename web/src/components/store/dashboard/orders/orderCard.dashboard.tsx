@@ -11,12 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  CREATE_ORDER_CUSTOM_MESSGE,
-  ORDER_SCHEMA,
-  ORDER_STATUS_ENUM,
-  OrderStatus,
-} from '@/schemas/order.schema'
+
 import {
   Select,
   SelectContent,
@@ -33,20 +28,27 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Label } from '@/components/ui/label'
-import { useGetProductsFromOrders } from '@/lib/hooks/order.hooks'
+
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import {
-  sf_GetPaymentMethodName,
-  sf_GetShippingMethodName,
+  create_ORDER_CUSTOM_MESSAGE,
+  enum_ORDER_STATUS,
+  type_enum_ORDER_STATUS,
+  type_schema_ORDER,
+} from '@/db/schemas/order.schema'
+import {
+  sf_get_StorePaymentMethodNameFromMethodId,
+  sf_get_StoreShippingMethodNameFromMethodId,
 } from '@/server/store/store.functions'
 import {
-  sf_AddCustomOrderMessage,
-  sf_UpdateOrderStatus,
-} from '@/server/store/orders/order.function'
+  sf_add_CustomOrderMessage,
+  sf_update_OrderStatus,
+} from '@/server/orders/order.function'
+import { use_get_ProductsFromOrderId } from '@/lib/hooks/order.hooks'
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -66,12 +68,12 @@ const OrderCardADM = ({
 }: {
   storeId: string
   storeCurrency: string
-  order: ORDER_SCHEMA
+  order: type_schema_ORDER
 }) => {
   // serverFn
-  const shippingMethod = useServerFn(sf_GetShippingMethodName)
-  const paymentMethod = useServerFn(sf_GetPaymentMethodName)
-  const updateOrderStatus = useServerFn(sf_UpdateOrderStatus)
+  const shippingMethod = useServerFn(sf_get_StoreShippingMethodNameFromMethodId)
+  const paymentMethod = useServerFn(sf_get_StorePaymentMethodNameFromMethodId)
+  const updateOrderStatus = useServerFn(sf_update_OrderStatus)
 
   // states
   const [shippingMethodName, setShippingMethodName] = useState<string>('')
@@ -93,14 +95,16 @@ const OrderCardADM = ({
     }).then(setPaymentMethodName)
   }, [order.orderShippingMethod, order.orderPaymentMethod])
 
-  const updateStatus = async (newStatus: OrderStatus) => {
+  const updateStatus = async (newStatus: type_enum_ORDER_STATUS) => {
     setStatus(newStatus)
     try {
       await updateOrderStatus({
-        data: { storeId, orderId: order.id, status: newStatus },
+        data: { storeId, orderId: order.orderId, status: newStatus },
       })
       toast.success(`Status changed to: ${newStatus}!`)
-      queryClient.invalidateQueries({ queryKey: ['orders', storeId, order.id] })
+      queryClient.invalidateQueries({
+        queryKey: ['orders', storeId, order.orderId],
+      })
     } catch (err: any) {
       toast.error(err.message ?? 'Error updating order status')
     }
@@ -126,7 +130,7 @@ const OrderCardADM = ({
                   <SelectValue placeholder={status.replace('_', ' ')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {ORDER_STATUS_ENUM.options.map((statusOption) => (
+                  {enum_ORDER_STATUS.options.map((statusOption) => (
                     <SelectItem key={statusOption} value={statusOption}>
                       {statusOption.replace('_', ' ')}
                     </SelectItem>
@@ -142,7 +146,7 @@ const OrderCardADM = ({
             <h1 className="flex items-center gap-2 font-bold text-lg">
               Order Date:
               <span className="text-base font-normal">
-                {formatDate(order.createdAt)}
+                {formatDate(order.orderCreatedAt)}
               </span>
             </h1>
             <h1 className="flex items-center gap-2">
@@ -165,12 +169,12 @@ const OrderCardADM = ({
         </CardContent>
       </Card>
       <OrderCardSheet
-        orderId={order.id}
+        orderId={order.orderId}
         storeId={storeId}
         storeCurrency={storeCurrency}
         orderCustomMessage={order.orderCustomMessage}
         orderIdentifier={order.orderIdentifier}
-        orderDate={order.createdAt}
+        orderDate={order.orderCreatedAt}
         orderDeliveryInstruction={order.orderDeliveryInstruction}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
@@ -205,16 +209,16 @@ const OrderCardSheet = ({
 
   // load the products from each order
   const { data: products, isLoading: productsIsLoading } =
-    useGetProductsFromOrders({ storeId, orderId })
+    use_get_ProductsFromOrderId({ storeId, orderId })
 
   // serverfn
-  const add = useServerFn(sf_AddCustomOrderMessage)
+  const add = useServerFn(sf_add_CustomOrderMessage)
 
   const queryClient = useQueryClient()
 
   useEffect(() => {
     if (
-      products !== 'No Products' &&
+      products !== undefined &&
       Array.isArray(products) &&
       products.length > 0
     ) {
@@ -232,7 +236,7 @@ const OrderCardSheet = ({
       orderCustomMessage: '',
     },
     validators: {
-      onSubmit: CREATE_ORDER_CUSTOM_MESSGE,
+      onSubmit: create_ORDER_CUSTOM_MESSAGE,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -306,7 +310,7 @@ const OrderCardSheet = ({
           {/* 
           LOADED PRODUCTS
           */}
-          {!productsIsLoading && products && products !== 'No Products' && (
+          {!productsIsLoading && products && (
             <ScrollArea className="flex flex-1 gap-2">
               {/* TOP OF THE SCROLL AREA */}
               <div className="flex flex-col gap-2">
@@ -317,9 +321,9 @@ const OrderCardSheet = ({
 
                     - produt image
                     */}
-                      {product.imageUrl && (
+                      {product.productImageUrl && (
                         <img
-                          src={product.imageUrl}
+                          src={product.productImageUrl}
                           className="h-15 w-15 rounded object-cover"
                         />
                       )}

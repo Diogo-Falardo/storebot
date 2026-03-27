@@ -144,8 +144,6 @@ const Checkout = ({
     return 'Checkout is currently unavailable.'
   }
 
-  console.log(productsId)
-
   return (
     <Dialog
       onOpenChange={async (open) => {

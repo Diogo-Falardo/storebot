@@ -85,7 +85,13 @@ function RouteComponent() {
             telegramUserId={telegramUserId}
           />
         )}
-        {activeTab === 'orders' && <StoreOrders />}
+        {activeTab === 'orders' && (
+          <StoreOrders
+            storeId={storeId}
+            storeCurrency={PublicStoreInfo.storeCurrency}
+            telegramUserId={telegramUserId}
+          />
+        )}
       </main>
       <footer className="sticky bottom-0 z-50 p-3 bg-background">
         <nav className="flex justify-center items-center">
