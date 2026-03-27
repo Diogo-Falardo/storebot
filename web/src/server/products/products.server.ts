@@ -32,7 +32,17 @@ export class serverProduct {
       if (!product[0]) {
         throw new Error('Product not found!')
       }
-      return schema_PRODUCT.parse(product[0])
+
+      const productInfo = {
+        ...product[0],
+        productId: product[0].id,
+        productImageUrl: product[0].imageUrl,
+        productVisible: product[0].visible,
+        productCategoryId: product[0].categoryId,
+        productCreatedAt: product[0].createdAt,
+      }
+
+      return schema_PRODUCT.parse(productInfo)
     } catch (err: any) {
       console.log(`
         -------------------------

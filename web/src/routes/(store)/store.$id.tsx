@@ -78,7 +78,13 @@ function RouteComponent() {
         </h1>
       </header>
       <main className="flex-1 flex flex-col">
-        {activeTab === 'products' && <StoreProducts storeId={storeId} />}
+        {activeTab === 'products' && (
+          <StoreProducts
+            storeId={storeId}
+            storeCurrency={PublicStoreInfo.storeCurrency}
+            telegramUserId={telegramUserId}
+          />
+        )}
         {activeTab === 'orders' && <StoreOrders />}
       </main>
       <footer className="sticky bottom-0 z-50 p-3 bg-background">

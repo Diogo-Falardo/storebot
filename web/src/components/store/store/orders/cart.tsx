@@ -2,31 +2,32 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingCart, X } from 'lucide-react'
-import { Button } from '../ui/button'
+import Checkout from './checkout'
+import { sf_validate_IfProductExists } from '@/server/products/product.functions'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet'
-import { Card } from '../ui/card'
+} from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card } from '@/components/ui/card'
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '../ui/empty'
-import { ScrollArea } from '../ui/scroll-area'
-import Checkout from './orders/checkout'
-import { sf_ValidateIfProductExists } from '@/server/store/products/product.functions'
+} from '@/components/ui/empty'
 
 type StoredItem = {
   productId: string
   productName: string
   productPrice: string
-  productImg: string | null
+  productImageUrl: string | null
 }
 
 const CART_PREFIX = 'cart-item:'
@@ -66,8 +67,8 @@ const Cart = ({
   telegramUserId,
 }: {
   storeId: string
-  storeCurrency: string | null
-  telegramUserId: number | null
+  storeCurrency: string
+  telegramUserId: number
 }) => {
   if (typeof telegramUserId !== 'number') {
     throw new Error('Couldnt validate telegram session!')
@@ -78,7 +79,7 @@ const Cart = ({
   const [validatedProducts, setValidatedProducts] = useState<Array<string>>([])
 
   // serverFn
-  const validProduct = useServerFn(sf_ValidateIfProductExists)
+  const validProduct = useServerFn(sf_validate_IfProductExists)
 
   useEffect(() => {
     setStored(getItemFromStorage())
@@ -153,17 +154,18 @@ const Cart = ({
     >
       <SheetTrigger asChild>
         <Button>
-          <ShoppingCart /> My Cart
+          <ShoppingCart />
         </Button>
       </SheetTrigger>
       <SheetContent className="flex flex-col h-full p-3">
+        <SheetDescription className="p-0"></SheetDescription>
         {/* container 1 */}
         <div className="flex-1 min-h-0">
           {cartProducts.length > 0 ? (
             <div className="flex flex-col h-full">
               {/* header when there is items */}
               <SheetHeader className="px-0 py-5">
-                <SheetTitle className="text-xl flex gap-2">
+                <SheetTitle className="text-xl text-neutral-400 font-medium flex gap-2">
                   <ShoppingCart /> Products in Cart
                 </SheetTitle>
               </SheetHeader>
@@ -178,9 +180,9 @@ const Cart = ({
                       >
                         <div className="flex justify-between">
                           <div className="flex w-full gap-2">
-                            {item.productImg && (
+                            {item.productImageUrl && (
                               <img
-                                src={item.productImg}
+                                src={item.productImageUrl}
                                 className="w-full max-w-24 h-24 object-cover border-2 border-white/10 rounded-md"
                               />
                             )}

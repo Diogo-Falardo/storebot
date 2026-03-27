@@ -246,7 +246,12 @@ export class serverStore {
         return null
       }
 
-      return select_STORE_METHODS.array().parse(methods)
+      return select_STORE_METHODS.array().parse(
+        methods.map((m) => ({
+          methodId: m.id,
+          method: m.method,
+        })),
+      )
     } catch (err: any) {
       console.log(`
         -------------------------
@@ -441,7 +446,12 @@ export class serverStore {
         return null
       }
 
-      return select_STORE_METHODS.array().parse(methods)
+      return select_STORE_METHODS.array().parse(
+        methods.map((m) => ({
+          methodId: m.id,
+          method: m.method,
+        })),
+      )
     } catch (err: any) {
       console.log(`
         -------------------------

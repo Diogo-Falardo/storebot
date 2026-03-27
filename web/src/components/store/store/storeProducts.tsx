@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { PackageIcon, Search, ShoppingCartIcon } from 'lucide-react'
+import { PackageIcon, Search } from 'lucide-react'
 import ProductsFilters from './products/productsFilters'
+import ProductCard from './products/productCard'
+import Cart from './orders/cart'
 import {
   Empty,
   EmptyDescription,
@@ -9,19 +11,26 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
-
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
 import { use_get_ProductsFromStoreId } from '@/lib/hooks/product.hook'
 import { type_schema_PRODUCT } from '@/db/schemas/product.schema'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-const StoreProducts = ({ storeId }: { storeId: string }) => {
+const StoreProducts = ({
+  storeId,
+  storeCurrency,
+  telegramUserId,
+}: {
+  storeId: string
+  storeCurrency: string
+  telegramUserId: number
+}) => {
   const { data: storeProducts, isLoading: isLoadingStoreProducts } =
     use_get_ProductsFromStoreId({ storeId })
   const { data: storeCategorys, isLoading: isLoadingStoreCategorys } =
     use_get_CategorysFromStoreId({ storeId })
-
   const [visibleProducts, setVisibleProducts] = useState<
     Array<type_schema_PRODUCT>
   >([])
@@ -30,6 +39,7 @@ const StoreProducts = ({ storeId }: { storeId: string }) => {
   const [selectedCategories, setSelectedCategories] = useState<Array<string>>(
     [],
   )
+
   useEffect(() => {
     if (!isLoadingStoreProducts && storeProducts) {
       setVisibleProducts(storeProducts.filter((p) => p.productVisible === 1))
@@ -78,12 +88,12 @@ const StoreProducts = ({ storeId }: { storeId: string }) => {
             </Empty>
           </div>
         )}
-      {!isLoadingStoreProducts && storeProducts && storeProducts.length > 0 && (
+      {visibleProducts.length > 0 && (
         <div className="flex-1 flex flex-col">
           {/* search, filters, cart */}
           <div className="p-2 flex gap-2">
             <Input placeholder="search" />
-            <Button>
+            <Button variant={'outline'}>
               <Search />
             </Button>
             <ProductsFilters
@@ -93,9 +103,24 @@ const StoreProducts = ({ storeId }: { storeId: string }) => {
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
             />
-            <Button variant={'outline'}>
-              <ShoppingCartIcon />
-            </Button>
+            <Cart
+              storeId={storeId}
+              storeCurrency={storeCurrency}
+              telegramUserId={telegramUserId}
+            />
+          </div>
+          <div className="flex-1">
+            <ScrollArea className="h-full overflow-y-auto">
+              <div className="py-4 px-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                {visibleProducts.map((product) => (
+                  <ProductCard
+                    key={product.productId}
+                    {...product}
+                    storeCurrency={storeCurrency}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       )}

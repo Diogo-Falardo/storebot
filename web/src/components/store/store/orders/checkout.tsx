@@ -4,7 +4,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
-import { clearCartStorage } from '../cart'
+import { clearCartStorage } from './cart'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,7 +23,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { RECEIVE_ORDER } from '@/schemas/order.schema'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -38,18 +37,19 @@ import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
 import {
-  useGetstorePaymentMethods,
-  useGetstoreShippingMethods,
-} from '@/lib/hooks/shop/store.hooks'
-import { sf_PlaceOrder } from '@/server/store/orders/order.function'
-import { sf_GetProductFromId } from '@/server/store/products/product.functions'
+  use_get_StorePaymentMethods,
+  use_get_StoreShippingMethods,
+} from '@/lib/hooks/store.hooks'
+import { sf_create_Order } from '@/server/orders/order.function'
+import { sf_get_ProductFromProductId } from '@/server/products/product.functions'
+import { create_ORDER } from '@/db/schemas/order.schema'
 
 type ProductInfo = {
-  id: string
+  productId: string
   productName: string
   productPrice: string
   productDesc?: string | null
-  imageUrl?: string | null
+  productImageUrl?: string | null
 }
 
 const Checkout = ({
@@ -67,16 +67,13 @@ const Checkout = ({
 }) => {
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
-  // hooks
   const { data: paymentMethods, isLoading: loadingPaymentMethods } =
-    useGetstorePaymentMethods({ storeId })
+    use_get_StorePaymentMethods({ storeId })
   const { data: shippingMethods, isLoading: loadingShippingMethods } =
-    useGetstoreShippingMethods({ storeId })
-  // server fn
-  const placeOrder = useServerFn(sf_PlaceOrder)
-  const productInfo = useServerFn(sf_GetProductFromId)
+    use_get_StoreShippingMethods({ storeId })
+  const placeOrder = useServerFn(sf_create_Order)
+  const productInfo = useServerFn(sf_get_ProductFromProductId)
 
-  // states
   const [displayProducts, setDisplayProducts] = useState<Array<ProductInfo>>([])
 
   // update products array
@@ -95,10 +92,10 @@ const Checkout = ({
 
   // remove product
   const handleRemove = (id: string) => {
-    setDisplayProducts((prev) => prev.filter((p) => p.id !== id))
+    setDisplayProducts((prev) => prev.filter((p) => p.productId !== id))
     form.setFieldValue(
       'productsId',
-      displayProducts.filter((p) => p.id !== id).map((p) => p.id),
+      displayProducts.filter((p) => p.productId !== id).map((p) => p.productId),
     )
   }
 
@@ -108,10 +105,10 @@ const Checkout = ({
       orderPaymentMethod: '',
       orderShippingMethod: '',
       orderDeliveryInstruction: '',
-      productsId: displayProducts.map((p) => p.id),
+      productsId: displayProducts.map((p) => p.productId),
     },
     validators: {
-      onSubmit: RECEIVE_ORDER,
+      onSubmit: create_ORDER,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -128,24 +125,26 @@ const Checkout = ({
   })
 
   const paymentReady =
-    !loadingPaymentMethods &&
-    paymentMethods !== 'There are a total of 0 Payment Methods...'
+    (!loadingPaymentMethods && paymentMethods !== null) ||
+    paymentMethods !== undefined
 
   const shippingReady =
-    !loadingShippingMethods &&
-    shippingMethods !== 'There are a total of 0 Shipping Methods...'
+    (!loadingShippingMethods && shippingMethods !== null) ||
+    shippingMethods !== undefined
 
   const checkoutEnable = paymentReady && shippingReady
 
   const getCheckoutDisableReason = () => {
-    if (paymentMethods === 'There are a total of 0 Payment Methods...') {
+    if (paymentMethods === null || paymentMethods === undefined) {
       return 'This store has no payment methods configured. Please contact the store owner.'
     }
-    if (shippingMethods === 'There are a total of 0 Shipping Methods...') {
+    if (shippingMethods === null || shippingMethods === undefined) {
       return 'This store has no shipping methods configured. Please contact the store owner.'
     }
     return 'Checkout is currently unavailable.'
   }
+
+  console.log(productsId)
 
   return (
     <Dialog
@@ -232,7 +231,10 @@ const Checkout = ({
                             paymentMethods &&
                             typeof paymentMethods !== 'string' &&
                             paymentMethods.map((method) => (
-                              <SelectItem key={method.id} value={method.id}>
+                              <SelectItem
+                                key={method.methodId}
+                                value={method.methodId}
+                              >
                                 {method.method}
                               </SelectItem>
                             ))}
@@ -270,7 +272,10 @@ const Checkout = ({
                             shippingMethods &&
                             typeof shippingMethods !== 'string' &&
                             shippingMethods.map((method) => (
-                              <SelectItem key={method.id} value={method.id}>
+                              <SelectItem
+                                key={method.methodId}
+                                value={method.methodId}
+                              >
                                 {method.method}
                               </SelectItem>
                             ))}
@@ -326,13 +331,13 @@ const Checkout = ({
                 <div className="flex flex-col gap-3">
                   {displayProducts.map((product) => (
                     <Card
-                      key={product.id}
+                      key={product.productId}
                       className="flex flex-row p-3 rounded-lg bg-black/5"
                     >
                       {/* image on left side if there is image */}
-                      {product.imageUrl && (
+                      {product.productImageUrl && (
                         <img
-                          src={product.imageUrl}
+                          src={product.productImageUrl}
                           alt={product.productName}
                           className="w-20 h-20 object-cover rounded"
                         />
@@ -353,7 +358,7 @@ const Checkout = ({
                             size="icon-lg"
                             className="text-destructive"
                             type="button"
-                            onClick={() => handleRemove(product.id)}
+                            onClick={() => handleRemove(product.productId)}
                           >
                             <X />
                           </Button>

@@ -1,19 +1,19 @@
 import { toast } from 'sonner'
 import { ShoppingCart } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 
 type CartAddProps = {
   productId: string
   productName: string
   productPrice: string
-  productImg: string | null
+  productImageUrl: string | null
 }
 
-const CartAdd = ({
+const AddProductToCart = ({
   productId,
   productName,
   productPrice,
-  productImg,
+  productImageUrl,
 }: CartAddProps) => {
   const addItemToStorage = () => {
     const key = 'cart-item:' + productId
@@ -21,17 +21,18 @@ const CartAdd = ({
       productId,
       productName,
       productPrice,
-      productImg,
+      productImageUrl,
     })
     localStorage.setItem(key, cartItem)
     toast.success(`${productName} added to the cart`)
   }
 
   return (
-    <Button size={'icon'} onClick={addItemToStorage}>
+    <Button className="w-full" variant={'secondary'} onClick={addItemToStorage}>
       <ShoppingCart />
+      Add to cart
     </Button>
   )
 }
 
-export default CartAdd
+export default AddProductToCart

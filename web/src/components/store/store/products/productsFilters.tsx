@@ -1,4 +1,4 @@
-import { HandCoins, ListFilter, ListFilterIcon, Tag } from 'lucide-react'
+import { HandCoins, ListFilterIcon, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -18,7 +18,7 @@ import {
 import { Slider } from '@/components/ui/slider'
 
 const MIN = 0
-const MAX = 100000
+const MAX = 10000
 
 type productsFiltersProps = {
   categoryNames: Array<string>
