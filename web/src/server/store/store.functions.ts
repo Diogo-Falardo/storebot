@@ -129,3 +129,17 @@ export const sf_get_PublicStoreInfoByStoreId = createServerFn({ method: 'GET' })
   .handler(async ({ data }): Promise<type_schema_PUBLIC_STORE | null> => {
     return await storeServer.get_PublicStoreInfoByStoreId(data.storeId)
   })
+
+/**
+ * function created for dashborad.$id.tsx to validate if person who is accessing the dashboard is the real owner
+ */
+export const sf_validate_IfUserIsOwnerOfTheStore = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((data: { userId: string; storeId: string }) => data)
+  .handler(async ({ data }): Promise<boolean> => {
+    return await storeServer.validate_IfUserIsOwnerOfTheStore(
+      data.userId,
+      data.storeId,
+    )
+  })

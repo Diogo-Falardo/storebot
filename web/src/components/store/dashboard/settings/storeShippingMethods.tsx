@@ -4,12 +4,6 @@ import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { MoreHorizontalIcon, SendHorizonal } from 'lucide-react'
-import { CREATE_SHIPPING_METHOD_SCHEMA } from '@/schemas/store.schema'
-import { useGetstoreShippingMethods } from '@/lib/hooks/shop/store.hooks'
-import {
-  sf_CreateStoreShippingMethod,
-  sf_DeletestoreShippingMethod,
-} from '@/server/store/store.functions'
 import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -26,6 +20,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { use_get_StoreShippingMethods } from '@/lib/hooks/store.hooks'
+import {
+  sf_create_StoreShippingMethod,
+  sf_delete_StoreShippingMethod,
+} from '@/server/store/store.functions'
+import { create_STORE_METHOD } from '@/db/schemas/store.schema'
 
 const StoreShippingMethod = ({
   userId,
@@ -35,14 +35,14 @@ const StoreShippingMethod = ({
   storeId: string
 }) => {
   // load current shipping methods
-  const { data, isLoading } = useGetstoreShippingMethods({ storeId })
+  const { data, isLoading } = use_get_StoreShippingMethods({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreateStoreShippingMethod)
-  const deleteMethod = useServerFn(sf_DeletestoreShippingMethod)
+  const addMethod = useServerFn(sf_create_StoreShippingMethod)
+  const deleteMethod = useServerFn(sf_delete_StoreShippingMethod)
 
   console.log(data)
 
@@ -51,7 +51,7 @@ const StoreShippingMethod = ({
       method: '',
     },
     validators: {
-      onSubmit: CREATE_SHIPPING_METHOD_SCHEMA,
+      onSubmit: create_STORE_METHOD,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -133,7 +133,7 @@ const StoreShippingMethod = ({
       <div className="flex-1 py-2">
         {!data && isLoading && <div>is loading</div>}
         <div className="border rounded-sm">
-          {data && data === 'There are a total of 0 Shipping Methods...' ? (
+          {data === null || data === undefined ? (
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>No Shipping Methods Yet</EmptyTitle>
@@ -150,7 +150,7 @@ const StoreShippingMethod = ({
                 data.map((method) => {
                   return (
                     <div
-                      key={method.id}
+                      key={method.methodId}
                       className="w-full flex justify-between items-center px-2 py-1 last:border-b-0 border-b-secondary border-b "
                     >
                       <h1>{method.method}</h1>
@@ -160,7 +160,7 @@ const StoreShippingMethod = ({
                             variant={'ghost'}
                             size={'icon'}
                             className={'size-8'}
-                            disabled={deletingId === method.id}
+                            disabled={deletingId === method.methodId}
                           >
                             <MoreHorizontalIcon />
                             <span className="sr-only">Open menu</span>
@@ -168,7 +168,7 @@ const StoreShippingMethod = ({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => useDeleteMethod(method.id)}
+                            onClick={() => useDeleteMethod(method.methodId)}
                             variant="destructive"
                           >
                             Delete

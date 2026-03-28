@@ -37,7 +37,9 @@ export const schema_ORDER = z.object({
     .min(1, { message: 'Order custom message cant be empty' })
     .max(2500, {
       message: 'Order custom message has a max limit of 2500 characters',
-    }),
+    })
+    .nullable()
+    .optional(),
   orderCreatedAt: z.string(),
 })
 export type type_schema_ORDER = z.infer<typeof schema_ORDER>

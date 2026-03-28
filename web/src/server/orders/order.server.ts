@@ -87,7 +87,21 @@ export class serverOrder {
         .from(orders)
         .where(eq(orders.storeId, storeId))
 
-      return schema_ORDER.array().parse(storeOrders)
+      // map DB fields to schema_ORDER fields
+      const mappedOrders = storeOrders.map((order) => ({
+        orderId: order.id,
+        storeId: order.storeId,
+        orderStatus: order.orderStatus,
+        orderIdentifier: order.orderIdentifier,
+        telegramUserId: order.telegramUserId,
+        orderPaymentMethod: order.orderPaymentMethod,
+        orderShippingMethod: order.orderShippingMethod,
+        orderDeliveryInstruction: order.orderDeliveryInstruction,
+        orderCustomMessage: order.orderCustomMessage,
+        orderCreatedAt: order.createdAt,
+      }))
+
+      return schema_ORDER.array().parse(mappedOrders)
     } catch (err: any) {
       console.log(`
       -------------------------

@@ -30,10 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
-import { sf_AddProductTostore } from '@/server/store/products/product.functions'
+import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
+import { sf_create_Product } from '@/server/products/product.functions'
+import { create_PRODUCT } from '@/db/schemas/product.schema'
 
 interface ProductAddProps {
   userId: string
@@ -45,23 +44,25 @@ interface ProductAddProps {
 const ProductAdd = ({ userId, storeId, open, setOpen }: ProductAddProps) => {
   const router = useRouter()
   // load current categories
-  const { data: categories, isLoading } = useGetstoreCategorys({ storeId })
+  const { data: categories, isLoading } = use_get_CategorysFromStoreId({
+    storeId,
+  })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
-  const add = useServerFn(sf_AddProductTostore)
+  const add = useServerFn(sf_create_Product)
 
   const form = useForm({
     defaultValues: {
       productName: '',
       productPrice: '',
       productDesc: '',
-      categoryId: 'none',
-      visible: 1,
+      productCategoryId: 'none',
+      productVisible: 1,
     },
     validators: {
-      onSubmit: CREATE_PRODUCT_SCHEMA,
+      onSubmit: create_PRODUCT,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -181,7 +182,7 @@ const ProductAdd = ({ userId, storeId, open, setOpen }: ProductAddProps) => {
               }}
             />
             <form.Field
-              name="categoryId"
+              name="productCategoryId"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -203,8 +204,11 @@ const ProductAdd = ({ userId, storeId, open, setOpen }: ProductAddProps) => {
                         {!isLoading &&
                           categories &&
                           categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.category}
+                            <SelectItem
+                              key={category.categoryId}
+                              value={category.categoryId}
+                            >
+                              {category.categoryName}
                             </SelectItem>
                           ))}
                       </SelectContent>

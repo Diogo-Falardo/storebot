@@ -65,3 +65,7 @@ export const select_STORE_METHODS = z.object({
   method: z.string(),
 })
 export type type_select_STORE_METHODS = z.infer<typeof select_STORE_METHODS>
+
+export const create_STORE_METHOD = select_STORE_METHODS.pick({
+  method: true,
+})

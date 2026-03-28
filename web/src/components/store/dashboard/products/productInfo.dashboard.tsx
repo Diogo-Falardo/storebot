@@ -3,10 +3,10 @@ import gsap from 'gsap'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { use_getProductByProductId } from '@/lib/hooks/product.hooks'
 import { Spinner } from '@/components/ui/spinner'
 import { useLayoutDashboard } from '@/lib/data'
-import { use_getCategoryNameByCategoryId } from '@/lib/hooks/category.hooks'
+import { use_get_ProductFromProductId } from '@/lib/hooks/product.hook'
+import { use_get_CategoryNamesByCategoryId } from '@/lib/hooks/category.hooks'
 
 export const ProductInfoDashboard = ({
   storeId,
@@ -19,9 +19,9 @@ export const ProductInfoDashboard = ({
     (cId) => cId.productInfoActiveCategoryId,
   )
   const { data: product, isLoading: productIsLoading } =
-    use_getProductByProductId({ storeId, productId })
+    use_get_ProductFromProductId({ storeId, productId })
   const { data: categoryName, isLoading: categoryNameIsLoading } =
-    use_getCategoryNameByCategoryId({
+    use_get_CategoryNamesByCategoryId({
       storeId,
       categoryId:
         activeProductCategoryId === null ? undefined : activeProductCategoryId,
@@ -80,10 +80,10 @@ export const ProductInfoDashboard = ({
           )}
         </Badge>
         <Badge
-          variant={product.visible ? 'default' : 'outline'}
-          className={`rounded-sm ${product.visible ? 'bg-green-500' : 'bg-zinc-400'}`}
+          variant={product.productVisible ? 'default' : 'outline'}
+          className={`rounded-sm ${product.productVisible ? 'bg-green-500' : 'bg-zinc-400'}`}
         >
-          {product.visible ? (
+          {product.productVisible ? (
             <span className="flex items-center gap-1">
               <EyeIcon className="size-4" /> Visible
             </span>
@@ -95,7 +95,7 @@ export const ProductInfoDashboard = ({
         </Badge>
       </div>
       <img
-        src={product.imageUrl || PLACEHOLDER_IMG}
+        src={product.productImageUrl || PLACEHOLDER_IMG}
         alt={product.productName}
         className="w-full h-70 object-cover rounded-lg border"
       />

@@ -26,13 +26,22 @@ export const schema_PRODUCT = z.object({
 export type type_schema_PRODUCT = z.infer<typeof schema_PRODUCT>
 
 // create a product
-export const create_PRODUCT = schema_PRODUCT.pick({
-  productName: true,
-  productPrice: true,
-  productDesc: true,
-  productVisible: true,
-  productCategoryId: true,
-})
+export const create_PRODUCT = schema_PRODUCT
+  .pick({
+    productName: true,
+    productPrice: true,
+    productDesc: true,
+    productVisible: true,
+    productCategoryId: true,
+  })
+  /**
+   * the reason of this is because we setting desc to "" it makes
+   * the field a string and its never null or undefined somehow there are conflits
+   * NEED TO BE MORE INVESTIGATED
+   */
+  .extend({
+    productDesc: z.string(),
+  })
 export type type_create_PRODUCT = z.infer<typeof create_PRODUCT>
 
 // update a product

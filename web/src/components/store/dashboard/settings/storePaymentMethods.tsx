@@ -4,12 +4,6 @@ import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { MoreHorizontal, SendHorizonal } from 'lucide-react'
-import { CREATE_PAYMENT_METHOD_SCHEMA } from '@/schemas/store.schema'
-import { useGetstorePaymentMethods } from '@/lib/hooks/shop/store.hooks'
-import {
-  sf_CreatestorePaymentMethod,
-  sf_DeletestorePaymentMethod,
-} from '@/server/store/store.functions'
 import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -26,6 +20,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { use_get_StorePaymentMethods } from '@/lib/hooks/store.hooks'
+import {
+  sf_create_StorePaymentMethod,
+  sf_delete_StorePaymentMethod,
+} from '@/server/store/store.functions'
+import { create_STORE_METHOD } from '@/db/schemas/store.schema'
 
 const StorePaymentMethod = ({
   userId,
@@ -35,21 +35,21 @@ const StorePaymentMethod = ({
   storeId: string
 }) => {
   // load current payment methods
-  const { data, isLoading } = useGetstorePaymentMethods({ storeId })
+  const { data, isLoading } = use_get_StorePaymentMethods({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const addMethod = useServerFn(sf_CreatestorePaymentMethod)
-  const deleteMethod = useServerFn(sf_DeletestorePaymentMethod)
+  const addMethod = useServerFn(sf_create_StorePaymentMethod)
+  const deleteMethod = useServerFn(sf_delete_StorePaymentMethod)
 
   const form = useForm({
     defaultValues: {
       method: '',
     },
     validators: {
-      onSubmit: CREATE_PAYMENT_METHOD_SCHEMA,
+      onSubmit: create_STORE_METHOD,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -129,7 +129,7 @@ const StorePaymentMethod = ({
       <div className="flex-1 py-2">
         {!data && isLoading && <div>is loading</div>}
         <div className="border rounded-sm">
-          {data && data === 'There are a total of 0 Payment Methods...' ? (
+          {data === null || data === undefined ? (
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>No Payment Methods Yet</EmptyTitle>
@@ -146,7 +146,7 @@ const StorePaymentMethod = ({
                 data.map((method) => {
                   return (
                     <div
-                      key={method.id}
+                      key={method.methodId}
                       className="w-full flex justify-between items-center px-2 py-1 last:border-b-0 border-b-secondary border-b "
                     >
                       <h1>{method.method}</h1>
@@ -156,7 +156,7 @@ const StorePaymentMethod = ({
                             variant={'ghost'}
                             size={'icon'}
                             className={'size-8'}
-                            disabled={deletingId === method.id}
+                            disabled={deletingId === method.methodId}
                           >
                             <MoreHorizontal />
                             <span className="sr-only">Open menu</span>
@@ -164,7 +164,7 @@ const StorePaymentMethod = ({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => useDeleteMethod(method.id)}
+                            onClick={() => useDeleteMethod(method.methodId)}
                             variant="destructive"
                           >
                             Delete

@@ -12,13 +12,11 @@ import { use_get_StoreOrdersFromStoreId } from '@/lib/hooks/order.hooks'
 import { Spinner } from '@/components/ui/spinner'
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import Orders from '../orders/orders'
 
 const DashboardOrders = ({ storeId }: { storeId: string }) => {
   const { data: orders, isLoading: ordersIsLoading } =
@@ -86,7 +84,9 @@ const DashboardOrders = ({ storeId }: { storeId: string }) => {
         <TabsContent value="all">
           {Array.isArray(orders) &&
             orders.length > 0 &&
-            orders.map((order) => <div key={order.id}>{order.id}</div>)}
+            orders.map((order) => (
+              <div key={order.orderId}>{order.orderId}</div>
+            ))}
         </TabsContent>
       </Tabs>
     </div>

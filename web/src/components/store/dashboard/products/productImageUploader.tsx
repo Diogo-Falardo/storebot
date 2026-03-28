@@ -4,11 +4,11 @@ import { useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { sf_AddProductImage } from '@/server/store/products/product.functions'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
+import { sf_add_ProductImage } from '@/server/products/product.functions'
 
 const CLOUD_NAME = 'ddpkwh9th'
 const UPLOAD_PRESET = 'KiraBot'
@@ -28,7 +28,7 @@ const ProductImageUploader = ({
 }) => {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const uploadImg = useServerFn(sf_AddProductImage)
+  const uploadImg = useServerFn(sf_add_ProductImage)
   const [uploading, setUploading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 

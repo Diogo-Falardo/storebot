@@ -1,36 +1,19 @@
-import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { LayoutDashboard, Package, ReceiptText, Settings } from 'lucide-react'
-import { sf_validateTelegramInitData } from '@/server/telegram/telegram.function'
+import { LayoutDashboard, ReceiptText, Settings } from 'lucide-react'
 import ErrorWrapper from '@/components/errorWrapper'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Spinner } from '@/components/ui/spinner'
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty'
 
-import { ScrollArea } from '@/components/ui/scroll-area'
-import StoreUpdate from '@/components/store/storeUpdate'
-import OrderCardADM from '@/components/store/orders/orderCard.admin'
-import PaymentMethodAdd from '@/components/store/paymentMethodAdd'
-import ShippingMethodAdd from '@/components/store/shippingMethodAdd'
-import ProductAdd from '@/components/store/products/productAdd'
-import ProductCardADM from '@/components/store/products/productCard.admin'
-import ProductCategoryAdd from '@/components/store/products/productCategoryAdd'
-
-import { useGetUserStoreInfo } from '@/lib/hooks/shop/store.hooks'
-import { sf_validateIfStoreIsActivated } from '@/server/store/store.functions'
 import { test_data } from '@/lib/test.data'
 import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
 import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
 import { useLayoutDashboard } from '@/lib/data'
 import DashboardOrders from '@/components/store/dashboard/dashboardOrders'
+import { sf_validate_TelegramInitData } from '@/server/telegram/telegram.function'
+import { sf_validate_IfUserIsOwnerOfTheStore } from '@/server/store/store.functions'
+import { use_get_StoreInfoByStoreId } from '@/lib/hooks/store.hooks'
 
 function DashboardErrorComponent({ error }: { error: Error }) {
   return <ErrorWrapper errorTitle={error.message} errorDescription={''} />
@@ -47,8 +30,10 @@ function RouteComponent() {
   const [error, setError] = useState<Error | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
 
-  const validateTelegramInitData = useServerFn(sf_validateTelegramInitData)
-  const validateIfStoreIsActivated = useServerFn(sf_validateIfStoreIsActivated)
+  const validateTelegramInitData = useServerFn(sf_validate_TelegramInitData)
+  const validateIfUserIsOwnerOfTheStore = useServerFn(
+    sf_validate_IfUserIsOwnerOfTheStore,
+  )
 
   const dashboardNavbarRef = useRef<HTMLDivElement>(null)
   const dashboardNavbarHeight = useLayoutDashboard((s) => s.headerHeight)
@@ -74,11 +59,11 @@ function RouteComponent() {
           data: { initData: test_data.initData },
         })
 
-        const isStoreActivated = await validateIfStoreIsActivated({
+        const isOwner = await validateIfUserIsOwnerOfTheStore({
           data: { userId: user.userId, storeId: storeId },
         })
 
-        if (!isStoreActivated) throw new Error('Unauthorized...')
+        if (!isOwner) throw new Error('Unauthorized...')
 
         setUserId(user.userId)
       } catch (err: any) {
@@ -109,7 +94,7 @@ function RouteComponent() {
     data: storeInfo,
     isLoading: storeLoading,
     error: storeError,
-  } = useGetUserStoreInfo({
+  } = use_get_StoreInfoByStoreId({
     userId: userId ?? '',
     storeId,
   })

@@ -30,17 +30,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CREATE_PRODUCT_SCHEMA } from '@/schemas/product.schema'
-import { sf_UpdateProductFromstore } from '@/server/store/products/product.functions'
-import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
+import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
+import { sf_update_Product } from '@/server/products/product.functions'
+import { create_PRODUCT } from '@/db/schemas/product.schema'
 
 type productProps = {
-  id: string
+  productId: string
   storeId: string
   productName?: string
   productPrice?: string
   productDesc?: string | null
-  categoryId?: string | null
+  productCategoryId?: string | null
 }
 
 type ProductUpdateProps = {
@@ -51,29 +51,35 @@ type ProductUpdateProps = {
 
 const ProductUpdate = ({ product, open, setOpen }: ProductUpdateProps) => {
   // get current store categorys
-  const { data, isLoading } = useGetstoreCategorys({ storeId: product.storeId })
+  const { data, isLoading } = use_get_CategorysFromStoreId({
+    storeId: product.storeId,
+  })
 
   const queryClient = useQueryClient()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
   // server fn
-  const update = useServerFn(sf_UpdateProductFromstore)
+  const update = useServerFn(sf_update_Product)
 
   const form = useForm({
     defaultValues: {
       productName: product.productName ?? '',
       productPrice: product.productPrice ?? '',
       productDesc: product.productDesc ?? '',
-      categoryId: product.categoryId ?? 'null',
-      visible: 1,
+      productCategoryId: product.productCategoryId ?? 'null',
+      productVisible: 1,
     },
     validators: {
-      onSubmit: CREATE_PRODUCT_SCHEMA,
+      onSubmit: create_PRODUCT,
     },
     onSubmit: async ({ value }) => {
       try {
         const service = await update({
-          data: { storeId: product.storeId, productId: product.id, dto: value },
+          data: {
+            storeId: product.storeId,
+            productId: product.productId,
+            dto: value,
+          },
         })
         toast.success(service)
         queryClient.invalidateQueries({ queryKey: ['products'] })
@@ -187,7 +193,7 @@ const ProductUpdate = ({ product, open, setOpen }: ProductUpdateProps) => {
             />
             {/* product category */}
             <form.Field
-              name="categoryId"
+              name="productCategoryId"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -209,8 +215,11 @@ const ProductUpdate = ({ product, open, setOpen }: ProductUpdateProps) => {
                         {!isLoading &&
                           data &&
                           data.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.category}
+                            <SelectItem
+                              key={category.categoryId}
+                              value={category.categoryId}
+                            >
+                              {category.categoryName}
                             </SelectItem>
                           ))}
                       </SelectContent>

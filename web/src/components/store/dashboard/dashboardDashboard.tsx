@@ -13,7 +13,6 @@ import ProductCardDashboard from './products/productCard.dashboard'
 import { ProductInfoDashboard } from './products/productInfo.dashboard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useGetstoreProducts } from '@/lib/hooks/shop/product.hook'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +30,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { use_get_ProductsFromStoreId } from '@/lib/hooks/product.hook'
 
 const DashboardDashboard = ({
   userId,
@@ -65,10 +65,10 @@ const DashboardDashboard = ({
   )
 
   // store products
-  const { data: products, isLoading: productsLoading } = useGetstoreProducts({
-    userId,
-    storeId,
-  })
+  const { data: products, isLoading: productsLoading } =
+    use_get_ProductsFromStoreId({
+      storeId,
+    })
 
   useEffect(() => {
     if (screenRef.current) {
@@ -205,7 +205,7 @@ const DashboardDashboard = ({
                 products.length > 0 &&
                 products.map((product) => (
                   <ProductCardDashboard
-                    key={product.id}
+                    key={product.productId}
                     storeCurrency={storeCurrency}
                     {...product}
                   />

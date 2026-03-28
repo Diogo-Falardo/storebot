@@ -10,3 +10,7 @@ export const schema_CATEGORY = z.object({
     .max(255, { message: 'limit of 255 characters for category' }),
 })
 export type type_schema_CATEGORY = z.infer<typeof schema_CATEGORY>
+
+export const create_CATEGORY = schema_CATEGORY.pick({
+  categoryName: true,
+})

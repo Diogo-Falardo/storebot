@@ -1,5 +1,5 @@
 import { validateWebAppData } from '@grammyjs/validator'
-import { get_UserByTelegramUserId } from '../user/user.server'
+import { get_InternalUserIdByTelegramUserId } from '../user/user.server'
 
 const TELEGRAM_BOT_TOKEN = process.env.BOT_TOKEN
 
@@ -47,7 +47,7 @@ export async function validate_TelegramInitData(initData: string) {
   const userData = JSON.parse(userDataStr)
 
   // convert the telegram id into internal user id
-  const userId = await get_UserByTelegramUserId(userData.id)
+  const userId = await get_InternalUserIdByTelegramUserId(userData.id)
 
   if (!userId) {
     throw new Error('User not found')

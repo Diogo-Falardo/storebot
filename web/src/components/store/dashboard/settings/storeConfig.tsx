@@ -20,10 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { store_CURRENCY_ENUM, store_TYPE_ENUM } from '@/schemas/store.schema'
-import { useGetUserStoreInfo } from '@/lib/hooks/shop/store.hooks'
-import { INSERT_STORE } from '@/db/schemas/store.schema'
-import { sf_deleteStore, sf_updateStore } from '@/server/store/store.functions'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -41,6 +37,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { use_get_StoreInfoByStoreId } from '@/lib/hooks/store.hooks'
+import {
+  sf_delete_Store,
+  sf_update_Store,
+} from '@/server/store/store.functions'
+import { create_STORE, enum_STORE_TYPE } from '@/db/schemas/store.schema'
 
 const StoreConfig = ({
   userId,
@@ -50,12 +52,12 @@ const StoreConfig = ({
   storeId: string
 }) => {
   // load existing data from store
-  const { data, isLoading } = useGetUserStoreInfo({ userId, storeId })
+  const { data, isLoading } = use_get_StoreInfoByStoreId({ userId, storeId })
   const queryClient = useQueryClient()
   const router = useRouter()
   const closeDialogRef = useRef<HTMLButtonElement>(null)
-  const updateStore = useServerFn(sf_updateStore)
-  const deleteStore = useServerFn(sf_deleteStore)
+  const updateStore = useServerFn(sf_update_Store)
+  const deleteStore = useServerFn(sf_delete_Store)
   const [openDeleteStoreDialog, setOpenDeleteStoreDialog] = useState(false)
 
   const form = useForm({
@@ -65,7 +67,7 @@ const StoreConfig = ({
       storeCurrency: data?.storeCurrency ?? 'EUR',
     },
     validators: {
-      onSubmit: INSERT_STORE,
+      onSubmit: create_STORE,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -221,7 +223,7 @@ const StoreConfig = ({
                       <SelectValue placeholder="Select your store currency" />
                     </SelectTrigger>
                     <SelectContent className="border-primary ring ring-primary">
-                      {store_CURRENCY_ENUM.options.map((type) => (
+                      {enum_STORE_TYPE.options.map((type) => (
                         <SelectItem
                           className="shadow-primary"
                           key={type}
@@ -261,7 +263,7 @@ const StoreConfig = ({
                       <SelectValue placeholder="Select a store type" />
                     </SelectTrigger>
                     <SelectContent className="border-primary ring ring-primary ">
-                      {store_TYPE_ENUM.options.map((type) => (
+                      {enum_STORE_TYPE.options.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </SelectItem>

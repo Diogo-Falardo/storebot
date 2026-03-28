@@ -3,8 +3,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useForm } from '@tanstack/react-form'
 import { useServerFn } from '@tanstack/react-start'
-import { CREATE_CATEGORY_SCHEMA } from '@/schemas/category.schema'
-import { sf_CreateCategory } from '@/server/category/productCategory.functions'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -17,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { sf_create_Category } from '@/server/category/category.functions'
+import { create_CATEGORY } from '@/db/schemas/category.schema'
 
 interface ProductCategoryAddProps {
   storeId: string
@@ -29,24 +29,24 @@ const ProductCategorysAdd = ({
   open,
   setOpen,
 }: ProductCategoryAddProps) => {
-  const addCategory = useServerFn(sf_CreateCategory)
+  const addCategory = useServerFn(sf_create_Category)
   const closeDialogRef = useRef<HTMLButtonElement>(null)
 
   const queryClient = useQueryClient()
 
   const form = useForm({
     defaultValues: {
-      category: '',
+      categoryName: '',
     },
     validators: {
-      onSubmit: CREATE_CATEGORY_SCHEMA,
+      onSubmit: create_CATEGORY,
     },
     onSubmit: async ({ value }) => {
       try {
         await addCategory({
-          data: { storeId, category: value.category },
+          data: { storeId, category: value.categoryName },
         })
-        toast.success(`NEW Category: ${value.category}`)
+        toast.success(`NEW Category: ${value.categoryName}`)
         queryClient.invalidateQueries({ queryKey: ['categorys', storeId] })
         closeDialogRef.current?.click()
       } catch (err: any) {
@@ -73,7 +73,7 @@ const ProductCategorysAdd = ({
           >
             <FieldGroup>
               <form.Field
-                name="category"
+                name="categoryName"
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid

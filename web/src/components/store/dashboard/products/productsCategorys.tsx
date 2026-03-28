@@ -3,8 +3,6 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Tags, X } from 'lucide-react'
-import { useGetstoreCategorys } from '@/lib/hooks/shop/category.hook'
-import { sf_DeleteCategory } from '@/server/category/productCategory.functions'
 import {
   Popover,
   PopoverContent,
@@ -15,16 +13,18 @@ import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyTitle } from '@/components/ui/empty'
+import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
+import { sf_delete_Category } from '@/server/category/category.functions'
 
 const ProductsCategorys = ({ storeId }: { storeId: string }) => {
   // load current payment methods
-  const { data, isLoading } = useGetstoreCategorys({ storeId })
+  const { data, isLoading } = use_get_CategorysFromStoreId({ storeId })
 
   const queryClient = useQueryClient()
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const deleteCategory = useServerFn(sf_DeleteCategory)
+  const deleteCategory = useServerFn(sf_delete_Category)
 
   const useDeleteCategory = async (categoryId: string) => {
     setDeletingId(categoryId)
@@ -69,21 +69,25 @@ const ProductsCategorys = ({ storeId }: { storeId: string }) => {
               <div className="flex flex-col gap-2">
                 {data.map((category) => (
                   <Card
-                    key={category.id}
+                    key={category.categoryId}
                     className="w-full p-1 rounded-sm bg-primary/5 border-primary/30"
                   >
                     <div className="px-1 select-none flex flex-row justify-between items-center text-neutral-400">
                       <CardTitle className="capitalize font-medium cursor-pointer w-full">
-                        {category.category}
+                        {category.categoryName}
                       </CardTitle>
                       <Button
                         variant={'ghost'}
                         className="text-destructive"
                         size={'icon-xs'}
-                        onClick={() => useDeleteCategory(category.id)}
-                        disabled={deletingId === category.id}
+                        onClick={() => useDeleteCategory(category.categoryId)}
+                        disabled={deletingId === category.categoryId}
                       >
-                        {deletingId === category.id ? <Spinner /> : <X />}
+                        {deletingId === category.categoryId ? (
+                          <Spinner />
+                        ) : (
+                          <X />
+                        )}
                       </Button>
                     </div>
                   </Card>

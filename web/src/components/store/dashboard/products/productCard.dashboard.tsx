@@ -20,10 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  sf_DeleteProductFromstore,
-  sf_ToogleProductVisibilty,
-} from '@/server/store/products/product.functions'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,18 +30,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { useLayoutDashboard } from '@/lib/data'
+import {
+  sf_delete_Product,
+  sf_toogle_ProductVisibilty,
+} from '@/server/products/product.functions'
+import { type_schema_PRODUCT } from '@/db/schemas/product.schema'
 
-type productProps = {
-  id: string
-  storeId: string
-  productName: string
-  productPrice: string
-  productDesc?: string | null
-  categoryId?: string | null
-  visible: number
-  imageUrl: string | null
-  storeCurrency: string | null
-}
+type productProps = type_schema_PRODUCT & { storeCurrency: string }
 
 const ProductCardDashboard = (product: productProps) => {
   const queryClient = useQueryClient()
@@ -61,13 +53,13 @@ const ProductCardDashboard = (product: productProps) => {
     (cId) => cId.setProductInfoActiveCategoryId,
   )
 
-  const deleted = useServerFn(sf_DeleteProductFromstore)
-  const visibility = useServerFn(sf_ToogleProductVisibilty)
+  const deleted = useServerFn(sf_delete_Product)
+  const visibility = useServerFn(sf_toogle_ProductVisibilty)
 
   const deleteProduct = async () => {
     try {
       const result = await deleted({
-        data: { storeId: product.storeId, productId: product.id },
+        data: { storeId: product.storeId, productId: product.productId },
       })
 
       if (result) {
@@ -84,12 +76,12 @@ const ProductCardDashboard = (product: productProps) => {
   const visibilityToogler = async () => {
     try {
       const result = await visibility({
-        data: { storeId: product.storeId, productId: product.id },
+        data: { storeId: product.storeId, productId: product.productId },
       })
 
       if (result) {
         toast.success(
-          product.visible === 1 ? 'Product hidden!' : 'Product shown!',
+          product.productVisible === 1 ? 'Product hidden!' : 'Product shown!',
         )
         queryClient.invalidateQueries({
           queryKey: ['products', product.storeId],
@@ -108,19 +100,19 @@ const ProductCardDashboard = (product: productProps) => {
       <CardContent className="flex w-full items-center justify-between p-0 gap-4">
         <div
           onClick={() => {
-            setOpenProductInfoCardCategoryId(product.categoryId ?? null)
-            setOpenProductInfoCard(product.id)
+            setOpenProductInfoCardCategoryId(product.productCategoryId)
+            setOpenProductInfoCard(product.productCategoryId)
           }}
           className="flex-1 flex gap-2 items-center"
         >
           <div className="relative w-15 h-15 shrink-0">
             <img
-              src={product.imageUrl || PLACEHOLDER_IMG}
+              src={product.productImageUrl || PLACEHOLDER_IMG}
               alt={product.productName}
               className="w-15 h-15 object-cover rounded"
             />
             <div className="absolute -bottom-1 left-0.75 shadow-sm">
-              {product.visible ? (
+              {product.productVisible ? (
                 <Badge className="bg-green-800 ring ring-green-700/50 border border-green-600/50 w-13.5 text-xs text-white rounded-sm">
                   active
                 </Badge>
@@ -160,10 +152,14 @@ const ProductCardDashboard = (product: productProps) => {
                   size={'icon'}
                   className="cursor-pointer"
                   onClick={visibilityToogler}
-                  aria-label={product.visible ? 'Hide product' : 'Show product'}
-                  title={product.visible ? 'Hide product' : 'Show product'}
+                  aria-label={
+                    product.productVisible ? 'Hide product' : 'Show product'
+                  }
+                  title={
+                    product.productVisible ? 'Hide product' : 'Show product'
+                  }
                 >
-                  {product.visible ? <EyeOffIcon /> : <EyeIcon />}
+                  {product.productVisible ? <EyeOffIcon /> : <EyeIcon />}
                 </Button>
               </DropdownMenuItem>
               {/* edit button  */}
@@ -182,7 +178,7 @@ const ProductCardDashboard = (product: productProps) => {
                   open={openProductImageUploader}
                   setOpen={setOpenProductImageUploader}
                   storeId={product.storeId}
-                  productId={product.id}
+                  productId={product.productId}
                   productName={product.productName}
                 />
               </DropdownMenuItem>
