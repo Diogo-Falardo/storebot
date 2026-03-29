@@ -5,7 +5,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: kira-api
+    container_name: dev-storebot-api-container
     ports:
       - "2109:2109"
     volumes:
@@ -16,51 +16,50 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=2109 # most express apps respect this
-      # If your API needs to know where the real DB is:
-      - DATABASE_URL=postgresql://user:pass@host.docker.internal:5432/mydb
-      # or mongodb://...@host.docker.internal:27017/...
     restart: unless-stopped
 
   bot:
     build:
       context: ./bot
       dockerfile: Dockerfile.dev
-    container_name: kira-bot
+    container_name: dev-storebot-bot-container
     # no ports → bot doesn't listen on network
     volumes:
       - ./bot:/app
       - /app/node_modules
+    env_file:
+      - ./bot/.env
     environment:
       - NODE_ENV=development
-      # If bot also needs DB:
-      # - DATABASE_URL=postgresql://...@host.docker.internal:5432/...
     restart: unless-stopped
     depends_on:
-      - api # optional – only if bot needs API available
+      - api # optional – only if bot needs API available # bot requires api
 
   web:
     build:
       context: ./web
-      dockerfile: Dockerfile
-    container_name: kira-web
+      dockerfile: Dockerfile.dev
+    container_name: dev-storebot-web-container
     ports:
       - "3000:3000" # TanStack Start dev server
+    command: npm run dev -- --host 0.0.0.0 --port 3000
     volumes:
       - ./web:/app
-      - /app/node_modules
+      ## named the node models to try fix errors
+      - web_node_modules:/app/node_modules
+    env_file:
+      - ./web/.env
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       # Very important: tell frontend where backend (api) lives inside network
       - VITE_API_URL=http://api:2109
-      # or if using import.meta.env / process.env in TanStack Start:
-      # - VITE_BACKEND_URL=http://api:2109
-      # If web also needs DB directly (unlikely but possible):
-      # - DATABASE_URL=...@host.docker.internal:...
-    command: npm run dev -- --host 0.0.0.0 --port 3000
     restart: unless-stopped
     depends_on:
       - api # recommended – web calls api
 
 networks:
   default:
-    name: kira-net
+    name: storebot-network
+
+volumes:
+  web_node_modules:
