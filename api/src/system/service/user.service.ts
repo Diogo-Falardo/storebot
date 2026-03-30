@@ -5,10 +5,10 @@ import { eq, and } from "drizzle-orm";
 import { HttpError } from "../utils/ErrorHandling.js";
 import { storeService } from "./store.service.js";
 import {
-  SELECT_ENTIRE_USER,
-  SELECT_ENTIRE_USER_type,
-  SELECT_SIMPLE_USER,
-  SELECT_SIMPLE_USER_type,
+  schema_SIMPLE_USER,
+  schema_USER,
+  type_schema_SIMPLE_USER,
+  type_schema_USER,
 } from "../../db/schemas/user.schema.js";
 
 export const userService = {
@@ -19,7 +19,7 @@ export const userService = {
    */
   async getTelegramUser(
     telegramId: number,
-  ): Promise<SELECT_SIMPLE_USER_type | null> {
+  ): Promise<type_schema_SIMPLE_USER | null> {
     try {
       const user = await db
         .select()
@@ -29,7 +29,11 @@ export const userService = {
 
       if (!user[0]) return null;
 
-      return SELECT_SIMPLE_USER.parse(user[0]);
+      return schema_SIMPLE_USER.parse({
+        userTelegramId: user[0].telegramUserId,
+        userId: user[0].id,
+        userCreatedAt: user[0].createdAt,
+      });
     } catch (err: any) {
       console.log(`
         --------------------------------
@@ -52,7 +56,7 @@ export const userService = {
    */
   async getTelegramUserInfo(
     telegramId: number,
-  ): Promise<SELECT_ENTIRE_USER_type | string | undefined> {
+  ): Promise<type_schema_USER | string | undefined> {
     try {
       const user = await db
         .select()
@@ -88,13 +92,13 @@ export const userService = {
         storeExpireDate: userStore.storeExpireDate
           ? userStore.storeExpireDate.toISOString()
           : null,
-        categorys: categorys?.map((c) => c.category) ?? [], // map to string
-        shippingMethods: shippingMethods?.map((m) => m.method) ?? [], // map to string
-        paymentMethods: paymentMethods?.map((m) => m.method) ?? [], // map to string
+        storeCategorys: categorys?.map((c) => c.category) ?? [], // map to string
+        storeShippingMethods: shippingMethods?.map((m) => m.method) ?? [], // map to string
+        storePaymentMethods: paymentMethods?.map((m) => m.method) ?? [], // map to string
         storeCreatedAt: userStore.storeCreatedAt.toISOString(),
       };
 
-      return SELECT_ENTIRE_USER.parse(info);
+      return schema_USER.parse(info);
     } catch (err: any) {
       console.log(`
         --------------------------------
@@ -172,7 +176,7 @@ export const userService = {
 
         -------------------------------
      `);
-      throw new HttpError(500, "Erro loading user...");
+      throw new HttpError(500, "Error loading user...");
     }
   },
 };

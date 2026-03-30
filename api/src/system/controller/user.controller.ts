@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../utils/ErrorHandling.js";
 import { userService } from "../service/user.service.js";
 import { REQUIRED_TELEGRAM_HEADERS } from "../../lib/field.valid.js";
 import { storeService } from "../service/store.service.js";
-import { SELECT_ENTIRE_USER } from "../../db/schemas/user.schema.js";
+import { schema_USER } from "../../db/schemas/user.schema.js";
 
 export const userController = {
   /**
@@ -64,7 +63,7 @@ export const userController = {
 
     try {
       const user = await userService.getTelegramUserInfo(tgUserId);
-      return res.status(200).json(SELECT_ENTIRE_USER.parse(user));
+      return res.status(200).json(schema_USER.parse(user));
     } catch (err) {
       next(err);
     }

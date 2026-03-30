@@ -1,45 +1,71 @@
-import { uuid, z } from "zod";
+import { z } from 'zod'
 
-export const STORE_TYPE_EMUM = z.enum(["public", "private"]);
+export const enum_STORE_TYPE = z.enum(['public', 'private'])
 
-// store info
-export const SELECT_STORE = z.object({
-  userId: z.uuid(),
+// db store schema
+export const schema_STORE = z.object({
   storeId: z.uuid(),
-  storeType: STORE_TYPE_EMUM,
-  storeName: z.string(),
+  userId: z.uuid(),
+  storeType: enum_STORE_TYPE,
+  storeName: z
+    .string()
+    .min(1, { message: 'store name is required' })
+    .max(120, { message: 'store name max characters 120' }),
   storeCurrency: z.string(),
   storeExpireDate: z.date().nullable(),
   storeCreatedAt: z.date(),
-});
-export type SELECT_STORE_type = z.infer<typeof SELECT_STORE>;
+})
+export type type_schema_STORE = z.infer<typeof schema_STORE>
 
-// public store info
-export const SELECT_PUBLIC_STORE = z.object({
+/**
+ * public store -> INFO
+ *
+ * created with the intention of retrieving store info that is
+ * not sensitive
+ */
+export const schema_PUBLIC_STORE = z.object({
   storeId: z.uuid(),
   storeName: z.string(),
   storeCurrency: z.string(),
-});
-export type SELECT_PUBLIC_STORE_type = z.infer<typeof SELECT_PUBLIC_STORE>;
+})
+export type type_schema_PUBLIC_STORE = z.infer<typeof schema_PUBLIC_STORE>
 
 // create a store
-export const INSERT_STORE = z.object({
-  storeName: z
-    .string()
-    .min(1, { message: "store name is required" })
-    .max(120, { message: "store name max characters 120" }),
-  storeType: STORE_TYPE_EMUM,
-});
-export type INSERT_STORE_type = z.infer<typeof INSERT_STORE>;
+export const create_STORE = schema_STORE.pick({
+  storeName: true,
+  storeType: true,
+  storeCurrency: true,
+})
+export type type_create_STORE = z.infer<typeof create_STORE>
 
-export const SELECT_STORE_CATEGORY = z.object({
-  id: z.string(),
+// update a store
+export const patch_STORE = schema_STORE
+  .pick({
+    storeName: true,
+    storeType: true,
+    storeCurrency: true,
+  })
+  .partial()
+export type type_patch_STORE = z.infer<typeof patch_STORE>
+
+// used to fetch store (products) categorys
+export const select_STORE_CATEGORY = z.object({
+  categoryId: z.uuid(),
   category: z.string(),
-});
-export type SELECT_STORE_CATEGORY_type = z.infer<typeof SELECT_STORE_CATEGORY>;
+})
+export type type_select_STORE_CATEGORY = z.infer<typeof select_STORE_CATEGORY>
 
-export const SELECT_STORE_METHODS = z.object({
-  id: z.string(),
+/**
+ * used to fetch:
+ *
+ * store shipping & payment methods
+ */
+export const select_STORE_METHODS = z.object({
+  methodId: z.string(),
   method: z.string(),
-});
-export type SELECT_STORE_METHODS_type = z.infer<typeof SELECT_STORE_METHODS>;
+})
+export type type_select_STORE_METHODS = z.infer<typeof select_STORE_METHODS>
+
+export const create_STORE_METHOD = select_STORE_METHODS.pick({
+  method: true,
+})

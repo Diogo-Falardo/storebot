@@ -3,8 +3,8 @@ import { userService } from "../service/user.service.js";
 import { storeService } from "../service/store.service.js";
 import { REQUIRED_TELEGRAM_HEADERS } from "../../lib/field.valid.js";
 import {
-  INSERT_STORE,
-  SELECT_PUBLIC_STORE,
+  create_STORE,
+  schema_PUBLIC_STORE,
 } from "../../db/schemas/store.schema.js";
 
 export const storeController = {
@@ -21,7 +21,10 @@ export const storeController = {
     if (header["x-bot-secret"] !== process.env.BOT_SECRET) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const storeCreateDto = INSERT_STORE.parse(req.body);
+    const storeCreateDto = create_STORE.parse({
+      ...req.body,
+      storeCurrency: "EUR",
+    });
     // db user id
     const userId = await userService.checkTelegramUserId(tg_userID);
     if (!userId) {
@@ -64,7 +67,7 @@ export const storeController = {
       if (!store) {
         return res.status(404).json({ error: "Store not found" });
       }
-      return res.status(200).json(SELECT_PUBLIC_STORE.parse(store));
+      return res.status(200).json(schema_PUBLIC_STORE.parse(store));
     } catch (err) {
       next(err);
     }
@@ -89,8 +92,9 @@ export const storeController = {
     if (!userId) {
       return res.status(404).json("User not found");
     }
+
     const ownership = await storeService.validateStoreOwner(userId, storeId);
-    if (!ownership) return "Upsss.... restriceted area!";
+    if (!ownership) return res.status(403).json({ error: "Restricted area!" });
 
     try {
       const expireDate = await storeService.getStoreExpireDate(storeId);

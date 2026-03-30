@@ -9,15 +9,15 @@ import {
   stores,
 } from "../../db/schema.js";
 import {
-  INSERT_STORE_type,
-  SELECT_PUBLIC_STORE,
-  SELECT_PUBLIC_STORE_type,
-  SELECT_STORE,
-  SELECT_STORE_CATEGORY,
-  SELECT_STORE_CATEGORY_type,
-  SELECT_STORE_METHODS,
-  SELECT_STORE_METHODS_type,
-  SELECT_STORE_type,
+  schema_PUBLIC_STORE,
+  schema_STORE,
+  select_STORE_CATEGORY,
+  select_STORE_METHODS,
+  type_create_STORE,
+  type_schema_PUBLIC_STORE,
+  type_schema_STORE,
+  type_select_STORE_CATEGORY,
+  type_select_STORE_METHODS,
 } from "../../db/schemas/store.schema.js";
 
 export const storeService = {
@@ -155,7 +155,7 @@ ${err}
    */
   async getStoreByInternalUserId(
     userId: string,
-  ): Promise<SELECT_STORE_type | null> {
+  ): Promise<type_schema_STORE | null> {
     try {
       const store = await db
         .select()
@@ -170,7 +170,7 @@ ${err}
         storeCreatedAt: new Date(store[0].createdAt),
         ...store[0],
       };
-      return SELECT_STORE.parse(_store);
+      return schema_STORE.parse(_store);
     } catch (err) {
       console.error(`
 -------------------------------------
@@ -196,7 +196,7 @@ ${err}
    */
   async publicStoreInfo(
     storeId: string,
-  ): Promise<SELECT_PUBLIC_STORE_type | null> {
+  ): Promise<type_schema_PUBLIC_STORE | null> {
     try {
       const store = await db
         .select()
@@ -206,7 +206,10 @@ ${err}
 
       if (!store[0]) return null;
 
-      return SELECT_PUBLIC_STORE.parse(store[0]);
+      return schema_PUBLIC_STORE.parse({
+        storeId: store[0].id,
+        ...store[0],
+      });
     } catch (err) {
       console.error(`
 -------------------------------------
@@ -226,13 +229,14 @@ ${err}
    * @param userId
    * @param dto
    */
-  async createStore(userId: string, dto: INSERT_STORE_type) {
+  async createStore(userId: string, dto: type_create_STORE) {
     try {
       await db.insert(stores).values({
         id: uuidv4(),
         userId: userId,
         storeName: dto.storeName,
         storeType: dto.storeType,
+        storeCurrency: "EUR",
       });
 
       return "store created";
@@ -254,7 +258,7 @@ ${err}
    * @param storeId
    * @returns store model
    */
-  async getStoreByStoreId(storeId: string): Promise<SELECT_STORE_type | null> {
+  async getStoreByStoreId(storeId: string): Promise<type_schema_STORE | null> {
     try {
       const store = await db
         .select()
@@ -270,7 +274,7 @@ ${err}
         storeCreatedAt: new Date(store[0].createdAt),
       };
 
-      return SELECT_STORE.parse(_store);
+      return schema_STORE.parse(_store);
     } catch (err: any) {
       console.error(`
 -------------------------------------
@@ -291,7 +295,7 @@ ${err}
    */
   async getStoreCategorysByStoreId(
     storeId: string,
-  ): Promise<Array<SELECT_STORE_CATEGORY_type> | null> {
+  ): Promise<Array<type_select_STORE_CATEGORY> | null> {
     try {
       const categorys = await db
         .select()
@@ -300,7 +304,12 @@ ${err}
 
       if (categorys.length === 0) return null;
 
-      return SELECT_STORE_CATEGORY.array().parse(categorys);
+      return select_STORE_CATEGORY.array().parse(
+        categorys.map((c) => ({
+          categoryId: c.id,
+          category: c.category,
+        })),
+      );
     } catch (err) {
       console.error(`
 -------------------------------------
@@ -321,7 +330,7 @@ ${err}
    */
   async getStoreShippingMethodsByStoreId(
     storeId: string,
-  ): Promise<Array<SELECT_STORE_METHODS_type> | null> {
+  ): Promise<Array<type_select_STORE_METHODS> | null> {
     try {
       const methods = await db
         .select()
@@ -330,7 +339,12 @@ ${err}
 
       if (methods.length === 0) return null;
 
-      return SELECT_STORE_METHODS.array().parse(methods);
+      return select_STORE_METHODS.array().parse(
+        methods.map((m) => ({
+          methodId: m.id,
+          method: m.method,
+        })),
+      );
     } catch (err: any) {
       console.error(`
 -------------------------------------
@@ -351,7 +365,7 @@ ${err}
    */
   async getStorePaymentMethodsByStoreId(
     storeId: string,
-  ): Promise<Array<SELECT_STORE_METHODS_type> | null> {
+  ): Promise<Array<type_select_STORE_METHODS> | null> {
     try {
       const methods = await db
         .select()
@@ -360,7 +374,12 @@ ${err}
 
       if (methods.length === 0) return null;
 
-      return SELECT_STORE_METHODS.array().parse(methods);
+      return select_STORE_METHODS.array().parse(
+        methods.map((m) => ({
+          methodId: m.id,
+          method: m.method,
+        })),
+      );
     } catch (err: any) {
       console.error(`
 -------------------------------------

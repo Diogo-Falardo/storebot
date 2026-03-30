@@ -1,4 +1,4 @@
-import type { SELECT_PUBLIC_STORE_type } from "../schemas/store.schema.js";
+import type { type_schema_PUBLIC_STORE } from "../schemas/store.schema.js";
 
 const API_URL = process.env.API_URL!;
 const BOT_SECRET = process.env.BOT_SECRET!;
@@ -29,7 +29,7 @@ export async function createStore(
 export async function getStoreInfoByStoreId(
   tgUserId: number,
   storeId: string,
-): Promise<SELECT_PUBLIC_STORE_type | null> {
+): Promise<type_schema_PUBLIC_STORE | null> {
   const res = await fetch(`${API_URL}${urlStore}/public-info/${storeId}`, {
     method: "GET",
     headers: {

@@ -1,4 +1,4 @@
-import type { SELECT_ENTIRE_USER_type } from "../schemas/user.schema.js";
+import type { type_schema_USER } from "../schemas/user.schema.js";
 
 const API_URL = process.env.API_URL!;
 const BOT_SECRET = process.env.BOT_SECRET!;
@@ -34,7 +34,7 @@ export async function userHasStore(
 }
 
 // returns entire user model
-export async function me(tgUserId: number): Promise<SELECT_ENTIRE_USER_type> {
+export async function me(tgUserId: number): Promise<type_schema_USER> {
   const res = await fetch(`${API_URL}${USER_URL}/me`, {
     method: "GET",
     headers: {
@@ -44,6 +44,6 @@ export async function me(tgUserId: number): Promise<SELECT_ENTIRE_USER_type> {
     },
   });
 
-  const data: SELECT_ENTIRE_USER_type = await res.json();
+  const data: type_schema_USER = await res.json();
   return data;
 }

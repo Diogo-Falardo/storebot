@@ -8,6 +8,6 @@ RUN npm install
 COPY . .
 
 # Keep container alive + hot reload
-CMD ["npm", "run", "dev"]
+CMD ["npx", "nodemon", "--legacy-watch", "--watch", "src", "--ext", "ts,js,json", "--exec", "node", "--loader", "ts-node/esm", "src/index.ts"]
 
 EXPOSE 2109

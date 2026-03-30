@@ -1,25 +1,23 @@
 import { z } from "zod";
-import { category, paymentMethods } from "../schema";
 
-export const SELECT_SIMPLE_USER = z.object({
+export const schema_SIMPLE_USER = z.object({
   userTelegramId: z.string(),
   userId: z.string(),
   userCreatedAt: z.string(),
 });
-export type SELECT_SIMPLE_USER_type = z.infer<typeof SELECT_SIMPLE_USER>;
-4;
+export type type_schema_SIMPLE_USER = z.infer<typeof schema_SIMPLE_USER>;
 
 // user info + shop info
-export const SELECT_ENTIRE_USER = z.object({
+export const schema_USER = z.object({
   userId: z.uuid(),
   storeId: z.uuid(),
   storeName: z.string(),
   storeType: z.string(),
   storeCurrency: z.string().nullable(),
   storeExpireDate: z.string().nullable(),
-  categorys: z.array(z.string()),
-  shippingMethods: z.array(z.string()),
-  paymentMethods: z.array(z.string()),
+  storeCategorys: z.array(z.string()),
+  storeShippingMethods: z.array(z.string()),
+  storePaymentMethods: z.array(z.string()),
   storeCreatedAt: z.string(),
 });
-export type SELECT_ENTIRE_USER_type = z.infer<typeof SELECT_ENTIRE_USER>;
+export type type_schema_USER = z.infer<typeof schema_USER>;

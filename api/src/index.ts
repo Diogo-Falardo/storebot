@@ -6,11 +6,11 @@ import { Request, Response, NextFunction } from "express";
 import { HttpError } from "./system/utils/ErrorHandling.js";
 
 const app = express();
-app.use(
-  cors({
-    origin: ["https://storebot.cc"],
-  }),
-);
+// app.use(
+//   cors({
+//     origin: ["https://storebot.cc"],
+//   }),
+// );
 const api = express.Router();
 app.use("/api", api);
 

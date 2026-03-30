@@ -1,7 +1,6 @@
 import "dotenv/config";
-import { Bot, Context, InlineKeyboard } from "grammy";
+import { Bot, Context } from "grammy";
 import {
-  type Conversation,
   type ConversationFlavor,
   conversations,
   createConversation,
@@ -358,4 +357,9 @@ Bot started as @${botInfo.username}
 by bloop
     `);
   },
+});
+
+bot.catch((err) => {
+  console.error("Error in bot:", err);
+  // Optionally, notify the user or perform other actions
 });
