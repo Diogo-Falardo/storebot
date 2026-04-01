@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/(public)/(pages)/how-to-use')({
   component: RouteComponent,
@@ -87,23 +86,6 @@ function RouteComponent() {
           >
             {publicData.howToUse.title}
           </h1>
-
-          <Button
-            onClick={() => {
-              setTimeout(() => {
-                window.open('https://t.me/usestorebot', '_blank')
-              }, 200)
-            }}
-            variant={'ghost'}
-            size={'icon'}
-            className="cursor-pointer"
-          >
-            <img
-              src="/icons/telegram.svg"
-              alt="Telegram"
-              className="w-10 h-10"
-            />
-          </Button>
         </div>
         <p
           ref={howToUseDescription}

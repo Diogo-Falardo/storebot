@@ -104,7 +104,7 @@ export const publicData = {
     versionLog: [
       {
         version: 'v1.1',
-        versionName: 'Mission has started',
+        versionName: 'Mission Saved',
         versionFeatures: ['Upgraded UI', 'Fixed minor bugs'] as const,
       },
       {

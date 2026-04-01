@@ -191,7 +191,7 @@ function RouteComponent() {
             </CardContent>
           </Card>
           <Tabs defaultValue="vf" className="max-w-xs w-full">
-            <TabsList variant={'line'} className='font-mono'>
+            <TabsList variant={'line'} className="font-mono">
               <TabsTrigger className="after:bg-sky-950" value="vf">
                 Version Features
               </TabsTrigger>
@@ -203,10 +203,10 @@ function RouteComponent() {
               <Card className="w-full max-w-xs bg-background ring ring-sky-800 border border-sky-950 rounded-sm">
                 <CardHeader>
                   <p className="text-xl font-mono text-sky-800">
-                    {publicData.botInfo.versionLog.at(-1)?.version ?? ''}
+                    {publicData.botInfo.versionLog.at(0)?.version ?? ''}
                   </p>
                   <CardTitle className="capitalize">
-                    {publicData.botInfo.versionLog.at(-1)?.versionName ?? ''}
+                    {publicData.botInfo.versionLog.at(0)?.versionName ?? ''}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="mt-3 text-neutral-400 text-sm flex flex-col gap-1">
@@ -215,7 +215,7 @@ function RouteComponent() {
                   </p>
                   <div className="mt-auto">
                     {publicData.botInfo.versionLog
-                      .at(-1)
+                      .at(0)
                       ?.versionFeatures.map((f) => (
                         <p key={f}>{f}</p>
                       ))}
