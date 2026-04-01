@@ -42,7 +42,11 @@ import {
   sf_delete_Store,
   sf_update_Store,
 } from '@/server/store/store.functions'
-import { create_STORE, enum_STORE_TYPE } from '@/db/schemas/store.schema'
+import {
+  create_STORE,
+  enum_STORE_CURRENCY,
+  enum_STORE_TYPE,
+} from '@/db/schemas/store.schema'
 
 const StoreConfig = ({
   userId,
@@ -223,7 +227,7 @@ const StoreConfig = ({
                       <SelectValue placeholder="Select your store currency" />
                     </SelectTrigger>
                     <SelectContent className="border-primary ring ring-primary">
-                      {enum_STORE_TYPE.options.map((type) => (
+                      {enum_STORE_CURRENCY.options.map((type) => (
                         <SelectItem
                           className="shadow-primary"
                           key={type}

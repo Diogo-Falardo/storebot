@@ -99,9 +99,14 @@ export const publicData = {
   },
 
   botInfo: {
-    version: 'v1.0',
-    versionName: 'Mission has started',
+    version: 'v1.1',
+    versionName: 'Mission Saved',
     versionLog: [
+      {
+        version: 'v1.1',
+        versionName: 'Mission has started',
+        versionFeatures: ['Upgraded UI', 'Fixed minor bugs'] as const,
+      },
       {
         version: 'v1.0',
         versionName: 'Mission has started',

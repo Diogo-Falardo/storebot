@@ -1,6 +1,13 @@
 import { z } from 'zod'
 
 export const enum_STORE_TYPE = z.enum(['public', 'private'])
+export const enum_STORE_CURRENCY = z.enum([
+  'EUR', // Euro
+  'USD', // US Dollar
+  'GBP', // British Pound
+  'JPY', // Japanese Yen
+  'CNY', // Chinese Yuan
+])
 
 // db store schema
 export const schema_STORE = z.object({
