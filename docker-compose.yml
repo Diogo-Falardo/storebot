@@ -15,7 +15,7 @@ services:
       - ./api/.env
     environment:
       - NODE_ENV=development
-      - PORT=2109 # most express apps respect this
+      - PORT=2109
     restart: unless-stopped
 
   bot:
@@ -23,7 +23,6 @@ services:
       context: ./bot
       dockerfile: Dockerfile.dev
     container_name: dev-storebot-bot-container
-    # no ports → bot doesn't listen on network
     volumes:
       - ./bot:/app
       - /app/node_modules
@@ -33,7 +32,7 @@ services:
       - NODE_ENV=development
     restart: unless-stopped
     depends_on:
-      - api # optional – only if bot needs API available # bot requires api
+      - api
 
   web:
     build:
@@ -41,21 +40,19 @@ services:
       dockerfile: Dockerfile.dev
     container_name: dev-storebot-web-container
     ports:
-      - "3000:3000" # TanStack Start dev server
+      - "3000:3000" #
     command: npm run dev -- --host 0.0.0.0 --port 3000
     volumes:
       - ./web:/app
-      ## named the node models to try fix errors
       - web_node_modules:/app/node_modules
     env_file:
       - ./web/.env
     environment:
       - NODE_ENV=development
-      # Very important: tell frontend where backend (api) lives inside network
       - VITE_API_URL=http://api:2109
     restart: unless-stopped
     depends_on:
-      - api # recommended – web calls api
+      - api
 
 networks:
   default:
