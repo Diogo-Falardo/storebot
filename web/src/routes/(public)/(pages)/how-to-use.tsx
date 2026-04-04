@@ -28,29 +28,22 @@ function RouteComponent() {
   useEffect(() => {
     const tl = gsap.timeline()
     if (howtToUseTitle.current) {
-      const split = new SplitText(howtToUseTitle.current, { type: 'chars' })
-      tl.from(split.chars, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.05,
-        duration: 0.05,
-        ease: 'power2.out',
-      })
+      tl.fromTo(
+        howtToUseTitle.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+      )
     }
 
     tl.to({}, { duration: 0.2 })
 
     if (howToUseDescription.current) {
-      const split = new SplitText(howToUseDescription.current, {
-        type: 'chars',
-      })
-      tl.from(split.chars, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.05,
-        duration: 0.05,
-        ease: 'power2.out',
-      })
+      tl.fromTo(
+        howToUseDescription.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        '>', // start after previous
+      )
     }
 
     if (commands.current.length > 0) {

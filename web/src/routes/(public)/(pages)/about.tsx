@@ -9,29 +9,21 @@ export const Route = createFileRoute('/(public)/(pages)/about')({
 
 function RouteComponent() {
   const offset = useLayoutPublic((s) => s.offset)
-  const aboutPage = useRef<HTMLDivElement>(null)
+  const page = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (aboutPage.current) {
+    if (page.current) {
       gsap.fromTo(
-        aboutPage.current,
-        {
-          opacity: 0,
-          y: 0,
-        },
-        {
-          opacity: 1,
-          y: 15,
-          duration: 1,
-          ease: 'power2.out',
-        },
+        page.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' },
       )
     }
   }, [])
 
   return (
     <div
-      ref={aboutPage}
+      ref={page}
       className="flex flex-col p-5 gap-10 w-full max-w-5xl "
       style={{ minHeight: `calc(100vh - ${offset}px)` }}
     >

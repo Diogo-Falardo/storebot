@@ -109,7 +109,7 @@ const Navbar = React.forwardRef<HTMLDivElement>((_, ref) => (
           <DropdownMenuItem asChild>
             <Link
               to="/how-to-use"
-              className={`${buttonVariants()} w-full text-base tracking-tighter font-semibold capitalize px-2 py-1 rounded-sm text-neutral-400 border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs `}
+              className={`${buttonVariants()} w-full text-base tracking-tighter font-semibold capitalize px-2 py-1 rounded-sm text-neutral-400! border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs `}
             >
               how to use
             </Link>

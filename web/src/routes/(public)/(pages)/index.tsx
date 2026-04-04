@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { SplitText } from 'gsap/SplitText'
 import { createFileRoute } from '@tanstack/react-router'
 import { MoveDown } from 'lucide-react'
 import { publicData, useLayoutPublic } from '@/lib/data'
@@ -18,8 +17,6 @@ export const Route = createFileRoute('/(public)/(pages)/')({
   component: RouteComponent,
 })
 
-gsap.registerPlugin(SplitText)
-
 function RouteComponent() {
   const offset = useLayoutPublic((s) => s.offset)
   const indexTitle = useRef<HTMLHeadingElement>(null)
@@ -33,67 +30,42 @@ function RouteComponent() {
   useEffect(() => {
     const tl = gsap.timeline()
     if (indexTitle.current) {
-      const split = new SplitText(indexTitle.current, { type: 'chars' })
-      tl.from(split.chars, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.05,
-        duration: 0.05,
-        ease: 'power2.out',
-      })
+      tl.fromTo(
+        indexTitle.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+      )
     }
-
-    tl.to({}, { duration: 0.2 })
-
     if (indexDescription.current) {
-      const split = new SplitText(indexDescription.current, { type: 'chars' })
-      tl.from(split.chars, {
-        opacity: 0,
-        y: 10,
-        stagger: 0.035,
-        duration: 0.05,
-        ease: 'power2.out',
-      })
+      tl.fromTo(
+        indexDescription.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        '>', // start after previous
+      )
     }
-
-    tl.to({}, { duration: 0.1 })
-
     if (reasonsDiv.current) {
       tl.fromTo(
         reasonsDiv.current,
-        { opacity: 0, y: 5 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'back.out',
-        },
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        '>',
       )
     }
-
     if (buttonsDiv.current) {
       tl.fromTo(
         buttonsDiv.current,
-        { opacity: 0, y: 5 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'back.out',
-        },
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        '>',
       )
     }
-
     if (section2.current) {
       tl.fromTo(
         section2.current,
-        { opacity: 0, y: 5 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'back.out',
-        },
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        '>',
       )
     }
   }, [])
@@ -107,9 +79,9 @@ function RouteComponent() {
     }
   }
   return (
-    <div className="flex flex-col w-full max-w-5xl z-0">
+    <div className="flex flex-col w-full max-w-5xl p-5 z-0">
       <section
-        className="w-full flex flex-col p-3 gap-10 justify-center"
+        className="w-full h-full flex flex-col gap-10 justify-center"
         style={{ minHeight: `calc(100vh - ${offset}px)` }}
       >
         <div className="flex flex-col gap-3">
@@ -146,31 +118,17 @@ function RouteComponent() {
           })}
         </Accordion>
 
-        <div
-          ref={buttonsDiv}
-          className="flex mt-auto justify-between  items-center"
-        >
-          <Button
-            onClick={() => {
-              setTimeout(() => {
-                window.open('https://t.me/usestorebot', '_blank')
-              }, 200)
-            }}
-            className="flex items-center font-semibold text-shadow-sm text-sky-200"
-            size={'sm'}
-          >
-            <img src="/icons/telegram.svg" alt="Telegram" className="w-5 h-5" />
-            Open Store Bot
-          </Button>
+        <div ref={buttonsDiv} className="mb-15">
           <Button
             onClick={handleMoreInfoClick}
             variant={'ghost'}
-            className="flex items-center text-sm text-neutral-500 font-semibold tracking-tight"
+            className="flex items-center px-0! text-sm text-neutral-500 font-semibold tracking-tight"
           >
             <MoveDown /> More Info
           </Button>
         </div>
       </section>
+      {/* ---- second -----  */}
       <section
         ref={section2}
         className="flex flex-col"

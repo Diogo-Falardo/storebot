@@ -16,18 +16,8 @@ function RouteComponent() {
     if (page.current) {
       gsap.fromTo(
         page.current,
-        {
-          opacity: 0,
-          y: 0,
-          duration: 2.5,
-          ease: 'power1.inOut',
-        },
-        {
-          opacity: 1,
-          y: 15,
-          duration: 1,
-          ease: 'power2.out',
-        },
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' },
       )
     }
   }, [])
