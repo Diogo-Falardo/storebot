@@ -1,13 +1,17 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import {
-  Link,
-  Outlet,
-  createFileRoute,
-  useNavigate,
-} from '@tanstack/react-router'
+import { BotIcon } from 'lucide-react'
+import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 import { useLayoutPublic } from '@/lib/data'
+import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -62,59 +66,56 @@ function RouteComponent() {
   )
 }
 
-const HowToUseButton = () => {
-  const navigate = useNavigate()
-  const btnRef = useRef<HTMLAnchorElement>(null)
-  // animate flag so button dont crash on multiple clicks
-  const animating = useRef(false)
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (animating.current) return
-    animating.current = true
-    if (btnRef.current) {
-      gsap.to(btnRef.current, {
-        scale: 0.5,
-        boxShadow: '0 0 5px #0c4a6e, 0 0 5px #082f49',
-        duration: 0.07,
-        yoyo: true,
-        repeat: 1,
-        ease: 'power1.inOut',
-        onComplete: () => {
-          animating.current = false
-          navigate({ to: '/how-to-use' }) // Navigate after animation
-        },
-      })
-    } else {
-      animating.current = false
-    }
-  }
-
-  return (
-    <Link
-      ref={btnRef}
-      to="/how-to-use"
-      className="text-base tracking-tighter font-semibold lowercase px-2 py-1 rounded-sm text-neutral-400 border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs"
-      onClick={handleClick}
-    >
-      how to use
-    </Link>
-  )
-}
-
 const Navbar = React.forwardRef<HTMLDivElement>((_, ref) => (
   <header
     ref={ref}
     className="sticky top-0 z-50 bg-background font-mono flex items-center justify-center shadow border-b border-neutral-900"
   >
-    <div className="flex w-full justify-between items-center p-5 max-w-5xl">
+    <div className="flex w-full justify-between items-center p-5  max-w-5xl">
       <Link
         to="/"
         className="text-3xl tracking-wide font-semibold text-neutral-200"
       >
         StoreBot
       </Link>
-      <HowToUseButton />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={'ghost'} size={'icon-lg'}>
+            <BotIcon className="size-7" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-40 bg-background border-sky-900 ring ring-sky-950 flex flex-col "
+          align="end"
+        >
+          <DropdownMenuItem asChild>
+            <Button
+              onClick={() => {
+                setTimeout(() => {
+                  window.open('https://t.me/usestorebot', '_blank')
+                }, 200)
+              }}
+              className="w-full text-base tracking-tighter font-semibold capitalize px-2 py-1 rounded-sm text-neutral-400 border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs"
+            >
+              <img
+                src="/icons/telegram.svg"
+                alt="Telegram"
+                className="w-5 h-5"
+              />
+              Open Store Bot
+            </Button>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-sky-900" />
+          <DropdownMenuItem asChild>
+            <Link
+              to="/how-to-use"
+              className={`${buttonVariants()} w-full text-base tracking-tighter font-semibold capitalize px-2 py-1 rounded-sm text-neutral-400 border ring bg-sky-950/70 ring-sky-800/25 border-sky-900/20 shadow-xs `}
+            >
+              how to use
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   </header>
 ))
