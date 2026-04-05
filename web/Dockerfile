@@ -1,60 +1,43 @@
-# ARG to bust cache – change the number (or date) when you want to force full rebuild
-ARG CACHE_BUST=2026-02-27-v2
+# tanstack start app docker production file
 
-# ────────────────────────────────────────────────
-# Stage 1: Build the application
-# ────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
-
-# Install ALL dependencies needed for build
 COPY package*.json ./
+
+# tells docker to create a persistent cach at /root/.npm 
+# RUN --mount=type=cache,target=/root/.npm npm ci --prefer-offline
+## to work on railway -> dont suport cache
 RUN npm ci --prefer-offline
 
-# Copy source code
+# create user and group
+RUN addgroup -g 1001 appgroup && adduser -D -u 1001 -G appgroup appuser
+
 COPY . .
 
-# Build (vite + nitro)
 RUN npm run build
 
-# ── Debug: show exactly what the build produced ──
-RUN echo "=== Build artifacts after npm run build ===" && \
-    ls -la . && \
-    echo "=== Looking for .output ===" && \
-    (ls -la .output 2>/dev/null || echo ".output NOT FOUND!") && \
-    echo "=== Looking for .output/server ===" && \
-    (ls -la .output/server 2>/dev/null || echo "server folder NOT FOUND!") && \
-    echo "=== Looking for index.mjs ===" && \
-    (find .output -name index.mjs || echo "index.mjs NOT FOUND!") || true
+# change ownership
+RUN chown -R appuser:appgroup /app
 
-# ────────────────────────────────────────────────
-# Stage 2: Production runtime (small & optimized)
-# ────────────────────────────────────────────────
-FROM node:22-alpine
+# swith to non-root user
+USER appuser
+
+RUN echo "=== Build output ===" && ls -la .output
+
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Copy package files first → better layer caching
-COPY --from=builder /app/package*.json ./
-
-# Install ONLY production dependencies
-RUN npm ci --omit=dev --ignore-scripts --no-audit --prefer-offline
-
-# Copy the built artifacts (the important part)
+# copy only production dependencies and build output
 COPY --from=builder /app/.output ./.output
 
-# ── Debug in final image (optional – remove later if not needed) ──
-RUN echo "=== Final image contents ===" && \
-    ls -la .output 2>/dev/null || echo ".output missing in final image!"
-
-# Railway uses $PORT environment variable – respect it
+ENV NODE_ENV=production
 ENV PORT=3000
-EXPOSE ${PORT}
+ENV HOST=0.0.0.0
 
-# Start the Nitro server
-CMD ["sh", "-c", "node .output/server/index.mjs --port ${PORT}"]
-
-# Optional: Healthcheck so Railway knows when the app is ready
+EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
+CMD ["node", ".output/server/index.mjs", "--port", "3000"]
