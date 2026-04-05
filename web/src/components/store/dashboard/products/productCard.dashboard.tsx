@@ -94,6 +94,8 @@ const ProductCardDashboard = (product: productProps) => {
     }
   }
 
+  console.log(`PRODUCT CARD DASHBOARD ID:` + product.productId)
+
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
     <Card className="cursor-pointer w-full p-2.5 bg-background ring ring-primary border-primary/50">
@@ -101,7 +103,7 @@ const ProductCardDashboard = (product: productProps) => {
         <div
           onClick={() => {
             setOpenProductInfoCardCategoryId(product.productCategoryId)
-            setOpenProductInfoCard(product.productCategoryId)
+            setOpenProductInfoCard(product.productId)
           }}
           className="flex-1 flex gap-2 items-center"
         >

@@ -14,7 +14,6 @@ export const schema_PRODUCT = z.object({
   }),
   productDesc: z
     .string()
-    .min(1, { message: 'valid description is required' })
     .max(2500, { message: 'limit of 2500 characters to product description' })
     .optional()
     .nullable(),

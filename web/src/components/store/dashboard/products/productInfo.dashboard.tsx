@@ -27,9 +27,6 @@ export const ProductInfoDashboard = ({
         activeProductCategoryId === null ? undefined : activeProductCategoryId,
     })
 
-  console.log(activeProductCategoryId)
-  console.log(categoryName)
-
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   const cardRef = useRef<HTMLDivElement>(null)
 

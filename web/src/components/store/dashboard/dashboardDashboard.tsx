@@ -95,12 +95,9 @@ const DashboardDashboard = ({
     setRemainingScreenSize(() => screenSize - ocupatedScreenSizeByOtherElements)
   }, [screenSize, ocupatedScreenSizeByOtherElements])
 
-  //   console.log(`
-  //  screenSize = ${screenSize}
-  //  ocupated = ${ocupatedScreenSizeByOtherElements}
-  //  remain = ${remainingScreenSize}
-
-  //   `)
+  if (products) {
+    console.log(products)
+  }
 
   return (
     <div
