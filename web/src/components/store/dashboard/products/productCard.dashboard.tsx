@@ -94,8 +94,6 @@ const ProductCardDashboard = (product: productProps) => {
     }
   }
 
-  console.log(`PRODUCT CARD DASHBOARD ID:` + product.productId)
-
   const PLACEHOLDER_IMG = 'https://placehold.co/400x300?text=No+Image'
   return (
     <Card className="cursor-pointer w-full p-2.5 bg-background ring ring-primary border-primary/50">

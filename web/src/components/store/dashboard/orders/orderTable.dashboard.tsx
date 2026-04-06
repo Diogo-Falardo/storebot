@@ -3,15 +3,13 @@ import { useEffect, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
+import { EllipsisIcon } from 'lucide-react'
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
 import {
   Select,
   SelectContent,
@@ -28,7 +26,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Label } from '@/components/ui/label'
-
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
@@ -38,17 +35,28 @@ import {
   create_ORDER_CUSTOM_MESSAGE,
   enum_ORDER_STATUS,
   type_enum_ORDER_STATUS,
-  type_schema_ORDER,
+  type_extended_schema_ORDER,
 } from '@/db/schemas/order.schema'
-import {
-  sf_get_StorePaymentMethodNameFromMethodId,
-  sf_get_StoreShippingMethodNameFromMethodId,
-} from '@/server/store/store.functions'
 import {
   sf_add_CustomOrderMessage,
   sf_update_OrderStatus,
 } from '@/server/orders/order.function'
 import { use_get_ProductsFromOrderId } from '@/lib/hooks/order.hooks'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -61,125 +69,122 @@ export function formatDate(dateString: string) {
   })
 }
 
-const OrderCardADM = ({
+const OrderTableDashboard = ({
   storeId,
   storeCurrency,
-  order,
+  orders,
+  tableCaption,
 }: {
   storeId: string
   storeCurrency: string
-  order: type_schema_ORDER
+  orders: Array<type_extended_schema_ORDER>
+  tableCaption: string
 }) => {
-  // serverFn
-  const shippingMethod = useServerFn(sf_get_StoreShippingMethodNameFromMethodId)
-  const paymentMethod = useServerFn(sf_get_StorePaymentMethodNameFromMethodId)
+  const queryClient = useQueryClient()
   const updateOrderStatus = useServerFn(sf_update_OrderStatus)
-
-  // states
-  const [shippingMethodName, setShippingMethodName] = useState<string>('')
-  const [paymentMethodName, setPaymentMethodName] = useState<string>('')
-  const [status, setStatus] = useState<string>(order.orderStatus)
-  // ui states
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  const queryClient = useQueryClient()
-
-  useEffect(() => {
-    // fetch shipping method name
-    shippingMethod({
-      data: { shippingMethodId: order.orderShippingMethod },
-    }).then(setShippingMethodName)
-    // fetch payment method name
-    paymentMethod({
-      data: { paymentMethodId: order.orderPaymentMethod },
-    }).then(setPaymentMethodName)
-  }, [order.orderShippingMethod, order.orderPaymentMethod])
-
-  const updateStatus = async (newStatus: type_enum_ORDER_STATUS) => {
-    setStatus(newStatus)
-    try {
-      await updateOrderStatus({
-        data: { storeId, orderId: order.orderId, status: newStatus },
-      })
-      toast.success(`Status changed to: ${newStatus}!`)
-      queryClient.invalidateQueries({
-        queryKey: ['orders', storeId, order.orderId],
-      })
-    } catch (err: any) {
-      toast.error(err.message ?? 'Error updating order status')
-    }
-  }
-
   return (
-    <div className="w-full max-w-sm">
-      <Card className="p-2  w-full max-w-sm">
-        <CardContent className="flex flex-col w-full justify-between p-0 gap-4">
-          {/* header */}
-          <CardHeader className="w-full flex flex-row justify-between items-start gap-0 p-0">
-            <CardTitle className="text-xl w-full p-0">
-              Order for: {order.orderIdentifier}
-            </CardTitle>
-            {/* order status changer */}
-            <div
-              className="w-full flex flex-row gap-2 justify-end items-end"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Label className="text-xl mb-1">Status</Label>
-              <Select value={status} onValueChange={updateStatus}>
-                <SelectTrigger className="uppercase dark:bg-neutral-950 text-xs ">
-                  <SelectValue placeholder={status.replace('_', ' ')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {enum_ORDER_STATUS.options.map((statusOption) => (
-                    <SelectItem key={statusOption} value={statusOption}>
-                      {statusOption.replace('_', ' ')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-
-          {/* container 1 */}
-          {/* order info */}
-          <div className="w-full gap-4">
-            <h1 className="flex items-center gap-2 font-bold text-lg">
-              Order Date:
-              <span className="text-base font-normal">
-                {formatDate(order.orderCreatedAt)}
-              </span>
-            </h1>
-            <h1 className="flex items-center gap-2">
-              Payment Method
-              <Badge className="rounded bg-emerald-900 text-white">
-                {paymentMethodName}
-              </Badge>
-            </h1>
-            <h1 className="flex items-center gap-2">
-              Shipping Method
-              <Badge className="rounded bg-cyan-900 text-white">
-                {shippingMethodName}
-              </Badge>
-            </h1>
-          </div>
-
-          <Button className="mt-4 w-full" onClick={() => setSheetOpen(true)}>
-            View Details
-          </Button>
-        </CardContent>
-      </Card>
-      <OrderCardSheet
-        orderId={order.orderId}
-        storeId={storeId}
-        storeCurrency={storeCurrency}
-        orderCustomMessage={order.orderCustomMessage}
-        orderIdentifier={order.orderIdentifier}
-        orderDate={order.orderCreatedAt}
-        orderDeliveryInstruction={order.orderDeliveryInstruction}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
-    </div>
+    <Table>
+      <TableCaption>{tableCaption}</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Client</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>More</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {orders
+          .sort(
+            (a, b) =>
+              new Date(b.orderCreatedAt).getTime() -
+              new Date(a.orderCreatedAt).getTime(),
+          )
+          .map((order) => (
+            <TableRow key={order.orderId}>
+              <TableCell>{order.orderIdentifier}</TableCell>
+              <TableCell>{formatDate(order.orderCreatedAt)}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant={'ghost'} size={'icon'}>
+                      <EllipsisIcon />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  {/* change order status */}
+                  <DropdownMenuContent className="flex flex-col gap-2">
+                    <DropdownMenuItem
+                      asChild
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <Select
+                        value={order.orderStatus}
+                        onValueChange={async (
+                          newStatus: type_enum_ORDER_STATUS,
+                        ) => {
+                          try {
+                            await updateOrderStatus({
+                              data: {
+                                storeId,
+                                orderId: order.orderId,
+                                status: newStatus,
+                              },
+                            })
+                            toast.success(`Status changed to: ${newStatus}!`)
+                            queryClient.invalidateQueries({
+                              queryKey: ['orders', storeId],
+                            })
+                          } catch (err: any) {
+                            toast.error(
+                              err.message ?? 'Error updating order status',
+                            )
+                          }
+                        }}
+                      >
+                        <SelectTrigger className=" dark:bg-neutral-900 border-primary text-xs! w-full ">
+                          <SelectValue
+                            placeholder={order.orderStatus.replace('_', ' ')}
+                          />
+                        </SelectTrigger>
+                        <SelectContent align="end" className="">
+                          {enum_ORDER_STATUS.options.map((statusOption) => (
+                            <SelectItem key={statusOption} value={statusOption}>
+                              {statusOption.replace('_', ' ')}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </DropdownMenuItem>
+                    {/* view order details */}
+                    <DropdownMenuItem
+                      asChild
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <OrderCardSheet
+                        key={order.orderId}
+                        orderId={order.orderId}
+                        storeId={storeId}
+                        storeCurrency={storeCurrency}
+                        orderCustomMessage={order.orderCustomMessage ?? null}
+                        orderIdentifier={order.orderIdentifier}
+                        orderPaymentMethod={order.orderPaymentMethodName}
+                        orderShippingMethod={order.orderShippingMethodName}
+                        orderDate={order.orderCreatedAt}
+                        orderDeliveryInstruction={
+                          order.orderDeliveryInstruction
+                        }
+                        open={sheetOpen}
+                        onOpenChange={setSheetOpen}
+                      />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+      </TableBody>
+    </Table>
   )
 }
 
@@ -189,6 +194,8 @@ const OrderCardSheet = ({
   orderId,
   orderDate,
   orderIdentifier,
+  orderPaymentMethod,
+  orderShippingMethod,
   orderDeliveryInstruction,
   orderCustomMessage,
   open,
@@ -199,20 +206,20 @@ const OrderCardSheet = ({
   orderId: string
   orderDate: string
   orderIdentifier: string
+  orderPaymentMethod: string
+  orderShippingMethod: string
   orderDeliveryInstruction: string
   orderCustomMessage: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }) => {
-  // states
   const [total, setTotal] = useState<number>(0)
 
   // load the products from each order
   const { data: products, isLoading: productsIsLoading } =
     use_get_ProductsFromOrderId({ storeId, orderId })
 
-  // serverfn
-  const add = useServerFn(sf_add_CustomOrderMessage)
+  const addCustomeOrderMessage = useServerFn(sf_add_CustomOrderMessage)
 
   const queryClient = useQueryClient()
 
@@ -240,7 +247,7 @@ const OrderCardSheet = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        await add({
+        await addCustomeOrderMessage({
           data: { storeId, orderId, message: value.orderCustomMessage },
         })
         toast.success(`Order Custom Message was updated!`)
@@ -256,38 +263,46 @@ const OrderCardSheet = ({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <span />
+        <Button>more details</Button>
       </SheetTrigger>
       <SheetContent>
         {/* header */}
-        {/* uses to render */}
         <SheetHeader>
-          <SheetTitle>
-            {`
-                ORDER FROM: ${orderIdentifier}
-                `}
+          <SheetTitle className="text-neutral-400">
+            Order From:{' '}
+            <span className="text-neutral-50">{orderIdentifier}</span>
           </SheetTitle>
-          <SheetDescription className="flex flex-col">
-            <h1 className="font-bold">
-              Order Id: <span className="font-normal">{orderId}</span>
+          <SheetDescription className="flex flex-col gap-1">
+            <h1 className="font-bold text-base">
+              Order Id:{' '}
+              <span className="font-normal text-neutral-100 text-sm">
+                {orderId}
+              </span>
             </h1>
-            <h1 className="font-bold">
-              Order Date:{' '}
-              <span className="font-normal">{formatDate(orderDate)}</span>
+            <h1 className="font-bold text-base">
+              Order Date:
+              <span className="font-normal text-neutral-100 text-sm">
+                {formatDate(orderDate)}
+              </span>
+            </h1>
+            <h1 className="font-bold text-base">
+              Order Payment Method:
+              <span className="font-normal text-neutral-100 text-sm bg-primary p-1 rounded-sm border-primary/50 border">
+                {orderPaymentMethod}
+              </span>
+            </h1>
+            <h1 className="font-bold text-base">
+              Order Shipping Method:
+              <span className="font-normal text-sm text-neutral-100 bg-emerald-900 p-1 rounded-sm border-emerald-500/50 border">
+                {orderShippingMethod}
+              </span>
             </h1>
           </SheetDescription>
         </SheetHeader>
-
-        {/* BODY OF THE ORDER
-        
-        - total of the oder
-        - orderDeliveryInstruction
-        - products ordered
-        */}
         <div className="px-4 flex flex-col gap-4 flex-1 overflow-auto">
-          <h1 className="text-lg flex gap-2 font-normal">
+          <h1 className="text-lg flex gap-2 text-neutral-400 font-normal">
             TOTAL:
-            <span className="font-medium">
+            <span className="font-medium text-neutral-50">
               {total.toFixed(2)}
               <span className="ml-1">{storeCurrency}</span>
             </span>
@@ -297,9 +312,6 @@ const OrderCardSheet = ({
           <p className="text-neutral-400">{orderDeliveryInstruction}</p>
 
           <Label>Products Requested</Label>
-          {/* 
-          WHILE PRODUCTS ARE LOADING
-          */}
           {productsIsLoading && (
             <div className="flex flex-1 justify-center items-center">
               <div className="flex gap-1">
@@ -307,31 +319,19 @@ const OrderCardSheet = ({
               </div>
             </div>
           )}
-          {/* 
-          LOADED PRODUCTS
-          */}
           {!productsIsLoading && products && (
             <ScrollArea className="flex flex-1 gap-2">
-              {/* TOP OF THE SCROLL AREA */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 p-1">
                 {products.map((product) => (
-                  <Card>
-                    <CardContent className="flex gap-2">
-                      {/* LEFT SIDE 
-
-                    - produt image
-                    */}
+                  <Card className="p-2.5 bg-background ring ring-primary border-primary/50">
+                    <CardContent className="flex gap-2 p-0">
                       {product.productImageUrl && (
                         <img
                           src={product.productImageUrl}
                           className="h-15 w-15 rounded object-cover"
                         />
                       )}
-                      {/* BODY OF PRODUCTS
-                    
-                    - product name
-                    - product price
-                    */}
+
                       <div className="flex flex-1 justify-between">
                         <div className="flex flex-col">
                           <CardTitle>{product.productName}</CardTitle>
@@ -346,7 +346,6 @@ const OrderCardSheet = ({
               </div>
             </ScrollArea>
           )}
-          {/* BOTTOM OF BODY */}
           <div className="flex flex-col gap-4 items-end mt-auto mb-4">
             <form
               id="add-order-custom-message"
@@ -363,7 +362,7 @@ const OrderCardSheet = ({
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>
-                        Order Custome Message
+                        Order Custom Message
                       </FieldLabel>
                       <FieldDescription>
                         Order Custom Message allows store administrators to
@@ -401,4 +400,4 @@ const OrderCardSheet = ({
   )
 }
 
-export default OrderCardADM
+export default OrderTableDashboard

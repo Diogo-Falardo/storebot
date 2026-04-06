@@ -57,6 +57,16 @@ export const create_ORDER = schema_ORDER
   })
 export type type_create_ORDER = z.infer<typeof create_ORDER>
 
-export const create_ORDER_CUSTOM_MESSAGE = schema_ORDER.pick({
-  orderCustomMessage: true,
+export const create_ORDER_CUSTOM_MESSAGE = schema_ORDER
+  .pick({
+    orderCustomMessage: true,
+  })
+  .extend({
+    orderCustomMessage: z.string(),
+  })
+
+export const extended_schema_ORDER = schema_ORDER.extend({
+  orderPaymentMethodName: z.string(),
+  orderShippingMethodName: z.string(),
 })
+export type type_extended_schema_ORDER = z.infer<typeof extended_schema_ORDER>

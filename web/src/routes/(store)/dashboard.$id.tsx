@@ -126,7 +126,12 @@ function RouteComponent() {
             dashboardOffset={dashboardOffset}
           />
         )}
-        {activeTab === 'orders' && <DashboardOrders storeId={storeId} />}
+        {activeTab === 'orders' && (
+          <DashboardOrders
+            storeId={storeId}
+            storeCurrency={storeInfo.storeCurrency}
+          />
+        )}
       </main>
       {/* menu */}
       <footer

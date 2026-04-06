@@ -1,16 +1,18 @@
 import { v4 as uuidv4 } from 'uuid'
 import { and, eq } from 'drizzle-orm'
+import { serverStore } from '../store/store.server'
 import { serverProduct } from '../products/products.server'
 import { db } from '@/db'
 import { orders, productsOrders } from '@/db/schema'
 import {
-  schema_ORDER,
+  extended_schema_ORDER,
   type_create_ORDER,
   type_enum_ORDER_STATUS,
-  type_schema_ORDER,
+  type_extended_schema_ORDER,
 } from '@/db/schemas/order.schema'
 
 const productServer = new serverProduct()
+const storeServer = new serverStore()
 
 export class serverOrder {
   /**
@@ -80,7 +82,7 @@ export class serverOrder {
    */
   async get_OrdersFromStoreId(
     storeId: string,
-  ): Promise<Array<type_schema_ORDER>> {
+  ): Promise<Array<type_extended_schema_ORDER>> {
     try {
       const storeOrders = await db
         .select()
@@ -88,20 +90,30 @@ export class serverOrder {
         .where(eq(orders.storeId, storeId))
 
       // map DB fields to schema_ORDER fields
-      const mappedOrders = storeOrders.map((order) => ({
-        orderId: order.id,
-        storeId: order.storeId,
-        orderStatus: order.orderStatus,
-        orderIdentifier: order.orderIdentifier,
-        telegramUserId: order.telegramUserId,
-        orderPaymentMethod: order.orderPaymentMethod,
-        orderShippingMethod: order.orderShippingMethod,
-        orderDeliveryInstruction: order.orderDeliveryInstruction,
-        orderCustomMessage: order.orderCustomMessage,
-        orderCreatedAt: order.createdAt,
-      }))
+      const mappedOrders = await Promise.all(
+        storeOrders.map(async (order) => ({
+          orderId: order.id,
+          storeId: order.storeId,
+          orderStatus: order.orderStatus,
+          orderIdentifier: order.orderIdentifier,
+          telegramUserId: order.telegramUserId,
+          orderPaymentMethod: order.orderPaymentMethod,
+          orderPaymentMethodName:
+            await storeServer.get_StorePaymentMethodNameFromMethodId(
+              order.orderPaymentMethod,
+            ),
+          orderShippingMethod: order.orderShippingMethod,
+          orderShippingMethodName:
+            await storeServer.get_StoreShippingMethodNameFromMethodId(
+              order.orderShippingMethod,
+            ),
+          orderDeliveryInstruction: order.orderDeliveryInstruction,
+          orderCustomMessage: order.orderCustomMessage,
+          orderCreatedAt: order.createdAt,
+        })),
+      )
 
-      return schema_ORDER.array().parse(mappedOrders)
+      return extended_schema_ORDER.array().parse(mappedOrders)
     } catch (err: any) {
       console.log(`
       -------------------------
@@ -219,7 +231,10 @@ export class serverOrder {
    * @param storeId
    * @returns
    */
-  async get_OrdersFromTelegramUserId(storeId: string, telegramUserId: number) {
+  async get_OrdersFromTelegramUserId(
+    storeId: string,
+    telegramUserId: number,
+  ): Promise<Array<type_extended_schema_ORDER>> {
     try {
       const userOrders = await db
         .select()
@@ -231,11 +246,30 @@ export class serverOrder {
           ),
         )
 
-      if (userOrders.length === 0) {
-        return 'no orders'
-      }
+      const mappedUserOrders = await Promise.all(
+        userOrders.map(async (order) => ({
+          orderId: order.id,
+          storeId: order.storeId,
+          orderStatus: order.orderStatus,
+          orderIdentifier: order.orderIdentifier,
+          telegramUserId: order.telegramUserId,
+          orderPaymentMethod: order.orderPaymentMethod,
+          orderPaymentMethodName:
+            await storeServer.get_StorePaymentMethodNameFromMethodId(
+              order.orderPaymentMethod,
+            ),
+          orderShippingMethod: order.orderShippingMethod,
+          orderShippingMethodName:
+            await storeServer.get_StoreShippingMethodNameFromMethodId(
+              order.orderShippingMethod,
+            ),
+          orderDeliveryInstruction: order.orderDeliveryInstruction,
+          orderCustomMessage: order.orderCustomMessage,
+          orderCreatedAt: order.createdAt,
+        })),
+      )
 
-      return userOrders
+      return extended_schema_ORDER.array().parse(mappedUserOrders)
     } catch (err: any) {
       console.log(`
       -------------------------
