@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react'
-import { useServerFn } from '@tanstack/react-start'
+import React, { useState } from 'react'
 import { ReceiptTextIcon } from 'lucide-react'
-import { formatDate } from '../dashboard/orders/orderCard.dashboard'
+import { formatDate } from '../dashboard/orders/orderTable.dashboard'
 import OrderInfo from './orders/orderInfo'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { use_get_OrdersFromTelegramUserId } from '@/lib/hooks/order.hooks'
-import {
-  sf_get_StorePaymentMethodNameFromMethodId,
-  sf_get_StoreShippingMethodNameFromMethodId,
-} from '@/server/store/store.functions'
 import { Button } from '@/components/ui/button'
 import {
   Empty,
@@ -32,80 +33,57 @@ const StoreOrders = ({
 }) => {
   const { data: userOrders, isLoading: loadingUserOrders } =
     use_get_OrdersFromTelegramUserId({ storeId, telegramUserId })
-  const shippingMethod = useServerFn(sf_get_StoreShippingMethodNameFromMethodId)
-  const paymentMethod = useServerFn(sf_get_StorePaymentMethodNameFromMethodId)
-  const [shippingMethodName, setShippingMethodName] = useState<string>('')
-  const [paymentMethodName, setPaymentMethodName] = useState<string>('')
   const [openOrderId, setOpenOrderId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (userOrders && userOrders !== 'no orders' && userOrders.length > 0) {
-      shippingMethod({
-        data: { shippingMethodId: userOrders[0].orderShippingMethod },
-      }).then(setShippingMethodName)
-      paymentMethod({
-        data: { paymentMethodId: userOrders[0].orderPaymentMethod },
-      }).then(setPaymentMethodName)
-    }
-  }, [userOrders])
 
   return (
     <div className="flex flex-col flex-1 min-h-0 pb-5">
       <ScrollArea className="flex-1 h-full min-h-0 p-2">
-        <div className="flex flex-col h-full gap-3">
+        <div className="flex flex-col h-full gap-3 p-1">
           {loadingUserOrders && (
             <div className="w-full h-full gap-2 flex justify-center items-center">
               <Spinner />
               Loading your orders
             </div>
           )}
-          {userOrders && userOrders.length > 0 && userOrders !== 'no orders' ? (
+          {userOrders && userOrders.length > 0 ? (
             userOrders
               .sort(
                 (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime(),
+                  new Date(b.orderCreatedAt).getTime() -
+                  new Date(a.orderCreatedAt).getTime(),
               )
               .map((order) => (
-                <React.Fragment key={order.id}>
-                  <Card className="p-2 rounded-sm">
-                    <CardContent className="p-0">
-                      {/* order header */}
-                      {/* render date, status, id */}
-                      <CardHeader className="p-0 w-full">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between">
-                          <CardTitle>
-                            <Badge className="rounded-sm bg-neutral-300 roudend text-black">
-                              {order.orderStatus}
-                            </Badge>
-                          </CardTitle>
-                          <Badge className="bg-neutral-800 text-neutral-200 rounded-sm">
-                            {order.id}
-                          </Badge>
-                        </div>
-                        <h1 className="py-2 text-base font-medium">
-                          {formatDate(order.createdAt)}
-                        </h1>
-                      </CardHeader>
+                <React.Fragment key={order.orderId}>
+                  <Card className="rounded-sm gap-2 p-2.5 bg-background ring ring-primary border-primary/50">
+                    <CardHeader className="p-0  w-full flex items-center justify-between">
+                      <CardTitle>{formatDate(order.orderCreatedAt)}</CardTitle>
+                      <Badge className="rounded-sm bg-neutral-300 roudend text-black">
+                        {order.orderStatus}
+                      </Badge>
+                    </CardHeader>
+                    <CardDescription className="p-0">
+                      <Badge className="bg-neutral-800 text-neutral-200 rounded-sm">
+                        {order.orderId}
+                      </Badge>
+                    </CardDescription>
+                    <CardContent className="p-0 flex flex-col gap-2">
                       <div className="w-full flex flex-col text-sm gap-2">
-                        <h1 className="flex items-center gap-2">
-                          Payment Method
+                        <h1 className="flex font-semibold text-neutral-300 items-center gap-2">
+                          Payment Method:
                           <Badge className="rounded bg-emerald-900 text-white">
-                            {paymentMethodName}
+                            {order.orderPaymentMethodName}
                           </Badge>
                         </h1>
-                        <h1 className="flex items-center gap-2">
-                          Shipping Method
+                        <h1 className="flex font-semibold text-neutral-300 items-center gap-2">
+                          Shipping Method:
                           <Badge className="rounded bg-cyan-900 text-white">
-                            {shippingMethodName}
+                            {order.orderShippingMethodName}
                           </Badge>
                         </h1>
                       </div>
-                      {/* Add a button to open InfoOrders */}
                       <Button
-                        className="mt-2"
                         variant="outline"
-                        onClick={() => setOpenOrderId(order.id)}
+                        onClick={() => setOpenOrderId(order.orderId)}
                       >
                         View Details
                       </Button>
@@ -114,14 +92,14 @@ const StoreOrders = ({
                   <OrderInfo
                     storeId={storeId}
                     storeCurrency={storeCurrency}
-                    orderId={order.id}
-                    orderDate={order.createdAt}
+                    orderId={order.orderId}
+                    orderDate={order.orderCreatedAt}
                     orderIdentifier={order.orderIdentifier}
                     orderDeliveryInstruction={order.orderDeliveryInstruction}
-                    orderCustomMessage={order.orderCustomMessage}
-                    open={openOrderId === order.id}
+                    orderCustomMessage={order.orderCustomMessage ?? null}
+                    open={openOrderId === order.orderId}
                     onOpenChange={(open) =>
-                      setOpenOrderId(open ? order.id : null)
+                      setOpenOrderId(open ? order.orderId : null)
                     }
                   />
                 </React.Fragment>
