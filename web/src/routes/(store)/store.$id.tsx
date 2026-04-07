@@ -3,7 +3,6 @@ import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
 import { PackageIcon, ReceiptTextIcon } from 'lucide-react'
 import ErrorWrapper from '@/components/errorWrapper'
-import { test_data } from '@/lib/test.data'
 import { sf_validate_ExternalUserAccess } from '@/server/store/store.functions'
 import { sf_validate_ExternalTelegramUserInitData } from '@/server/telegram/telegram.function'
 import { Spinner } from '@/components/ui/spinner'
@@ -35,11 +34,11 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
         const user = await validateExternalUserTelegramInitData({
-          data: { initData: test_data.initData },
+          data: { initData: WebApp.initData },
         })
 
         if (user.telegramId) {

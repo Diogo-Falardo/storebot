@@ -18,18 +18,18 @@ export async function validate_TelegramInitData(initData: string) {
   // convert the initData string to URLSearchParams
   const params = new URLSearchParams(initData)
 
-  // const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
 
-  // if (!isValid) {
-  //   console.log(`
-  //   ------------------------------
-  //   ERROR VALIDATING TELEGRAM
+  if (!isValid) {
+    console.log(`
+    ------------------------------
+    ERROR VALIDATING TELEGRAM
 
-  //   ERROR: Invalid Telegram initData: signature verification failed...
-  //   ------------------------------
-  //   `)
-  //   throw new Error('Ups... store is only valid in telegram.')
-  // }
+    ERROR: Invalid Telegram initData: signature verification failed...
+    ------------------------------
+    `)
+    throw new Error('Ups... store is only valid in telegram.')
+  }
 
   // user data
   const userDataStr = params.get('user')
@@ -74,18 +74,18 @@ export function validate_ExternalTelegramUserInitData(initData: string) {
   // convert the initData string to URLSearchParams
   const params = new URLSearchParams(initData)
 
-  // const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
+  const isValid = validateWebAppData(TELEGRAM_BOT_TOKEN, params)
 
-  // if (!isValid) {
-  //   console.log(`
-  //   ------------------------------
-  //   ERROR VALIDATING TELEGRAM
+  if (!isValid) {
+    console.log(`
+    ------------------------------
+    ERROR VALIDATING TELEGRAM
 
-  //   ERROR: Invalid Telegram initData: signature verification failed...
-  //   ------------------------------
-  //   `)
-  //   throw new Error('Ups... store is only valid in telegram.')
-  // }
+    ERROR: Invalid Telegram initData: signature verification failed...
+    ------------------------------
+    `)
+    throw new Error('Ups... store is only valid in telegram.')
+  }
 
   // user data
   const userDataStr = params.get('user')

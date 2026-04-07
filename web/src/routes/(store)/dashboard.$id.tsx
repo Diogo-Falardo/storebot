@@ -5,8 +5,6 @@ import { LayoutDashboard, ReceiptText, Settings } from 'lucide-react'
 import ErrorWrapper from '@/components/errorWrapper'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Spinner } from '@/components/ui/spinner'
-
-import { test_data } from '@/lib/test.data'
 import DashboardSettings from '@/components/store/dashboard/dashboardSettings'
 import DashboardDashboard from '@/components/store/dashboard/dashboardDashboard'
 import { useLayoutDashboard } from '@/lib/data'
@@ -48,15 +46,11 @@ function RouteComponent() {
   useEffect(() => {
     const authenticate = async () => {
       try {
-        // const { WebApp } = await import('@grammyjs/web-app')
-        // WebApp.ready()
-
-        // const user = await validateTelegramInitData({
-        //   data: { initData: WebApp.initData },
-        // })
+        const { WebApp } = await import('@grammyjs/web-app')
+        WebApp.ready()
 
         const user = await validateTelegramInitData({
-          data: { initData: test_data.initData },
+          data: { initData: WebApp.initData },
         })
 
         const isOwner = await validateIfUserIsOwnerOfTheStore({
