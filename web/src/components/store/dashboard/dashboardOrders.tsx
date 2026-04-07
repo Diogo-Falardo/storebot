@@ -74,6 +74,14 @@ const DashboardOrders = ({
               <DropdownMenuItem asChild>
                 <TabsTrigger
                   className=" ring ring-neutral-800"
+                  value="accepted"
+                >
+                  Accepted
+                </TabsTrigger>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <TabsTrigger
+                  className=" ring ring-neutral-800"
                   value="awaiting_payment"
                 >
                   Awaiting Payment
@@ -127,6 +135,18 @@ const DashboardOrders = ({
                 (order) => order.orderStatus === 'in_progress',
               )}
               tableCaption="List of In Progress Orders"
+            />
+          )}
+        </TabsContent>
+        <TabsContent value="accepted">
+          {orders && orders.length > 0 && (
+            <OrderTableDashboard
+              storeId={storeId}
+              storeCurrency={storeCurrency}
+              orders={orders.filter(
+                (order) => order.orderStatus === 'accepted',
+              )}
+              tableCaption="List of Accepted Orders"
             />
           )}
         </TabsContent>
