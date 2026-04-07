@@ -31,7 +31,7 @@ const ProductCard = (product: productCardProps) => {
         </span>
       </h1>
 
-      <div className="w-full">
+      <div className="w-full mt-auto">
         <AddProductToCart
           productImageUrl={product.productImageUrl ?? null}
           {...product}

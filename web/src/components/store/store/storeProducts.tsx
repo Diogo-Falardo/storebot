@@ -78,18 +78,12 @@ const StoreProducts = ({
   }, [isLoadingStoreCategorys, storeCategorys])
 
   useLayoutEffect(() => {
-    const updateSizes = () => {
-      if (productsPageRef.current) {
-        setProductsPageSize(productsPageRef.current.offsetHeight)
-      }
-      if (searchOptionsDivRef.current) {
-        setSearchOptionsDivSize(searchOptionsDivRef.current.offsetHeight)
-      }
+    if (productsPageRef.current) {
+      setProductsPageSize(productsPageRef.current.offsetHeight)
     }
-
-    updateSizes()
-    window.addEventListener('resize', updateSizes)
-    return () => window.removeEventListener('resize', updateSizes)
+    if (searchOptionsDivRef.current) {
+      setSearchOptionsDivSize(searchOptionsDivRef.current.offsetHeight)
+    }
   }, [])
 
   useEffect(() => {
@@ -131,6 +125,8 @@ const StoreProducts = ({
     priceRange,
     searchQuery,
   ])
+
+  console.log(productsScrollAreaSize)
 
   return (
     <div className="flex-1 flex flex-col" ref={productsPageRef}>
@@ -183,7 +179,7 @@ const StoreProducts = ({
             />
           </div>
           <div className="flex-1" ref={productsScrollAreaDivRef}>
-            {productsScrollAreaSize > 0 ? (
+            {productsScrollAreaSize > 0 && (
               <ScrollArea
                 style={{
                   height: `${productsScrollAreaSize}px`,
@@ -201,18 +197,6 @@ const StoreProducts = ({
                   ))}
                 </div>
               </ScrollArea>
-            ) : (
-              <div className="flex flex-col justify-center items-center h-full">
-                <h1 className="text-neutral-200 flex gap-2 items-center">
-                  <Spinner /> rendering products...
-                </h1>
-                <p className="text-neutral-500 font-medium text-sm text-center mt-2">
-                  If this takes too long, try switching tabs or refreshing the
-                  page.
-                  <br />
-                  We're working to make this smoother—thanks for your patience!
-                </p>
-              </div>
             )}
           </div>
         </div>
