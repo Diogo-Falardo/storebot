@@ -21,10 +21,10 @@ const MIN = 0
 const MAX = 10000
 
 type productsFiltersProps = {
-  categoryNames: Array<string>
+  categories: Array<{ categoryId: string; categoryName: string }>
   priceRange: [number, number]
   setPriceRange: (range: [number, number]) => void
-  selectedCategories: Array<string>
+  selectedCategories: Array<string> // store IDs
   setSelectedCategories: (categories: Array<string>) => void
 }
 
@@ -44,13 +44,13 @@ const ProductsFilters = (filters: productsFiltersProps) => {
     filters.setPriceRange([filters.priceRange[0], value])
   }
 
-  const handleCategoryChange = (name: string) => {
-    if (filters.selectedCategories.includes(name)) {
+  const handleCategoryChange = (id: string) => {
+    if (filters.selectedCategories.includes(id)) {
       filters.setSelectedCategories(
-        filters.selectedCategories.filter((c) => c !== name),
+        filters.selectedCategories.filter((c) => c !== id),
       )
     } else {
-      filters.setSelectedCategories([...filters.selectedCategories, name])
+      filters.setSelectedCategories([...filters.selectedCategories, id])
     }
   }
 
@@ -95,31 +95,35 @@ const ProductsFilters = (filters: productsFiltersProps) => {
             />
           </CollapsibleContent>
         </Collapsible>
-        {/* categorys collapse*/}
+        {/* categories collapse*/}
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex items-center gap-2">
             <Tag />
-            <h1>Categorys</h1>
+            <h1>Categories</h1>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">
-            {filters.categoryNames.length === 0 ? (
+            {filters.categories.length === 0 ? (
               <Empty>
                 <EmptyHeader>
-                  <EmptyTitle>No categorys</EmptyTitle>
+                  <EmptyTitle>No categories</EmptyTitle>
                 </EmptyHeader>
               </Empty>
             ) : (
               <FieldGroup className="gap-2">
-                {filters.categoryNames.map((name) => (
-                  <Field orientation={'horizontal'}>
+                {filters.categories.map((category) => (
+                  <Field orientation={'horizontal'} key={category.categoryId}>
                     <Checkbox
-                      id={name}
-                      name={name}
-                      checked={filters.selectedCategories.includes(name)}
-                      onCheckedChange={() => handleCategoryChange(name)}
+                      id={category.categoryId}
+                      name={category.categoryName}
+                      checked={filters.selectedCategories.includes(
+                        category.categoryId,
+                      )}
+                      onCheckedChange={() =>
+                        handleCategoryChange(category.categoryId)
+                      }
                     />
-                    <Label className="text-base" htmlFor={name}>
-                      {name}
+                    <Label className="text-base" htmlFor={category.categoryId}>
+                      {category.categoryName}
                     </Label>
                   </Field>
                 ))}

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { PackageIcon, Search } from 'lucide-react'
+import { PackageIcon } from 'lucide-react'
 import ProductsFilters from './products/productsFilters'
 import ProductCard from './products/productCard'
 import Cart from './orders/cart'
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
 import { use_get_ProductsFromStoreId } from '@/lib/hooks/product.hook'
 import { type_schema_PRODUCT } from '@/db/schemas/product.schema'
@@ -34,11 +33,14 @@ const StoreProducts = ({
   const [visibleProducts, setVisibleProducts] = useState<
     Array<type_schema_PRODUCT>
   >([])
-  const [categorysNames, setCateoryNames] = useState<Array<string>>([])
+  const [categorysNames, setCateoryNames] = useState<
+    Array<{ categoryId: string; categoryName: string }>
+  >([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0])
   const [selectedCategories, setSelectedCategories] = useState<Array<string>>(
     [],
   )
+  const [searchQuery, setSearchQuery] = useState('')
   const productsPageRef = useRef<HTMLDivElement>(null)
   const [productsPageSize, setProductsPageSize] = useState<number>(0)
   const searchOptionsDivRef = useRef<HTMLDivElement>(null)
@@ -54,17 +56,24 @@ const StoreProducts = ({
   }, [isLoadingStoreProducts, storeProducts])
 
   useEffect(() => {
-    if (visibleProducts.length > 0) {
-      const prices = visibleProducts.map((p) => Number(p.productPrice))
+    if (!isLoadingStoreProducts && storeProducts && storeProducts.length > 0) {
+      const prices = storeProducts
+        .filter((p) => p.productVisible === 1)
+        .map((p) => Number(p.productPrice))
       const min = Math.min(...prices)
       const max = Math.max(...prices)
       setPriceRange([min, max])
     }
-  }, [visibleProducts])
+  }, [isLoadingStoreProducts, storeProducts])
 
   useEffect(() => {
     if (!isLoadingStoreCategorys && storeCategorys) {
-      setCateoryNames(storeCategorys.map((c) => c.categoryName))
+      setCateoryNames(
+        storeCategorys.map((c) => ({
+          categoryId: c.categoryId,
+          categoryName: c.categoryName,
+        })),
+      )
     }
   }, [isLoadingStoreCategorys, storeCategorys])
 
@@ -86,6 +95,42 @@ const StoreProducts = ({
   useEffect(() => {
     setProductsScrollAreaSize(productsPageSize - searchOptionsDivSize)
   }, [productsPageSize, searchOptionsDivSize])
+
+  useEffect(() => {
+    if (!isLoadingStoreProducts && storeProducts) {
+      let filtered = storeProducts.filter((p) => p.productVisible === 1)
+
+      if (selectedCategories.length > 0) {
+        filtered = filtered.filter((p) =>
+          selectedCategories.includes(p.productCategoryId),
+        )
+      }
+
+      if (priceRange[0] !== priceRange[1]) {
+        filtered = filtered.filter((p) => {
+          const price = Number(p.productPrice)
+          return price >= priceRange[0] && price <= priceRange[1]
+        })
+      }
+
+      if (searchQuery.trim() !== '') {
+        const searched = filtered.filter((p) =>
+          p.productName.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+        if (searched.length > 0) {
+          filtered = searched
+        } // else: keep previous filtered (do not update)
+      }
+
+      setVisibleProducts(filtered)
+    }
+  }, [
+    isLoadingStoreProducts,
+    storeProducts,
+    selectedCategories,
+    priceRange,
+    searchQuery,
+  ])
 
   return (
     <div className="flex-1 flex flex-col" ref={productsPageRef}>
@@ -118,12 +163,14 @@ const StoreProducts = ({
         <div className="flex-1 flex flex-col" ref={searchOptionsDivRef}>
           {/* search, filters, cart */}
           <div className="p-2 flex gap-2">
-            <Input placeholder="search" />
-            <Button variant={'outline'}>
-              <Search />
-            </Button>
+            <Input
+              placeholder="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
             <ProductsFilters
-              categoryNames={categorysNames}
+              categories={categorysNames}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               selectedCategories={selectedCategories}
@@ -155,8 +202,16 @@ const StoreProducts = ({
                 </div>
               </ScrollArea>
             ) : (
-              <div className="flex justify-center items-center h-full">
-                <Spinner />
+              <div className="flex flex-col justify-center items-center h-full">
+                <h1 className="text-neutral-200 flex gap-2 items-center">
+                  <Spinner /> rendering products...
+                </h1>
+                <p className="text-neutral-500 font-medium text-sm text-center mt-2">
+                  If this takes too long, try switching tabs or refreshing the
+                  page.
+                  <br />
+                  We're working to make this smoother—thanks for your patience!
+                </p>
               </div>
             )}
           </div>
