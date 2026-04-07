@@ -54,10 +54,6 @@ const DashboardOrders = ({
     )
   }
 
-  if (orders) {
-    console.log(orders)
-  }
-
   return (
     <div className="flex-1 py-2">
       {/* controller of the page content */}

@@ -3,7 +3,6 @@ import {
   ArrowLeftIcon,
   EllipsisVertical,
   PackageIcon,
-  Search,
   Tags,
 } from 'lucide-react'
 import ProductsCategorys from './products/productsCategorys'
@@ -46,6 +45,7 @@ const DashboardDashboard = ({
   const [openProductCategoryAdd, setOpenProductCategoryAdd] =
     useState<boolean>(false)
   const [openProductAdd, setOpenProductAdd] = useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const screenRef = useRef<HTMLDivElement>(null)
   const searchAndButtonsRef = useRef<HTMLDivElement>(null)
   const container2Ref = useRef<HTMLDivElement>(null)
@@ -91,6 +91,15 @@ const DashboardDashboard = ({
     }
   }, [])
 
+  const filteredProducts = (() => {
+    if (!Array.isArray(products)) return []
+    if (searchQuery.trim() === '') return products
+    const matches = products.filter((p) =>
+      p.productName.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    return matches.length > 0 ? matches : products
+  })()
+
   useEffect(() => {
     setRemainingScreenSize(() => screenSize - ocupatedScreenSizeByOtherElements)
   }, [screenSize, ocupatedScreenSizeByOtherElements])
@@ -104,10 +113,12 @@ const DashboardDashboard = ({
       <div className="p-2 flex flex-col gap-2">
         {/* search bar and buttons */}
         <div ref={searchAndButtonsRef} className="flex gap-2">
-          <Input placeholder="search" />
-          <Button>
-            <Search />
-          </Button>
+          <Input
+            placeholder="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={'outline'}>
@@ -194,9 +205,8 @@ const DashboardDashboard = ({
           <ScrollArea style={{ height: `${remainingScreenSize}px` }}>
             <div className="px-2 pb-8 flex flex-col gap-4 pt-2">
               {!productsLoading &&
-                Array.isArray(products) &&
-                products.length > 0 &&
-                products.map((product) => (
+                filteredProducts.length > 0 &&
+                filteredProducts.map((product) => (
                   <ProductCardDashboard
                     key={product.productId}
                     storeCurrency={storeCurrency}
