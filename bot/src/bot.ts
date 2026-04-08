@@ -36,6 +36,7 @@ No websites. No monthly fees. No platform cuts — you keep 100% of every sale.
 • /dashboard — Open your management dashboard
 • /mystore — Preview your store privately
 • /share — Share your store in groups & channels
+• /invite — Get your personal store invite command
 • /activate — Activate or extend your store
 • /pricing — See activation prices
 • /about — Learn how it works
@@ -235,14 +236,19 @@ bot.command("share", async (ctx) => {
       );
     }
 
-    const deepLink = `https://t.me/usestorebot?openshop=shop_${user.storeId}`;
+    const deepLink = `https://t.me/bloop_0_bot?start`;
+    const storeCommand = `/store store_${user.storeId}`;
 
     await ctx.reply(
-      `🛒 <b>${user.storeName}</b>\n\n` + `Tap below to open my store`,
+      `🛒 <b>${user.storeName}</b>\n\n` +
+        `Copy and paste the following command to the bot to open ${user.storeName}:\n\n` +
+        `<code>${storeCommand}</code>`,
       {
         parse_mode: "HTML",
         reply_markup: {
-          inline_keyboard: [[{ text: user.storeName, url: deepLink }]],
+          inline_keyboard: [
+            [{ text: `Open ${user.storeName}`, url: deepLink }],
+          ],
         },
       },
     );
@@ -296,6 +302,43 @@ bot.command("store", async (ctx) => {
     );
   }
   await handleStoreCommand(ctx, args);
+});
+
+// invite link command
+bot.command("invite", async (ctx) => {
+  if (ctx.chat.type !== "private") {
+    return ctx.reply(
+      "⚠️ The /invite command is only available in a private chat. Use /share to share your store in groups or channels.",
+    );
+  }
+
+  const tgUserId = ctx.from?.id;
+  if (!tgUserId) {
+    return ctx.reply("⚠️ Unable to identify your account. Please try again.");
+  }
+
+  try {
+    const user = await me(tgUserId);
+    const hasStore = await userHasStore(tgUserId);
+
+    if (hasStore === "has no store" || !user.storeId) {
+      return ctx.reply(
+        "ℹ️ You don't have a store yet. Create one using /create.",
+      );
+    }
+
+    const storeCommand = `/store store_${user.storeId}`;
+
+    await ctx.reply(
+      `🛒 <b>${user.storeName}</b>\n\n` +
+        `Copy and share this command with anyone to invite them to your store:\n\n` +
+        `<code>${storeCommand}</code>`,
+      { parse_mode: "HTML" },
+    );
+  } catch (err) {
+    console.log(err);
+    return ctx.reply("❌ Something went wrong. Please try again later.");
+  }
 });
 
 // ---------------------
@@ -353,6 +396,10 @@ bot.start({
       {
         command: "share",
         description: "Share your store in groups/channels",
+      },
+      {
+        command: "invite",
+        description: "Get your personal store invite command",
       },
       { command: "store", description: "Open any store by ID" },
       { command: "about", description: "Learn how Store Bot works" },
