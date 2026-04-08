@@ -254,30 +254,23 @@ bot.command("share", async (ctx) => {
 
 // ---------------------
 // open a store by id
-bot.command("store", async (ctx) => {
+async function handleStoreCommand(ctx: any, storeId: string) {
   const tgUserId = ctx.from?.id;
   if (!tgUserId) {
     return ctx.reply("⚠️ Unable to identify your account. Please try again.");
   }
-
-  const args = ctx.match?.toString().trim();
-  if (!args) {
-    return ctx.reply(
-      "ℹ️ Please provide a valid store ID. Example: /openstore store_1234",
-    );
-  }
-
-  const storeId = args;
-
   try {
-    const store = await getStoreInfoByStoreId(tgUserId, storeId);
+    const id = storeId.split("store_")[1];
 
-    if (!store) {
+    if (!id) {
       return ctx.reply("❌ The store you are looking for was not found.");
     }
 
+    const store = await getStoreInfoByStoreId(tgUserId, id);
+    if (!store) {
+      return ctx.reply("❌ The store you are looking for was not found.");
+    }
     const storeUrl = `${webUrl}/store/${store.storeId}`;
-
     await ctx.reply(`🛒 Viewing store: <b>${store.storeName}</b>`, {
       parse_mode: "HTML",
       reply_markup: {
@@ -287,6 +280,22 @@ bot.command("store", async (ctx) => {
   } catch (err) {
     return ctx.reply("❌ Something went wrong. Please try again later.");
   }
+}
+
+bot.command("store", async (ctx) => {
+  if (ctx.chat.type !== "private") {
+    return ctx.reply(
+      "⚠️ This command is only available in a private chat. Please message me directly to continue.",
+    );
+  }
+
+  const args = ctx.match?.toString().trim();
+  if (!args) {
+    return ctx.reply(
+      "ℹ️ Please provide a valid store ID. Example: /store store_1234",
+    );
+  }
+  await handleStoreCommand(ctx, args);
 });
 
 // ---------------------
