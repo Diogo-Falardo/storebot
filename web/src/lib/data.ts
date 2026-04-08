@@ -124,28 +124,34 @@ type LayoutState = {
   setFooterHeight: (h: number) => void
   setOffset: (n: number) => void
 }
-/**
- * this const was created with the intention of storing the height that:
- * its between the header and footer so every section can have the
- * proper space
- */
-export const useLayoutPublic = create<LayoutState>((set) => ({
-  headerHeight: 0,
-  footerHeight: 0,
-  offset: 0,
-  setHeaderHeight: (h: number) => set({ headerHeight: h }),
-  setFooterHeight: (h: number) => set({ footerHeight: h }),
-  setOffset: (n: number) => set({ offset: n }),
-}))
 
-interface LayoutDashboardState extends LayoutState {
+interface LayoutExtendedState extends LayoutState {
   productInfoActive: string | null // product id
   productInfoActiveCategoryId: string | null
   setProductInfoActive: (pId: string | null) => void
   setProductInfoActiveCategoryId: (cId: string | null) => void
 }
 
-export const useLayoutDashboard = create<LayoutDashboardState>((set) => ({
+/**
+ * this const was created with the intention of storing the height that:
+ * its between the header and footer so every section can have the
+ * proper space
+ */
+export const useLayoutPublic = create<LayoutExtendedState>((set) => ({
+  headerHeight: 0,
+  footerHeight: 0,
+  offset: 0,
+  productInfoActive: null,
+  productInfoActiveCategoryId: null,
+  setHeaderHeight: (h: number) => set({ headerHeight: h }),
+  setFooterHeight: (h: number) => set({ footerHeight: h }),
+  setOffset: (n: number) => set({ offset: n }),
+  setProductInfoActive: (pId: string | null) => set({ productInfoActive: pId }),
+  setProductInfoActiveCategoryId: (cId: string | null) =>
+    set({ productInfoActiveCategoryId: cId }),
+}))
+
+export const useLayoutDashboard = create<LayoutExtendedState>((set) => ({
   headerHeight: 0,
   footerHeight: 0,
   offset: 0,

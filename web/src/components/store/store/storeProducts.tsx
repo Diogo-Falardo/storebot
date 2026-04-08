@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { PackageIcon } from 'lucide-react'
+import { ArrowLeftIcon, PackageIcon } from 'lucide-react'
 import ProductsFilters from './products/productsFilters'
 import ProductCard from './products/productCard'
+import { ProductInfo } from './products/productInfo'
 import Cart from './orders/cart'
 import {
   Empty,
@@ -16,6 +17,8 @@ import { use_get_CategorysFromStoreId } from '@/lib/hooks/category.hooks'
 import { use_get_ProductsFromStoreId } from '@/lib/hooks/product.hook'
 import { type_schema_PRODUCT } from '@/db/schemas/product.schema'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useLayoutPublic } from '@/lib/data'
+import { Button } from '@/components/ui/button'
 
 const StoreProducts = ({
   storeId,
@@ -43,11 +46,16 @@ const StoreProducts = ({
   const [searchQuery, setSearchQuery] = useState('')
   const productsPageRef = useRef<HTMLDivElement>(null)
   const [productsPageSize, setProductsPageSize] = useState<number>(0)
-  const searchOptionsDivRef = useRef<HTMLDivElement>(null)
-  const [searchOptionsDivSize, setSearchOptionsDivSize] = useState<number>(0)
   const productsScrollAreaDivRef = useRef<HTMLDivElement>(null)
   const [productsScrollAreaSize, setProductsScrollAreaSize] =
     useState<number>(0)
+  const activeProductInfo = useLayoutPublic((s) => s.productInfoActive)
+  const deactivateProductInfo = useLayoutPublic(
+    (pId) => pId.setProductInfoActive,
+  )
+  const removeActiveCategoryId = useLayoutPublic(
+    (cId) => cId.setProductInfoActiveCategoryId,
+  )
 
   useEffect(() => {
     if (!isLoadingStoreProducts && storeProducts) {
@@ -81,14 +89,11 @@ const StoreProducts = ({
     if (productsPageRef.current) {
       setProductsPageSize(productsPageRef.current.offsetHeight)
     }
-    if (searchOptionsDivRef.current) {
-      setSearchOptionsDivSize(searchOptionsDivRef.current.offsetHeight)
-    }
   }, [])
 
   useEffect(() => {
-    setProductsScrollAreaSize(productsPageSize - searchOptionsDivSize)
-  }, [productsPageSize, searchOptionsDivSize])
+    setProductsScrollAreaSize(productsPageSize)
+  }, [productsPageSize])
 
   useEffect(() => {
     if (!isLoadingStoreProducts && storeProducts) {
@@ -126,8 +131,6 @@ const StoreProducts = ({
     searchQuery,
   ])
 
-  console.log(productsScrollAreaSize)
-
   return (
     <div className="flex-1 flex flex-col" ref={productsPageRef}>
       {isLoadingStoreProducts && (
@@ -156,48 +159,82 @@ const StoreProducts = ({
           </div>
         )}
       {visibleProducts.length > 0 && (
-        <div className="flex-1 flex flex-col" ref={searchOptionsDivRef}>
+        <div className="flex-1 flex flex-col">
           {/* search, filters, cart */}
-          <div className="p-2 flex gap-2">
-            <Input
-              placeholder="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-
-            <ProductsFilters
-              categories={categorysNames}
-              priceRange={priceRange}
-              setPriceRange={setPriceRange}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-            />
-            <Cart
-              storeId={storeId}
-              storeCurrency={storeCurrency}
-              telegramUserId={telegramUserId}
-            />
-          </div>
-          <div className="flex-1" ref={productsScrollAreaDivRef}>
-            {productsScrollAreaSize > 0 && (
-              <ScrollArea
-                style={{
-                  height: `${productsScrollAreaSize}px`,
-                  maxHeight: `${productsScrollAreaSize - 55}px`,
+          {activeProductInfo !== null ? (
+            <div className="p-2">
+              <Button
+                onClick={() => {
+                  deactivateProductInfo(null)
+                  removeActiveCategoryId(null)
                 }}
-                className="h-full overflow-y-auto"
+                size={'icon'}
+                variant="secondary"
+                aria-label="Back"
               >
-                <div className="py-4 px-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {visibleProducts.map((product) => (
-                    <ProductCard
-                      key={product.productId}
-                      {...product}
-                      storeCurrency={storeCurrency}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
+                <ArrowLeftIcon />
+              </Button>
+            </div>
+          ) : (
+            <div className="p-2 flex gap-2">
+              <Input
+                placeholder="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+
+              <ProductsFilters
+                categories={categorysNames}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+              />
+              <Cart
+                storeId={storeId}
+                storeCurrency={storeCurrency}
+                telegramUserId={telegramUserId}
+              />
+            </div>
+          )}
+          <div className="flex-1" ref={productsScrollAreaDivRef}>
+            {productsScrollAreaSize > 0 &&
+              (activeProductInfo !== null ? (
+                <>
+                  <div className="px-2"></div>
+                  <ScrollArea
+                    style={{
+                      height: `${productsScrollAreaSize}px`,
+                      maxHeight: `${productsScrollAreaSize - 55}px`,
+                    }}
+                  >
+                    <div className="px-2 pb-8 flex flex-col gap-4 pt-2">
+                      <ProductInfo
+                        storeId={storeId}
+                        productId={activeProductInfo}
+                      />
+                    </div>
+                  </ScrollArea>
+                </>
+              ) : (
+                <ScrollArea
+                  style={{
+                    height: `${productsScrollAreaSize}px`,
+                    maxHeight: `${productsScrollAreaSize - 55}px`,
+                  }}
+                  className="h-full overflow-y-auto"
+                >
+                  <div className="py-4 px-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                    {visibleProducts.map((product) => (
+                      <ProductCard
+                        key={product.productId}
+                        {...product}
+                        storeCurrency={storeCurrency}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
+              ))}
           </div>
         </div>
       )}
