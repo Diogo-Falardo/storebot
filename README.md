@@ -1,4 +1,4 @@
-# PROJECT IS FINISHED 
+# Telegram Shops (formerly storebot)
 
-## Project without updates...
-## FEEL FREE TO USE AS RESEARCH
+> Build your own **private, invite-only personal shop** inside Telegram.  
+> Full owner control. Direct customer relationships. Zero platform cuts.
