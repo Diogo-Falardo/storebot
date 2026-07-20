@@ -3,8 +3,8 @@ import { table_users } from "#/db/schema"
 import { eq } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid"
 
-import { createUserInputSchema } from "#/db/schemas/user/user.schema"
-import type { CreateUser } from "#/db/schemas/user/user.types"
+import { createUserInputSchema, selectUserSchema } from "#/db/schemas/user/user.schema"
+import type { CreateUser, SelectUser } from "#/db/schemas/user/user.types"
 
 /**
  * fetch the userId corresponding to a telegramUserId
@@ -58,5 +58,19 @@ export async function createNewUser(input: CreateUser): Promise<string> {
   } catch (error) {
     console.error("createNewUser", error)
     throw new Error("Error creating user!")
+  }
+}
+
+export async function fetchUser(userId: string): Promise<SelectUser> {
+  try {
+    const [user] = await db.select().from(table_users).where(eq(table_users.id, userId)).limit(1)
+
+    if (!user) throw new Error("User not found!")
+
+    return selectUserSchema.parse(user)
+  } catch (error) {
+    console.error("fetchUser", error)
+    throw new Error("Error loading user!")
+
   }
 }

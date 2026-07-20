@@ -22,8 +22,12 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import { Skeleton } from '#/components/ui/skeleton'
+import type { SelectUser } from '#/db/schemas/user/user.types'
 import { cn } from '#/lib/utils'
+import { authentication, fake_INITDATA } from '#/server/authentication'
+import { useFetchUser } from '#/server/users/user.function'
 import { createFileRoute } from '@tanstack/react-router'
+import { useServerFn } from '@tanstack/react-start'
 import gsap from 'gsap'
 import {
   Activity,
@@ -204,11 +208,15 @@ const DASHBOARD_STATS = [
  * home → My Shop gate (Dashboard | Shop) → destination sheets
  */
 function Lobby() {
+  const authenticator = useServerFn(authentication)
+  const fetchUser = useServerFn(useFetchUser)
+
   const [booting, setBooting] = useState(true)
   const [screen, setScreen] = useState<LobbyScreen>('home')
   const [dashboardOpen, setDashboardOpen] = useState(false)
   const [clientShopOpen, setClientShopOpen] = useState(false)
   const [favsOpen, setFavsOpen] = useState(false)
+  const [user, setUser] = useState<SelectUser>()
 
   const rootRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -245,6 +253,22 @@ function Lobby() {
 
     return () => ctx.revert()
   }, [booting, screen])
+
+  useEffect(() => {
+    const _authentication = async () => {
+      try {
+        const auth = await authenticator({ data: fake_INITDATA })
+        console.log(auth)
+        const user = await fetchUser({ data: auth.userId })
+        console.log(user)
+        setUser(user)
+      } catch (error) {
+        console.error(error)
+        throw new Error("Error Authenticating!")
+      }
+    }
+    _authentication()
+  }, [])
 
   // Animate into shop-gate
   useEffect(() => {
@@ -340,8 +364,8 @@ function Lobby() {
             </Button>
           )}
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            {isGate ? 'My Shop' : 'Telegram Shops'}
           </h1>
+          {isGate ? 'My Shop' : 'Telegram Shops'}
           <div className="size-9" aria-hidden />
         </div>
       </header>
@@ -359,7 +383,7 @@ function Lobby() {
             >
               <Avatar className="size-20">
                 <AvatarFallback className="bg-primary text-xl font-semibold text-primary-foreground">
-                  {MOCK_USER.initials}
+                  {}
                 </AvatarFallback>
                 <AvatarBadge className="size-4 bg-chart-2" />
               </Avatar>
