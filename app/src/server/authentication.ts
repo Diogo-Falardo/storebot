@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createNewUser, fetchTelegramId } from "./users/user.server";
+import { createNewUser, fetchTelegramId, updateLastLogin } from "./users/user.server";
 
 // Used when real Telegram hash validation is re-enabled
 // const TELEGRAM_BOT_TOKEN = process.env.BOT_TOKEN
@@ -43,7 +43,7 @@ export const authentication = createServerFn({ method: "POST" })
         username: userData.username ?? null,
       })
     }
-
+    await updateLastLogin(userId, new Date())
     return {
       telegramUserId,
       userId,

@@ -61,6 +61,11 @@ export async function createNewUser(input: CreateUser): Promise<string> {
   }
 }
 
+/**
+ * Fecths an user
+ * @param userId internal user id
+ * @returns selectUserSchema
+ * */
 export async function fetchUser(userId: string): Promise<SelectUser> {
   try {
     const [user] = await db.select().from(table_users).where(eq(table_users.id, userId)).limit(1)
@@ -72,5 +77,19 @@ export async function fetchUser(userId: string): Promise<SelectUser> {
     console.error("fetchUser", error)
     throw new Error("Error loading user!")
 
+  }
+}
+
+/**
+ * Updates the last login with new date
+ * @param userId internal user id
+ * @param lastLogin date of the last login
+ * */
+export async function updateLastLogin(userId: string, lastLogin: Date) {
+  try {
+    await db.update(table_users).set({ lastLogin }).where(eq(table_users.id, userId))
+  } catch (error) {
+    console.error("updateLastLogin", error)
+    throw new Error("Internal Server Error")
   }
 }
