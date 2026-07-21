@@ -291,11 +291,15 @@ export function AppLobby() {
         )}
       </div>
 
-      <MyShopSheet
-        open={dashboardOpen}
-        onOpenChange={setDashboardOpen}
-        shop={MOCK_MY_SHOP}
-      />
+      {user && (
+        <MyShopSheet
+          open={dashboardOpen}
+          onOpenChange={setDashboardOpen}
+          shop={MOCK_MY_SHOP}
+          userId={user.id}
+        />
+      )}
+
       <ClientShopSheet
         open={clientShopOpen}
         onOpenChange={setClientShopOpen}

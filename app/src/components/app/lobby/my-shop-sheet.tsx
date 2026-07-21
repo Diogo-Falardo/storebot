@@ -1,6 +1,10 @@
 /**
  * Owner dashboard preview sheet — stats, quick actions, recent activity.
  */
+import { useEffect } from 'react'
+import { useServerFn } from '@tanstack/react-start'
+import { sfCreateShop } from '#/server/shops/shops.function'
+
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import {
@@ -32,11 +36,21 @@ export function MyShopSheet({
   open,
   onOpenChange,
   shop,
+  userId
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   shop: MockShop
+  userId: string
 }) {
+  const createShop = useServerFn(sfCreateShop)
+  useEffect(() => {
+    const _createShop = async () => {
+      await createShop({ data: userId })
+    }
+
+    void _createShop()
+  }, [createShop])
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent

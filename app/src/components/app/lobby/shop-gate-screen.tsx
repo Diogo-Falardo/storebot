@@ -1,4 +1,4 @@
-import type { Ref } from 'react'
+import { type Ref } from 'react'
 import { Card } from '#/components/ui/card'
 import { cn } from '#/lib/utils'
 import {
@@ -7,7 +7,6 @@ import {
   ShoppingBagIcon,
 } from 'lucide-react'
 import type { MockShop } from './mock-data'
-
 export type { MockShop }
 
 /**
@@ -25,6 +24,7 @@ export function ShopGateScreen({
   onDashboard: () => void
   onShop: () => void
 }) {
+
   return (
     <div
       ref={innerRef}
