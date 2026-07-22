@@ -2,6 +2,7 @@
  * Owner dashboard preview sheet — stats, quick actions, recent activity.
  */
 import { useEffect } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { sfCreateShop } from '#/server/shops/shops.function'
 
@@ -43,6 +44,7 @@ export function MyShopSheet({
   shop: MockShop
   userId: string
 }) {
+  const navigate = useNavigate()
   const createShop = useServerFn(sfCreateShop)
   useEffect(() => {
     const _createShop = async () => {
@@ -50,7 +52,13 @@ export function MyShopSheet({
     }
 
     void _createShop()
-  }, [createShop])
+  }, [createShop, userId])
+
+  const openFullDashboard = () => {
+    onOpenChange(false)
+    void navigate({ to: '/dashboard' })
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -140,7 +148,7 @@ export function MyShopSheet({
         </div>
 
         <SheetFooter className="shrink-0 border-t border-border/60">
-          <Button className="w-full" onClick={() => onOpenChange(false)}>
+          <Button className="w-full" onClick={openFullDashboard}>
             Open full dashboard
           </Button>
         </SheetFooter>
