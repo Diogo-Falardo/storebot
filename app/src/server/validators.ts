@@ -20,6 +20,10 @@ type validator = {
   isUserOwner?: boolean;
 }
 export async function validateUserShopInteraction(validator: validator) {
+  if (!validator.userId || !validator.shopId) {
+    throw Error("wrong validator usage")
+  }
+
   validateUUID(validator.userId)
   validateUUID(validator.shopId)
 

@@ -3,8 +3,8 @@ import { table_users } from "#/db/schema"
 import { eq } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid"
 
-import { createUserInputSchema, selectUserSchema } from "#/db/schemas/user/user.schema"
-import type { CreateUser, SelectUser } from "#/db/schemas/user/user.types"
+import { createUserSchema, outputUserSchema } from "#/db/schemas/user/user.schema"
+import type { CreateUser, OutputUser } from "#/db/schemas/user/user.types"
 
 /**
  * fetch the userId corresponding to a telegramUserId
@@ -34,7 +34,7 @@ export async function fetchTelegramId(
  * @returns userId or null
  * */
 export async function createNewUser(input: CreateUser): Promise<string> {
-  const user = createUserInputSchema.parse(input)
+  const user = createUserSchema.parse(input)
   if (!user.username) {
     const random_uuid = uuidv4()
     user.username = `user_${random_uuid}`
@@ -66,13 +66,13 @@ export async function createNewUser(input: CreateUser): Promise<string> {
  * @param userId internal user id
  * @returns selectUserSchema
  * */
-export async function fetchUser(userId: string): Promise<SelectUser> {
+export async function fetchUser(userId: string): Promise<OutputUser> {
   try {
     const [user] = await db.select().from(table_users).where(eq(table_users.id, userId)).limit(1)
 
     if (!user) throw new Error("User not found!")
 
-    return selectUserSchema.parse(user)
+    return outputUserSchema.parse(user)
   } catch (error) {
     console.error("fetchUser", error)
     throw new Error("Error loading user!")

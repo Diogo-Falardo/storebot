@@ -10,7 +10,12 @@ export const insertUserSchema = createInsertSchema(table_users, {
     schema.min(2, "username is too short!").max(64, "username is too long!"),
 })
 
-export const createUserInputSchema = insertUserSchema.pick({
+export const outputUserSchema = selectUserSchema.pick({
+  username: true,
+  lastLogin: true,
+})
+
+export const createUserSchema = insertUserSchema.pick({
   telegramUserId: true,
   username: true,
 })
