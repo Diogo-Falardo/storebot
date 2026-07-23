@@ -5,7 +5,7 @@ import { authentication, FAKE_INITDATA } from '#/server/authentication'
 import type { OutputUser } from '#/db/schemas/user/user.types'
 import { fetchCurrentUser } from '#/server/users/user.function'
 import { TgAlert } from '#/components/app/telegram/tg-alert'
-
+import { LobbyPage } from '#/components/app/lobby/lobby-page'
 
 export const Route = createFileRoute('/')({
   component: Lobby,
@@ -23,16 +23,16 @@ function Lobby() {
     const auth = async () => {
       try {
         const auth = await _authentication({ data: FAKE_INITDATA })
-        if (auth !== "ok") {
-          if (!cancelled) setError("Authentication failed!")
+        if (auth !== 'ok') {
+          if (!cancelled) setError('Authentication failed!')
           return
         }
 
         const me = await fetchUser()
         if (!cancelled) setUser(me)
       } catch (error) {
-        console.error("route.lobby", error)
-        if (!cancelled) setError("Authentication failed!")
+        console.error('route.lobby', error)
+        if (!cancelled) setError('Authentication failed!')
       }
     }
     auth()
@@ -46,9 +46,10 @@ function Lobby() {
     console.log(user)
   }
 
-  return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-2 bg-background p-6 text-center text-foreground">
-      {error ? (
+  // Auth error — keep TgAlert; do not mount lobby
+  if (error) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-background p-6 text-foreground">
         <TgAlert
           variant="destructive"
           title="Sign-in failed"
@@ -56,9 +57,18 @@ function Lobby() {
           onClose={() => setError(undefined)}
           className="w-full max-w-sm"
         />
-      ) : null}
-      <h1 className="text-lg font-semibold">Storebot</h1>
-      <p className="text-sm text-muted-foreground">UI reset — start from components.</p>
-    </main>
-  )
+      </main>
+    )
+  }
+
+  // Loading while user is undefined and no error
+  if (!user) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-background text-sm text-muted-foreground">
+        Connecting…
+      </main>
+    )
+  }
+
+  return <LobbyPage user={user} />
 }
