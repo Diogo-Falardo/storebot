@@ -1,11 +1,19 @@
 /**
- * Payment methods list (shop_payment_methods).
+ * Payment methods — list + TanStack Form to add (shop_payment_methods).
  */
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
 import { Separator } from '#/components/ui/separator'
+import { useForm } from '@tanstack/react-form'
 import { PlusIcon, Trash2Icon } from 'lucide-react'
 import { useState } from 'react'
+import { formSchema, methodFormSchema } from './form-schemas'
 import type { PaymentMethod } from './mock-data'
 import { TelegramSection } from './telegram-section'
 
@@ -19,26 +27,36 @@ export function PaymentMethodsSection({
   onChange?: (methods: PaymentMethod[]) => void
 }) {
   const [methods, setMethods] = useState(initial)
-  const [draft, setDraft] = useState('')
 
   const commit = (next: PaymentMethod[]) => {
     setMethods(next)
     onChange?.(next)
   }
 
-  const add = () => {
-    const method = draft.trim()
-    if (!method) return
-    commit([
-      ...methods,
-      { id: `pay_${crypto.randomUUID().slice(0, 8)}`, shopId, method },
-    ])
-    setDraft('')
-  }
-
   const remove = (id: string) => {
     commit(methods.filter((m) => m.id !== id))
   }
+
+  const form = useForm({
+    defaultValues: {
+      method: '',
+    },
+    validators: {
+      onSubmit: formSchema(methodFormSchema),
+    },
+    onSubmit: async ({ value, formApi }) => {
+      const parsed = methodFormSchema.parse(value)
+      commit([
+        ...methods,
+        {
+          id: `pay_${crypto.randomUUID().slice(0, 8)}`,
+          shopId,
+          method: parsed.method,
+        },
+      ])
+      formApi.reset()
+    },
+  })
 
   return (
     <div className="flex flex-col gap-4">
@@ -71,22 +89,55 @@ export function PaymentMethodsSection({
         )}
       </TelegramSection>
 
-      <TelegramSection title="Add method" cardClassName="p-3">
-        <div className="flex gap-2">
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="e.g. Crypto (USDT)"
-            className="border-border/60"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') add()
-            }}
-          />
-          <Button type="button" size="icon" onClick={add} aria-label="Add">
-            <PlusIcon />
-          </Button>
-        </div>
-      </TelegramSection>
+      <form
+        id="add-payment-method-form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          void form.handleSubmit()
+        }}
+      >
+        <TelegramSection title="Add method" cardClassName="p-4">
+          <FieldGroup className="flex flex-col gap-3">
+            <form.Field
+              name="method"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Payment method</FieldLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder="e.g. Crypto (USDT)"
+                        className="border-border/60"
+                        autoComplete="off"
+                      />
+                      <Button
+                        type="submit"
+                        size="icon"
+                        aria-label="Add payment method"
+                        disabled={form.state.isSubmitting}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    </div>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
+          </FieldGroup>
+        </TelegramSection>
+      </form>
     </div>
   )
 }

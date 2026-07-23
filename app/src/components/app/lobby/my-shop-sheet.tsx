@@ -56,7 +56,10 @@ export function MyShopSheet({
 
   const openFullDashboard = () => {
     onOpenChange(false)
-    void navigate({ to: '/dashboard' })
+    void navigate({
+      to: '/dashboard',
+      search: { userId, shopId: shop.id },
+    })
   }
 
   return (

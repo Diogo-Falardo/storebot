@@ -1,12 +1,6 @@
 /**
  * AppDashboard — full owner control surface (Telegram Mini App style).
- *
- * Panels: home overview, clients, products, shop info, payments, shipping.
- * Data starts as mock matching `db/schema.ts`; swap for server fns later.
- *
- * Preview vs full:
- *  - Lobby `MyShopSheet` stays a lightweight glance + CTA
- *  - This component is the complete dashboard experience
+ * Receives userId + shopId from the lobby (via route). No auth here.
  */
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -32,16 +26,23 @@ import { ShopInfoSection } from './shop-info-section'
 import { PANEL_TITLES, type DashboardPanel } from './types'
 
 export function AppDashboard({
-  /** Optional back target (default: lobby `/`) */
+  userId,
+  shopId,
   onExit,
 }: {
+  userId: string
+  shopId: string
   onExit?: () => void
-} = {}) {
+}) {
   const navigate = useNavigate()
   const [panel, setPanel] = useState<DashboardPanel>('home')
 
   // Local working copy of shop domain (mock → real API later)
-  const [shop, setShop] = useState<ShopInfo>(MOCK_SHOP)
+  const [shop, setShop] = useState<ShopInfo>({
+    ...MOCK_SHOP,
+    id: shopId,
+    userId,
+  })
   const [clients, setClients] = useState<ShopClient[]>(MOCK_CLIENTS)
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS)
   const [payments, setPayments] = useState<PaymentMethod[]>(MOCK_PAYMENTS)
@@ -86,13 +87,18 @@ export function AppDashboard({
         )}
 
         {panel === 'shop-info' && (
-          <ShopInfoSection shop={shop} onSave={setShop} />
+          <ShopInfoSection
+            shop={shop}
+            userId={userId}
+            shopId={shopId}
+            onSave={setShop}
+          />
         )}
 
         {panel === 'payments' && (
           <PaymentMethodsSection
             methods={payments}
-            shopId={shop.id}
+            shopId={shopId}
             onChange={setPayments}
           />
         )}
@@ -100,7 +106,7 @@ export function AppDashboard({
         {panel === 'shipping' && (
           <ShippingMethodsSection
             methods={shipping}
-            shopId={shop.id}
+            shopId={shopId}
             onChange={setShipping}
           />
         )}
