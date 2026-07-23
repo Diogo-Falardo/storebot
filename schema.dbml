@@ -1,0 +1,119 @@
+// Storebot — MySQL schema (from api/src/db/schema.ts + drizzle migration)
+// Paste into https://dbdiagram.io
+
+Project storebot {
+  database_type: 'MySQL'
+  Note: 'Telegram store bot — users, stores, products, orders'
+}
+
+enum store_type {
+  public
+  private
+}
+
+Table users {
+  id char(36) [pk, not null, note: 'UUID']
+  telegram_user_id bigint [unique, note: 'uq_users_telegram_user_id']
+  created_at datetime [not null, default: `now(3)`]
+}
+
+Table stores {
+  id char(36) [pk, not null, note: 'UUID']
+  user_id char(36) [not null]
+  store_type store_type [not null, default: 'public']
+  store_name varchar(120) [not null]
+  created_at datetime [not null, default: `now(3)`]
+  store_currency varchar(3) [default: 'EUR']
+  store_expire_date datetime
+
+  indexes {
+    user_id [name: 'idx_stores_user_id']
+  }
+}
+
+Table category {
+  id char(36) [pk, not null, note: 'UUID']
+  store_id char(36) [not null]
+  category varchar(255) [not null]
+}
+
+Table products {
+  id char(36) [pk, not null, note: 'UUID']
+  store_id char(36) [not null]
+  product_name varchar(120) [not null]
+  product_price decimal(10,2) [not null]
+  product_desc text
+  image_url varchar(512)
+  created_at datetime [not null, default: `now(3)`]
+  visible tinyint [default: 1]
+  category_id char(36) [null, note: 'Indexed only; no formal FK in migration']
+
+  indexes {
+    category_id [name: 'fk_category']
+  }
+}
+
+Table payment_methods {
+  id char(36) [pk, not null, note: 'UUID']
+  store_id char(36) [not null]
+  method varchar(255) [not null]
+
+  indexes {
+    store_id [name: 'idx_paymentMethods_store_id']
+  }
+}
+
+Table shipping_methods {
+  id char(36) [pk, not null, note: 'UUID']
+  store_id char(36) [not null]
+  method varchar(255) [not null]
+
+  indexes {
+    store_id [name: 'idx_shippingMethods_store_id']
+  }
+}
+
+Table orders {
+  id char(36) [pk, not null, note: 'UUID']
+  store_id char(36) [not null]
+  order_status varchar(120) [not null, note: 'pending | accepted | awaiting_payment | in_progress | shipped | completed | failed']
+  order_identifier varchar(255) [not null]
+  telegram_user_id bigint [not null]
+  order_delivery_instruction varchar(1000) [not null]
+  order_custom_message varchar(2500)
+  order_shipping_method char(36) [not null]
+  order_payment_method char(36) [not null]
+  created_at datetime [not null, default: `now(3)`]
+
+  indexes {
+   order_status [name: 'idx_orders_status']
+    order_shipping_method [name: 'idx_orders_shipping_method']
+    order_payment_method [name: 'idx_orders_payment_method']
+  }
+}
+
+Table products_orders {
+  id char(36) [pk, not null, note: 'UUID']
+  order_id char(36) [not null]
+  product_id char(36) [not null]
+
+  indexes {
+    order_id [name: 'idx_orders_id']
+    product_id [name: 'idx_orders_product_id']
+  }
+}
+
+// Foreign keys (matches api/drizzle/0000_harsh_exodus.sql)
+Ref: category.store_id > stores.id [delete: cascade, update: cascade]
+Ref: orders.store_id > stores.id [delete: cascade]
+Ref: orders.order_shipping_method > shipping_methods.id [delete: cascade]
+Ref: orders.order_payment_method > payment_methods.id [delete: cascade]
+Ref: payment_methods.store_id > stores.id [delete: cascade]
+Ref: products.store_id > stores.id [delete: cascade, update: cascade]
+Ref: products_orders.order_id > orders.id [delete: cascade]
+Ref: products_orders.product_id > products.id [delete: cascade]
+Ref: shipping_methods.store_id > stores.id [delete: cascade]
+Ref: stores.user_id > users.id [delete: cascade]
+
+// Diagram-only (no formal FK in migration)
+Ref: products.category_id > category.id
